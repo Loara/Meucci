@@ -3,22 +3,17 @@
 <project name="Meucci" >
 
     <target name="compile">
-        <mkdir dir="build/classes"/>
+        <mkdir dir="Mbuild"/>
         <javac srcdir="." destdir="Mbuild"/>
     </target>
 
     <target name="jar">
-        <mkdir dir="build/jar"/>
         <jar destfile="Meucci.jar" basedir="Mbuild">
             <manifest>
                 <attribute name="Main-Class" value="comp.general.Master"/>
             </manifest>
         </jar>
 	<delete dir="Mbuild" />
-    </target>
-
-    <target name="run">
-        <java jar="build/jar/HelloWorld.jar" fork="true"/>
     </target>
 
 </project>
