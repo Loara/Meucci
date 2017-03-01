@@ -179,8 +179,6 @@ public class Modulo {
         Types.getIstance().clearAll();
         TNumbers.getIstance().clearAll();
         Environment.currentModulo=nome;
-        if(mas.std)
-            mas.importModulo("Standard", nome);
         for(String dep:deps)
             mas.importModulo(dep, nome);
         for(TypeDef t:type){

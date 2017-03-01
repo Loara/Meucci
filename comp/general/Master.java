@@ -65,7 +65,7 @@ public class Master {
     public final ArrayList<String> resps;
     private String[] oname;
     private final ArrayList<String> modLoaded;
-    public boolean compile, std, assemble, link;
+    public boolean compile, assemble, link;
     
     public static void main(String[] args)throws Exception{
         Master m=new Master();
@@ -78,12 +78,9 @@ public class Master {
             System.out.println("generates only file headers, no compile anything");
             System.out.println();
             System.out.println("bit 1 == 1");
-            System.out.println("don't add the Standard module automatically");
-            System.out.println();
-            System.out.println("bit 2 == 1");
             System.out.println("don't assemble files automatically");
             System.out.println();
-            System.out.println("bit 3 == 1");
+            System.out.println("bit 2 == 1");
             System.out.println("don't link files automatically");
             return;
         }
@@ -97,9 +94,8 @@ public class Master {
             +"Utilizzato il valore 0%n");
         }
         m.compile=(num & 1)==0;
-        m.std=(num & 2)==0;
-        m.assemble=(num & 4)==0;
-        m.link=(num & 8)==0;
+        m.assemble=(num & 2)==0;
+        m.link=(num & 4)==0;
         for (String arg : args) {
             if(arg.equals("/"))
                 break;//Per tagliare l'input
