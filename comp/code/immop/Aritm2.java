@@ -31,8 +31,8 @@ import comp.code.TypeElem;
  * @author loara
  */
 public class Aritm2 {
-    public static final String[] Ar={"++", "--", "~", "-"}, Lr={"!"}, XS={":sqrt"};
-    public static final String[] ArV={"inc", "dec", "not", "neg"}, XSV={"sqrtsd"};
+    public static final String[] Ar={"++", "--", "~", "-"}, Lr={"!"}, XS={":sqrt"}, Ys={":Ilog"};
+    public static final String[] ArV={"inc", "dec", "not", "neg"}, XSV={"sqrtsd"}, YsV={"bsr"};
     public static boolean analyze(Segmenti text
             , Variabili vars, Environment env, Accumulator acc, Op1Expr op)throws CodeException
     {
@@ -40,6 +40,19 @@ public class Aritm2 {
             int i=Aritm.isIn(op.getName(), Ar);
             if(i!=-1){
                 initAr(text, vars, env, acc, op, false, ArV[i]);
+                return true;
+            }
+        }
+        if(op.getExpr().returnType(vars, false).isUnsignedNum()){
+            int i=Aritm.isIn(op.getName(), Ys);
+            if(i!=-1){
+                int d1=op.getExpr().returnType(vars, false).realDim();
+                op.getExpr().toCode(text, vars, env, acc);
+                if(d1==1){
+                    text.addIstruzione("movzx", acc.getAccReg().getReg(2), acc.getAccReg().getReg(1));
+                    d1=2;
+                }
+                text.addIstruzione(YsV[i],acc.getAccReg().getReg(d1), acc.getAccReg().getReg(d1));
                 return true;
             }
             else return false;
@@ -80,8 +93,14 @@ public class Aritm2 {
         String s=op.getName();
         TypeElem ty=op.getExpr().returnType(vars, v);
         if(Aritm.isIn(s, Ar)!=-1){
-            if(Info.varNum(ty.name)){
+            if(ty.isNum()){
                 return ty;
+            }
+            else return null;
+        }
+        else if(Aritm.isIn(s, Ys)!=-1){
+            if(ty.isUnsignedNum()){
+                return Types.getIstance().find("ubyte");
             }
             else return null;
         }
@@ -101,7 +120,10 @@ public class Aritm2 {
         String s=op.getName();
         TypeElem ty=op.getExpr().returnType(var, true);
         if(Aritm.isIn(s, Ar)!=-1){
-            return Info.varNum(ty.name);
+            return ty.isNum();
+        }
+        else if(Aritm.isIn(s, Ys)!=-1){
+            return ty.isUnsignedNum();
         }
         else if(Aritm.isIn(s, Lr)!=-1){
             return ty.name.equals("boolean");
