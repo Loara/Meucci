@@ -3,6 +3,8 @@ Compiler of Meucci Programming Language.
 Meucci programming language is a new programming language based on the concept of "module" 
 as a container of methods and data that have the same role inside the final program.
 
+This compile currently works only on Linux platforms.
+
 ##Manual errata
 Differently from what has been sain in the manual, you can't (still) compile sources with `mecc`, but you use instead `java -jar Meucci.jar option_number sources...`
 
