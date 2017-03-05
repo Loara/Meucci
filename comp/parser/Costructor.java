@@ -64,24 +64,20 @@ public class Costructor extends Callable{
         dd[0]=new FunzParam(new TypeName(type, Template.conversion(params)), "this");
         System.arraycopy(dichs, 0, dd, 1, dichs.length);
         dichs=dd;
-        if(istr.m.length==0)
-            costruct=new FunzExpr(new IdentToken("~super", super.nome.getRiga()), 
-                    Template.conversion(temp), new Espressione[0]);
-        else{
-            if(istr.m[0] instanceof ClassisIstr && ((ClassisIstr)istr.m[0]).isExpression()){
-                Espressione ei=((ClassisIstr)istr.m[0]).getExpr();
-                if(ei instanceof FunzExpr && ((FunzExpr)ei).getName().equals("super")){
-                    costruct=(FunzExpr)ei;
-                    istr.m[0]=null;//già contemplata
-                }
-                else
-                    costruct=new FunzExpr(new IdentToken("~super", super.nome.getRiga()), 
-                    Template.conversion(temp), new Espressione[0]);
+        if(istr.m.length==0){
+            costruct=null;
+        }
+        else if(istr.m[0] instanceof ClassisIstr && ((ClassisIstr)istr.m[0]).isExpression()){
+            Espressione ei=((ClassisIstr)istr.m[0]).getExpr();
+            if(ei instanceof FunzExpr && ((FunzExpr)ei).getName().equals("super")){
+                costruct=(FunzExpr)ei;
+                istr.m[0]=null;//già contemplata
             }
             else
-                costruct=new FunzExpr(new IdentToken("~super", super.nome.getRiga()), 
-                    Template.conversion(temp), new Espressione[0]);
+                costruct=null;
         }
+        else
+            costruct=null;
     }
     public String className(){
         return classname;
@@ -99,9 +95,14 @@ public class Costructor extends Callable{
         TypeName tne=new TypeName(classname, telem);
         TypeElem te=Types.getIstance().find(tne, true);
         if(te.extend==null){
-            if(!costruct.getName().equals("~super")) throw new CodeException("Chiamata erronea di costruttore inesistente");
+            if(costruct!=null){
+                throw new CodeException("Chiamata erronea di costruttore inesistente");
+            }
         }
         else{
+            if(costruct==null){
+                throw new CodeException("Non è specificata alcuna chiamata al costruttore del sovrattipo");
+            }
             TypeElem[] parames;
             Espressione[] expre=costruct.getValues();
             parames=new TypeElem[expre.length+1];
