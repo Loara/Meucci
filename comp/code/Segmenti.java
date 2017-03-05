@@ -24,13 +24,14 @@ import java.util.ArrayList;
  * @author loara
  */
 public class Segmenti {
-    public final ArrayList<String> data, bss, stat;//Deve essere creata una sorta 
+    public final ArrayList<String> data, bss, stat, rodata;//Deve essere creata una sorta 
     //di DataMap che tenga conto dell'allineamento, ma molto più avanti, in un
     //rilascio futuro magari
     public final CodeMap text, vtors;
     public Segmenti(){
         text=new CodeMap();
         data=new ArrayList<>();
+        rodata=new ArrayList<>();
         bss=new ArrayList<>();
         vtors=new CodeMap();
         stat=new ArrayList<>();//inizializzazione modulo

@@ -257,6 +257,11 @@ public class Modulo {
             out.println(t);
         });
         
+        out.println("\tsection\t.rodata");
+        text.rodata.stream().forEach((t) ->{
+            out.println(t);
+        });
+        
         out.println("\tsection\t.bss");
         text.bss.stream().forEach((t) ->{
             out.println(t);

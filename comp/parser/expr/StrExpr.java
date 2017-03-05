@@ -69,14 +69,15 @@ public class StrExpr extends Espressione{
         int i=env.get("STR");
         int len=t.getString().length()+1;
         //String vt="STRVT"+i+":\tdq\t0";//no vtable, tipo esplicito
-        String allen="STRL"+i+":\tdd\t"+len;
+        String allen="STRL"+i+":\tdd\t"+len;//lunghezza-primo elemento oggetto
         String allp="STRP"+i+":\tdq\t0";//puntatore
-        String allc="STRS"+i+":\tdb\t\'"+t.getString()+"\',0";
+        String allc="STRS"+i+":\tdb\t\'"+t.getString()+"\',0";//vera stringa (considerare l'opportunità
+        //di lasciare o meno il byte null alla fine)
         text.data.add("\talign\t"+Info.pointerdim+", db 0");//Utilizzato da NASM per allineare la memoria
         text.data.add(allen);
         text.data.add("\talign\t"+Info.pointerdim+", db 0");//Utilizzato da NASM per allineare la memoria
         text.data.add(allp);
-        text.data.add(allc);
+        text.rodata.add(allc);//meglio in rodata essendo la stringa immutabile
         int p=acc.prenota();
         text.addIstruzione("lea",acc.getAccReg().getReg(),"[STRL"+i+"]");
         text.addIstruzione("lea",acc.getReg(p).getReg(),"[STRS"+i+"]");

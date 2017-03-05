@@ -294,8 +294,14 @@ public class Master {
             Funz.getIstance().ext.stream().forEach((ex) -> {
                 out.println("\textern\t"+ex);
             });
+            
             out.println("\tsection\t.data");
             seg.data.stream().forEach((t) -> {
+                out.println(t);
+            });
+            
+            out.println("\tsection\t.rodata");
+            seg.rodata.stream().forEach((t) ->{
                 out.println(t);
             });
         
@@ -330,8 +336,14 @@ public class Master {
             Funz.getIstance().ext.stream().forEach((ex) -> {
                 out.println("\textern\t"+ex);
             });
+            
             out.println("\tsection\t.data");
             seg.data.stream().forEach((t) -> {
+                out.println(t);
+            });
+            
+            out.println("\tsection\t.rodata");
+            seg.rodata.stream().forEach((t) ->{
                 out.println(t);
             });
         
