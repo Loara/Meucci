@@ -128,10 +128,13 @@ public class Costructor extends Callable{
         TypeName tne=new TypeName(classname, telemy);
         TypeElem te=Types.getIstance().find(tne, true);
         if(te.extend==null){
-            if(!costruct.getName().equals("~super"))
+            if(costruct!=null)
                 throw new CodeException("Chiamata erronea di costruttore inesistente");
         }
         else{
+            if(costruct==null){
+                throw new CodeException("Non è specificata alcuna chiamata al costruttore del sovrattipo");
+            }
             TypeElem[] parames;
             Espressione[] expre=costruct.getValues();
             parames=new TypeElem[expre.length+1];
