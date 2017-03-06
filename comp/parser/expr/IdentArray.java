@@ -71,36 +71,6 @@ public class IdentArray extends Espressione{
         return tp;
     }
     @Override
-    public void substituteAll(Substitutor sub)throws CodeException{
-        if(elems.length==0){
-            if(chiam instanceof IdentExpr){
-                String v=((IdentExpr)chiam).val();
-                TemplateEle te=sub.recursiveGet(new ParamDich(v));
-                if(te==null){
-                    //Non è da sostituire
-                }
-                else if(te instanceof NumDich)
-                    chiam=new NumExpr(((NumDich)te).getNum());
-                else if (te instanceof ParamDich){
-                    //niente
-                }
-                else throw new CodeException("Template in posizione errata");
-            }
-            else if(chiam instanceof TemplExpr){
-                NumDich te=sub.recursiveGet(((TemplExpr)chiam).getTemplate());
-                chiam=new NumExpr(te.getNum());
-            }
-            else
-                chiam.substituteAll(sub);
-        }
-        else{
-            chiam.substituteAll(sub);
-            for(IdentEle ie:elems)//Gli identEle non si sostituiscono banalmente
-                for(Espressione ex:ie.getVals())
-                    ex.substituteAll(sub);
-        }
-    }
-    @Override
     public void validate(Variabili vars)throws CodeException{
         chiam.validate(vars);
         TypeElem ty=chiam.returnType(vars, true);

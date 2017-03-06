@@ -40,11 +40,6 @@ public class TemplExpr extends Espressione{
         return funz;
     }
     @Override
-    public void substituteAll(Substitutor sub){
-        //Non fa niente: la sostituzione deve
-        //essere effettuata da IdentArray
-    }
-    @Override
     public void validate(Variabili var)throws CodeException{
         funz.validate();
     }

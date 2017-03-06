@@ -38,6 +38,7 @@ import comp.scanner.Token;
 import comp.parser.istruz.MultiIstr;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.HashSet;
 
 /**
  * Ecco una guida su molte funzioni generate automaticamente:
@@ -179,8 +180,12 @@ public class Modulo {
         Types.getIstance().clearAll();
         TNumbers.getIstance().clearAll();
         Environment.currentModulo=nome;
-        for(String dep:deps)
-            mas.importModulo(dep, nome);
+        HashSet<String> loadedModules=new HashSet<>();//Per evitare di caricare
+        Funz f=Funz.getIstance();
+        for(String dep:deps){
+            mas.importModulo(dep, nome, loadedModules);
+            int y=0;
+        }
         for(TypeDef t:type){
             Types.getIstance().load(t, false);
         }

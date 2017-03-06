@@ -58,13 +58,6 @@ public class StaticExpr extends Espressione{
         Funz.getIstance().request(Meth.costructorName(type), esp1, false, type.templates());
     }
     @Override
-    public void substituteAll(Substitutor sub)throws CodeException{
-        type=sub.recursiveGet(type);
-        for(Espressione es:exp){
-            es.substituteAll(sub);
-        }
-    }
-    @Override
     public void toCode(Segmenti seg, Variabili var, Environment env, Accumulator acc)
         throws CodeException{
         TypeElem tp=Types.getIstance().find(type, false);

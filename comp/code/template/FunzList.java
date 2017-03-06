@@ -52,6 +52,15 @@ public class FunzList extends TList<Callable>{
     noAdd da impostare a true se è utilizzato durante il validate, in modo da
     non generare un file inutile
     */
+    /*
+    Bisogna ASSOLUTAMENTE cambiare l'algoritmo di sostituzione
+    genera troppi errori utilizzare un substituteAll per sostituire ogni ricorrenza
+    in quanto, una volta effettuata la sostituzione, se si vuole generare una
+    nuova sostituzione dell'oggetto o si deve rileggerlo dal file oppure
+    bisognerebbe ogni volta clonarlo. La soluzione migliore resta quella di utilizzare
+    una mediazione nella ricerca che sostituisce automaticamente durante la ricerca
+    */
+            
     public FElement generate(String name, TemplateEle[] param, TypeElem[] fpdec, boolean noAdd)
             throws CodeException{
         if(param.length==0)

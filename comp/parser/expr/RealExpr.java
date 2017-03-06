@@ -46,10 +46,6 @@ public class RealExpr extends Espressione{
         
     }
     @Override
-    public void substituteAll(Substitutor sub)throws CodeException{
-        
-    }
-    @Override
     public void toCode(Segmenti text, Variabili var, Environment env, Accumulator acc)
             throws CodeException{
         text.addIstruzione("mov", acc.getAccReg().getReg(), String.valueOf(val));

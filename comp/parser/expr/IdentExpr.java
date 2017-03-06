@@ -95,10 +95,6 @@ public class IdentExpr extends Espressione{
         }
     }
     @Override
-    public void substituteAll(Substitutor sub)throws CodeException{
-        //Inutile, viene effettuata dall'IdentArray
-    }
-    @Override
     public void toCode(Segmenti text, Variabili vars, Environment env, Accumulator acc)
             throws CodeException{
         //Non è necessario utilizzare il TNumber, in quanto la traduzione è

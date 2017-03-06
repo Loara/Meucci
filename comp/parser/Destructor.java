@@ -88,12 +88,6 @@ public class Destructor extends Callable{
         Template.removeTemplateConditions(temp);
     }
     @Override
-    public void substituteAll(Substitutor s)throws CodeException{
-        super.substituteAll(s);
-        //ClassName non deve essere sostituita
-        temParam=s.recursiveGet(temParam);
-    }
-    @Override
     public void postCode(Segmenti text, Variabili var, Environment env,
             Accumulator acc)throws CodeException{
         TypeName tne=new TypeName(classname, temParam);//già sostituito

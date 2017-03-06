@@ -62,6 +62,7 @@ public abstract class Callable implements Serializable{
         noglobal=false;
         retType=new TypeName("void");
         temp=new Template[0];
+        this.mod=mod;
     }
     /**
      * Da modificare
@@ -157,13 +158,6 @@ public abstract class Callable implements Serializable{
     public TypeElem getReturnType(boolean v)throws CodeException{
         return Types.getIstance().find(retType, v);
     }
-    public void substituteAll(Substitutor s)throws CodeException{
-        retType=s.recursiveGet(retType);
-        for (FunzParam dich : dichs) {
-            dich.dich.type = s.recursiveGet(dich.dich.type);
-        }
-        istr.substituteAll(s);
-    }
     public void toCode(Segmenti text, Dichiarazione[] varSt, Environment env, 
             TemplateEle... temps)throws CodeException{
         if(temp.length!=temps.length)
@@ -172,7 +166,6 @@ public abstract class Callable implements Serializable{
         Substitutor s=new Substitutor();
         s.clear();
         s.addAll(templateNames(), temps);
-        this.substituteAll(s);
         Accumulator acc=new Accumulator();//servirà in VarStack
         Variabili vs=new Variabili(dichs, varSt, false, acc);
         Environment.ret=Types.getIstance().find(retType, false);

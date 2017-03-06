@@ -64,7 +64,6 @@ public class Master {
     private String cpath;//percorso corrente
     public final ArrayList<String> resps;
     private String[] oname;
-    private final ArrayList<String> modLoaded;
     public boolean compile, assemble, link;
     
     public static void main(String[] args)throws Exception{
@@ -103,7 +102,7 @@ public class Master {
                 fil.push(arg);
         }
         m.compila(fil.toArray());
-        if(!m.assemble)
+        if(!m.assemble || !m.compile)
             return;
         for(String f:m.createdFile){
             Process p=Runtime.getRuntime().exec(new String[]{"nasm", "-felf64", "-o"+f+".o", f+".asm"});
@@ -145,7 +144,6 @@ public class Master {
         }
     }
     public Master(){
-        modLoaded=new ArrayList<>();
         resps=new ArrayList<>();
         resps.add("/usr/include/meucci");
     }
@@ -363,7 +361,8 @@ public class Master {
     private void settaAmbiente(String modulo)throws CodeException, IOException, ClassNotFoundException{
         Types.getIstance().clearAll();
         Funz.getIstance().clearAll();
-        importModulo(modulo, modulo);
+        HashSet<String> ml=new HashSet<>();
+        importModulo(modulo, modulo, ml);
     }
     private Notifica getNoSigned(HashSet<Notifica> nos){
         for(Notifica no:nos){
@@ -454,17 +453,16 @@ public class Master {
     /**
      * Aggiunge i Tipi e i Callable ai Funz e Types (anche template), e lo fa ricorsivamente.
      * Prima di utilizzarlo assicurarsi di lanciare clearAll ai suddetti
+     * 
+     * L'HashSet è necessario per evitare di caricare più volte lo stesso modulo
      * @param name modulo da caricare
      * @param oname modulo che effettua il caricamento
+     * @param ml
      * @throws IOException 
      * @throws java.lang.ClassNotFoundException 
      */
-    public void importModulo(String name, String oname)throws IOException, ClassNotFoundException{
-        importModulo0(name, oname);
-        modLoaded.clear();
-    }
-    private void importModulo0(String name, String oname)throws IOException, ClassNotFoundException{
-        if(modLoaded.contains(name))
+    public void importModulo(String name, String oname, HashSet<String> ml)throws IOException, ClassNotFoundException{
+        if(ml.contains(name))
             return;//se già caricato
         boolean ext=!(name.equals(oname));
         Path p=findMod(name);
@@ -487,9 +485,9 @@ public class Master {
         rey re=readTemplates(name);//Ora lo cerca
         Types.getIstance().getClassList().addAll(re.td);
         Funz.getIstance().getFunzList().addAll(re.ca);
-        modLoaded.add(name);
+        ml.add(name);
         for(String dep:de)
-            importModulo0(dep, oname);
+            importModulo(dep, oname, ml);
     }
     private void exportType(TypeElem te, ObjectOutputStream out)throws IOException{
         out.writeUTF(te.name);

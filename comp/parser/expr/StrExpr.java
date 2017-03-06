@@ -59,10 +59,6 @@ public class StrExpr extends Espressione{
         
     }
     @Override
-    public void substituteAll(Substitutor sub)throws CodeException{
-        
-    }
-    @Override
     public void toCode(Segmenti text, Variabili var, Environment env, 
             Accumulator acc)throws CodeException{
         env.increment("STR");

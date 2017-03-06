@@ -59,12 +59,6 @@ public class NewExpr extends Espressione{
         Funz.getIstance().request("allocate", new TypeElem[]{Types.getIstance().find("uint")}, true);
     }
     @Override
-    public void substituteAll(Substitutor sub)throws CodeException{
-        type=sub.recursiveGet(type);
-        for(Espressione es:exp)
-            es.substituteAll(sub);
-    }
-    @Override
     public void toCode(Segmenti seg, Variabili var, Environment env, Accumulator acc)
         throws CodeException{
         TypeElem tp=Types.getIstance().find(type, false);

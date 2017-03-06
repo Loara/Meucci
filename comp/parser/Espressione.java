@@ -56,5 +56,4 @@ public abstract class Espressione implements Serializable{
      * @throws CodeException 
      */
     public abstract void validate(Variabili var)throws CodeException;
-    public abstract void substituteAll(Substitutor sub)throws CodeException;
 }

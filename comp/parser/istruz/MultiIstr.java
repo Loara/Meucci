@@ -61,13 +61,6 @@ public class MultiIstr extends Istruzione{
         var.getGhostVar().removeBlock();
     }
     @Override
-    public void substituteAll(Substitutor sub)throws CodeException{
-        for(Istruzione mm:m){
-            if(mm!=null)
-                mm.substituteAll(sub);
-        }
-    }
-    @Override
     public void toCode(Segmenti text, Variabili var, Environment env, Accumulator acc)throws CodeException{
         var.getVarStack().addBlock();
         for(Istruzione e:m){

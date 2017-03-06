@@ -38,7 +38,6 @@ public abstract class Istruzione implements Serializable{
     public abstract void toCode(Segmenti text, Variabili var, Environment env,
             Accumulator acc)throws CodeException;
     public abstract void validate(Variabili var, Environment env)throws CodeException;
-    public abstract void substituteAll(Substitutor sub)throws CodeException;
     /*
     per if, for, while
     */

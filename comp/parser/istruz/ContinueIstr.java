@@ -44,10 +44,6 @@ public class ContinueIstr extends Istruzione{
             throw new CodeException("Continue in nessun ciclo");
     }
     @Override
-    public void substituteAll(Substitutor sub)throws CodeException{
-        
-    }
-    @Override
     public void toCode(Segmenti text, Variabili var, Environment env,
             Accumulator acc)throws CodeException{
         String r=env.getSt();

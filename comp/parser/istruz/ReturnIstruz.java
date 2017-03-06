@@ -48,11 +48,6 @@ public class ReturnIstruz extends Istruzione{
         }
     }
     @Override
-    public void substituteAll(Substitutor sub)throws CodeException{
-        if(e!=null)
-            e.substituteAll(sub);
-    }
-    @Override
     public void validate(Variabili vars, Environment env)throws CodeException{
         if(e!=null){
             e.validate(vars);

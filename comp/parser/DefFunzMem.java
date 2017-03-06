@@ -44,19 +44,11 @@ public class DefFunzMem extends FunzMem{
         
     }
     @Override
-    public void substituteAll(Substitutor s)throws CodeException{
-        retType=s.recursiveGet(retType);
-        for (FunzParam dich : dichs) {
-            dich.dich.type = s.recursiveGet(dich.dich.type);
-        }
-    }
-    @Override
     public void toCode(Segmenti text, Dichiarazione[] varSt, Environment env, 
             TemplateEle... temps)throws CodeException{
         Substitutor s=new Substitutor();
         s.clear();
         s.addAll(templateNames(), temps);
-        this.substituteAll(s);
         Accumulator acc=new Accumulator();//servirà in VarStack
         Variabili vs=new Variabili(dichs, varSt, false, acc);
         Environment.ret=Types.getIstance().find(retType, false);

@@ -63,14 +63,6 @@ public class IfIstr extends Istruzione{
             var.getGhostVar().removeBlock();
     }
     @Override
-    public void substituteAll(Substitutor sub)throws CodeException{
-        if(ele!=null)
-            ele.substituteAll(sub);
-        if(ifi!=null)
-            ifi.substituteAll(sub);
-        con.substituteAll(sub);
-    }
-    @Override
     public void toCode(Segmenti text, Variabili var, Environment env,
             Accumulator acc)throws CodeException{
         if("boolean".equals(con.returnType(var, false).name)){

@@ -41,7 +41,7 @@ import comp.scanner.Token;
  * @author loara
  */
 public class Costructor extends Callable{
-    private String classname;
+    private TypeName classname;
     private FunzExpr costruct;
     /**
      * 
@@ -59,7 +59,7 @@ public class Costructor extends Callable{
         if(!(nome instanceof IdentToken) || !((IdentToken)nome).getString().equals("init"))
             throw new ParserException("Non è un costruttore",t);
         nome=new IdentToken(Meth.costructorName(type), nome.getRiga());
-        classname=type;
+        classname=new TypeName(type, Template.conversion(params));
         FunzParam[] dd=new FunzParam[dichs.length+1];
         dd[0]=new FunzParam(new TypeName(type, Template.conversion(params)), "this");
         System.arraycopy(dichs, 0, dd, 1, dichs.length);
@@ -72,6 +72,8 @@ public class Costructor extends Callable{
             if(ei instanceof FunzExpr && ((FunzExpr)ei).getName().equals("super")){
                 costruct=(FunzExpr)ei;
                 istr.m[0]=null;//già contemplata
+                if(costruct.template().length!=0)
+                    throw new ParserException("Impossibile specificare template per super", t);
             }
             else
                 costruct=null;
@@ -80,7 +82,7 @@ public class Costructor extends Callable{
             costruct=null;
     }
     public String className(){
-        return classname;
+        return classname.getName();
     }
     @Override
     public String getName(){
@@ -91,9 +93,7 @@ public class Costructor extends Callable{
         Template.addTemplateConditions(temp);
         Variabili vs=new Variabili(dichs, varSt, true, null);
         Environment.ret=Types.getIstance().find(retType, true);
-        TemplateEle[] telem=Template.conversion(temp);
-        TypeName tne=new TypeName(classname, telem);
-        TypeElem te=Types.getIstance().find(tne, true);
+        TypeElem te=Types.getIstance().find(classname, true);
         if(te.extend==null){
             if(costruct!=null){
                 throw new CodeException("Chiamata erronea di costruttore inesistente");
@@ -110,23 +110,18 @@ public class Costructor extends Callable{
             for(int i=0; i<expre.length; i++){
                 parames[i+1]=expre[i].returnType(vs, true);
             }
-            Funz.getIstance().request(Meth.costructorName(te.extend), parames, true, telem);
+            Funz.getIstance().request(Meth.costructorName(te.extend), parames, 
+                    true, classname.templates());
         }
         istr.validate(vs, env);
         Template.removeTemplateConditions(temp);
     }
     @Override
-    public void substituteAll(Substitutor s)throws CodeException{
-        super.substituteAll(s);
-        //ClassName non deve essere sostituita
-        costruct.substituteAll(s);
-    }
-    @Override
     public void preCode(Segmenti text, Variabili var, Environment env,
             Accumulator acc)throws CodeException{
-        TemplateEle[] telemy=costruct.template();//Già sostituito
-        TypeName tne=new TypeName(classname, telemy);
-        TypeElem te=Types.getIstance().find(tne, true);
+        //TemplateEle[] telemy=Template.conversion(temp); Questa linea è erronea, in quanto
+        //il campo temp non può ovviamente essere sostituito
+        TypeElem te=Types.getIstance().find(classname, true);
         if(te.extend==null){
             if(costruct!=null)
                 throw new CodeException("Chiamata erronea di costruttore inesistente");

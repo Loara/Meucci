@@ -26,6 +26,7 @@ import comp.code.TypeElem;
 import comp.code.Types;
 import comp.code.template.Substitutor;
 import comp.code.vars.Variabili;
+import comp.parser.Espressione;
 import comp.parser.Istruzione;
 import comp.parser.expr.IdentArray;
 
@@ -34,29 +35,23 @@ import comp.parser.expr.IdentArray;
  * @author loara
  */
 public class DesIstr extends Istruzione{
-    private final IdentArray exp;
+    private final Espressione exp;
     public DesIstr(IdentArray data){
         exp=data;
     }
     @Override
     public void validate(Variabili var, Environment env)throws CodeException{
         exp.validate(var);
-        exp.canWrite(var, true);
         TypeElem te=exp.returnType(var, true);
         if(!te.reference)
             throw new CodeException("Tipo non refernce");
         Funz.getIstance().request("free", new TypeElem[]{Types.getIstance().find("pt")}, false);
     }
     @Override
-    public void substituteAll(Substitutor sub)throws CodeException{
-        exp.substituteAll(sub);
-    }
-    @Override
     public void toCode(Segmenti seg, Variabili var, Environment env, Accumulator acc)throws CodeException{
         TypeElem te=exp.returnType(var, false);
         if(!te.reference)
             throw new CodeException("Tipo non reference");
-        exp.canWrite(var, false);
         exp.toCode(seg, var, env, acc);
         int rd=acc.saveAccumulator();
         int ii;

@@ -58,12 +58,6 @@ public class WhileIstr extends Istruzione{
             var.getGhostVar().removeBlock();
     }
     @Override
-    public void substituteAll(Substitutor sub)throws CodeException{
-        e.substituteAll(sub);
-        if(d!=null)
-            d.substituteAll(sub);
-    }
-    @Override
     public void toCode(Segmenti text, Variabili var, Environment env, Accumulator acc)throws CodeException{
             env.increment("WHILE");
             int i=env.get("WHILE");

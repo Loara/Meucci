@@ -90,20 +90,6 @@ public class ClassisIstr extends Istruzione{
         }
     }
     @Override
-    public void substituteAll(Substitutor sub)throws CodeException{
-        if(d!=null){
-            d.substitute(sub);
-            if(epr!=null)
-                epr.substituteAll(sub);
-        }
-        else if(e!=null){
-            e.substituteAll(sub);
-            epr.substituteAll(sub);
-        }
-        else
-            epr.substituteAll(sub);
-    }
-    @Override
     public void validate(Variabili var, Environment env)throws CodeException{
         if(d!=null){
             TypeElem dt=Types.getIstance().find(d.getRType(), true);//per vedere se esiste
@@ -151,7 +137,8 @@ public class ClassisIstr extends Istruzione{
                     throw new CodeException("Variabile non inizializzata");
                 else{
                     if(!epr.returnType(var, false).ifEstende(d.getRType(), false))
-                        throw new CodeException("impossibile effettuare l'assegnazione");
+                        throw new CodeException("impossibile effettuare l'assegnazione: "+
+                                epr.returnType(var, false).name+" non estende "+d.getRType().getName());
                     epr.toCode(text, var, env, acc);
                     var.addVarStack(d);
                     var.setVar(text, acc, d.getIdent());//fa in automatico

@@ -44,11 +44,6 @@ public class CastExpr extends Espressione{
         return Types.getIstance().find(type, v);
     }
     @Override
-    public void substituteAll(Substitutor sub)throws CodeException{
-        esp.substituteAll(sub);
-        type=sub.recursiveGet(type);
-    }
-    @Override
     public void validate(Variabili vars)throws CodeException{
         esp.validate(vars);
         //Tolti tutti i possibili controlli sul cast

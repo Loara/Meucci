@@ -65,17 +65,6 @@ public class ForIstr extends Istruzione{
             var.getGhostVar().removeBlock();
     }
     @Override
-    public void substituteAll(Substitutor sub)throws CodeException{
-        if(after!=null)
-            after.substituteAll(sub);
-        if(frist!=null)
-            frist.substituteAll(sub);
-        if(doi!=null)
-            doi.substituteAll(sub);
-        if(wh!=null)
-            wh.substituteAll(sub);
-    }
-    @Override
     public void toCode(Segmenti text, Variabili var, Environment env,
             Accumulator acc)throws CodeException{
             env.increment("FOR");

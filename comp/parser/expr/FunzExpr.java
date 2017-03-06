@@ -71,12 +71,6 @@ public class FunzExpr extends Espressione{
         setModname(var, v);
         return Funz.getIstance().request(modname).Return(v);
     }
-    @Override
-    public void substituteAll(Substitutor sub)throws CodeException{
-        params=sub.recursiveGet(params);
-        for(Espressione e:values)
-            e.substituteAll(sub);
-    }
     /*
     Non solo setta il modname, ma effettua altri controlli, tra cui il cost
     */

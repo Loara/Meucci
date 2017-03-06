@@ -55,10 +55,6 @@ public class Op1Expr extends Espressione{
             setModname(var, v);
         return Funz.getIstance().request(modname).Return(v);
     }
-    @Override
-    public void substituteAll(Substitutor sub)throws CodeException{
-        epr.substituteAll(sub);
-    }
     public String getName(){
         return symb.getString();
     }

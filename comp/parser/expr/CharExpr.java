@@ -51,10 +51,6 @@ public class CharExpr extends Espressione{
         
     }
     @Override
-    public void substituteAll(Substitutor sub)throws CodeException{
-        
-    }
-    @Override
     public void toCode(Segmenti text, Variabili vars, Environment env, Accumulator acc)
             throws CodeException{
         if(unicode){

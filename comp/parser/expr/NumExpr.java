@@ -70,10 +70,6 @@ public class NumExpr extends Espressione{
         System.out.println(i);
     }
     @Override
-    public void substituteAll(Substitutor sub)throws CodeException{
-        
-    }
-    @Override
     public TypeElem returnType(Variabili val, boolean v)throws CodeException{
         String p="";
         if(unsigned)

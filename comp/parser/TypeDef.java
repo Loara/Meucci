@@ -167,22 +167,6 @@ public class TypeDef implements Serializable{
         hash = 83 * hash + Objects.hashCode(this.nome);
         return hash;
     }
-    public void substituteAll(Substitutor s)throws CodeException{
-        if(s.isEmpty())
-            return;
-        ext=s.recursiveGet(ext);
-        for(Membro ttt:types){
-            ttt.dich.type=s.recursiveGet(ttt.dich.type);
-            if(ttt.packed!=null)
-                ttt.packed=s.recursiveGet(new TemplateEle[]{ttt.packed})[0];
-        }
-        for(FMorg fm:ffm){
-            if(fm.get!=null)
-                fm.get.substituteAll(s);
-            if(fm.set!=null)
-                fm.set.substituteAll(s);
-        }
-    }
     /**
      * Scrive l'oggetto in memoria, determina costruttori ed inizializatori
      * @param seg
@@ -197,7 +181,6 @@ public class TypeDef implements Serializable{
         Substitutor s=new Substitutor();
         s.addAll(templateNames(), tparams);
         Environment.template=tt.length!=0;
-        this.substituteAll(s);
         String rax=Register.AX.getReg();
         String rbx=Register.BX.getReg();
         String rnome=Meth.className(nome, tparams);

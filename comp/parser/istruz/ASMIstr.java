@@ -43,10 +43,6 @@ public class ASMIstr extends Istruzione{
         
     }
     @Override
-    public void substituteAll(Substitutor sub)throws CodeException{
-        
-    }
-    @Override
     public void toCode(Segmenti text, Variabili var,
             Environment env, Accumulator acc){
         text.add(asm.code);

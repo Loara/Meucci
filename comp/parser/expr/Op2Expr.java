@@ -70,11 +70,6 @@ public class Op2Expr extends Espressione{
             setModname(var, v);
         return Funz.getIstance().request(modname).Return(v);
     }
-    @Override
-    public void substituteAll(Substitutor sub)throws CodeException{
-        epr.substituteAll(sub);
-        epr2.substituteAll(sub);
-    }
     private void setModname(Variabili var, boolean v)throws CodeException{
         TypeElem[] tr=new TypeElem[2];
         tr[0]=epr.returnType(var, v);
