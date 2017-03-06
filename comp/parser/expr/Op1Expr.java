@@ -33,7 +33,6 @@ public class Op1Expr extends Espressione{
     public Op1Expr(SymbToken t, Espressione e){
         symb=t;
         epr=e;
-        modname=null;
     }
     @Override
     public void println(int inter){
@@ -45,29 +44,29 @@ public class Op1Expr extends Espressione{
         System.out.println(i+"Elemento:");
         epr.println(inter+2);
     }
-    private String modname;
+    private Funz.FElement request(Variabili var, boolean v)throws CodeException{
+            TypeElem[] tr=new TypeElem[1];
+            tr[0]=epr.returnType(var, v);
+            return Funz.getIstance().request(symb.getString(), tr, v);
+    }
+    private String modname(Variabili var)throws CodeException{
+            Funz.FElement fe=request(var, false);
+            if(fe.isExternFile())
+                Funz.getIstance().ext.add(fe.modname);
+            return fe.modname;
+    }
     @Override
     public TypeElem returnType(Variabili var, boolean v)throws CodeException{
         TypeElem reimm=Aritm2.returnType(this, var, v);
         if(reimm!=null)
             return reimm;
-        if(modname==null)
-            setModname(var, v);
-        return Funz.getIstance().request(modname).Return(v);
+        return request(var, v).Return(v);
     }
     public String getName(){
         return symb.getString();
     }
     public Espressione getExpr(){
         return epr;
-    }
-    private void setModname(Variabili var, boolean v)throws CodeException{
-            TypeElem[] tr=new TypeElem[1];
-            tr[0]=epr.returnType(var, v);
-            Funz.FElement fe=Funz.getIstance().request(symb.getString(), tr, v);
-            modname=fe.modname;
-            if(!v && (Environment.template||fe.isExternFile()))
-                Funz.getIstance().ext.add(modname);
     }
     @Override
     public void validate(Variabili var)throws CodeException{
@@ -79,8 +78,7 @@ public class Op1Expr extends Espressione{
     public void toCode(Segmenti text, Variabili var, Environment env, Accumulator acc)throws CodeException{
         if(Aritm2.analyze(text, var, env, acc, this))
             return;
-        if(modname==null)
-            setModname(var, false);
+        String modname=modname(var);
         acc.pushAll(text);
         FunzExpr.perfCall(modname, returnType(var, false), 
                 new Espressione[]{epr}, text, var, env, acc);

@@ -65,24 +65,23 @@ public class FunzExpr extends Espressione{
             es.println(inter+2);
         }
     }
-    private String modname;
+    //private String modname; Proviamo ad eliminarlo
     @Override
     public TypeElem returnType(Variabili var, boolean v)throws CodeException{
-        setModname(var, v);
-        return Funz.getIstance().request(modname).Return(v);
+        return request(var, v).Return(v);
     }
-    /*
-    Non solo setta il modname, ma effettua altri controlli, tra cui il cost
-    */
-    private void setModname(Variabili var, boolean v)throws CodeException{
+    private FElement request(Variabili var, boolean v)throws CodeException{
             TypeElem[] tr=new TypeElem[values.length];
             for(int i=0; i<tr.length; i++){
                 tr[i]=values[i].returnType(var, v);
             }
-            FElement fe=Funz.getIstance().request(nome, tr, v, params);
-            modname=fe.modname;
-            if(!v && (fe.isExternFile()))
-                Funz.getIstance().ext.add(modname);
+            return Funz.getIstance().request(nome, tr, v, params);
+    }
+    private String modname(Variabili var)throws CodeException{
+            FElement fe=request(var, false);
+            if(fe.isExternFile())
+                Funz.getIstance().ext.add(fe.modname);
+            return fe.modname;
     }
     @Override
     public void validate(Variabili var)throws CodeException{
@@ -96,7 +95,7 @@ public class FunzExpr extends Espressione{
     @Override
     public void toCode(Segmenti text, Variabili var, Environment env, Accumulator acc
         )throws CodeException{
-        setModname(var, false);
+        String modname=modname(var);
         acc.pushAll(text);//bisogna farlo prima altrimenti inquina lo stack
         //per la chiamata a funzione
         //non sono importanti i registri prenotati dopo, verranno rilasciati

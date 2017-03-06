@@ -77,7 +77,7 @@ public class Substitutor extends HashMap<String, TemplateEle>{
                 return tte;
         }
         if(te instanceof FunzDich){
-            NumDich nd=recursiveGet((FunzDich)te);
+            TemplateEle nd=recursiveGet((FunzDich)te);
             return nd;
         }
         return null;//Per sicurezza, anche se non accade mai
@@ -142,12 +142,11 @@ public class Substitutor extends HashMap<String, TemplateEle>{
         }
         return ret;
     }
-    public NumDich recursiveGet(FunzDich fd)throws CodeException{
+    public TemplateEle recursiveGet(FunzDich fd)throws CodeException{
         fd.setParams(recursiveGet(fd.getParams()));
         long ret;
         TypeName val;
         TemplateEle te;
-        TemplateEle[] par=recursiveGet(fd.getParams());
         int dim=fd.dimension();
         if(fd instanceof FunzDich.SIZEOF){
             te=fd.getParams()[0];

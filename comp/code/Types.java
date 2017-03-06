@@ -17,6 +17,7 @@
 package comp.code;
 
 import comp.code.template.ClassList;
+import comp.code.template.Substitutor;
 import comp.general.Info;
 import comp.parser.Membro;
 import comp.parser.TypeDef;
@@ -37,10 +38,12 @@ public class Types {
     }
     private final HashSet<TypeElem> elems, Telems;//Tipi template e tipi con parametri template
     private final ClassList cl;
+    private Substitutor suds;
     public void clearAll(){
         elems.clear();
         Telems.clear();
         cl.clearAll();
+        suds=null;
         addPrim();
     }
     private Types(){
@@ -48,6 +51,7 @@ public class Types {
         addPrim();
         cl=new ClassList();
         Telems=new HashSet<>();
+        suds=null;
     }
     private void addPrim(){
         for(String tt:Info.primitive()){
@@ -55,6 +59,9 @@ public class Types {
         }
         elems.add(new TypeElem("void"));
         elems.add(new TypeElem(":null"));
+    }
+    public void setSubstitutor(Substitutor sub){
+        suds=sub;
     }
     /**
      * Carica un tipo. Decide automaticamente dove inserirlo
@@ -108,22 +115,25 @@ public class Types {
     nel qual caso non deve essere aggiunta la notifica in ClassList
     */
     public TypeElem find(TypeName t, boolean validate)throws CodeException{
-        if(t.templates().length==0){
+        if(suds!=null){
+            t=suds.recursiveGet(t);
+        }
+        if(t.templates().length==0)
             return find(t.getName());
+        String mname=Meth.className(t);
+        for(TypeElem i:Telems){
+            if(i.name.equals(mname))
+                return i;
         }
-        else{
-            String mname=Meth.className(t);
-            for(TypeElem i:Telems){
-                if(i.name.equals(mname))
-                    return i;
-            }
-            TypeElem tt=cl.generate(t.getName(), t.templates(), validate);
-            if(tt==null)
-                throw new CodeException("Impossibile trovate classe template di nome "
-                +t.getName());
-            Telems.add(tt);
-            return tt;
+        if(t.templates().length==0){
+            throw new CodeException("Impossibile trovare il tipo "+t.getName());
         }
+        TypeElem tt=cl.generate(t.getName(), t.templates(), validate);
+        if(tt==null)
+            throw new CodeException("Impossibile trovate classe template di nome "
+            +t.getName());
+        Telems.add(tt);
+        return tt;
     }
     public ClassList getClassList(){
         return cl;

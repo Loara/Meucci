@@ -57,11 +57,13 @@ public class TypeElem {
     public final VTable vt;
     public final boolean primitive, reference, number, external, 
             explicit;//se è definita in un altro modulo, explicit se non ha vtable e membri espliciti
+    public final boolean template;//è true se e solo se è un parametro template
     private int dim;
     public TypeElem(TypeDef e, boolean ex)throws CodeException{
         primitive=false;
         reference=true;
         number=false;
+        template=false;
         explicit=e.classExplicit();
         name=e.getName();
         Stack<Membro> bbi=new Stack<>(Membro.class);
@@ -82,6 +84,7 @@ public class TypeElem {
         name=n;
         extend=e;
         subtypes=s;
+        template=false;
         allineamenti=new int[s.length];
         primitive=false;
         reference=true;
@@ -103,6 +106,7 @@ public class TypeElem {
      */
     public TypeElem(String n, TypeName e, Membro[] s, boolean ex, boolean ref, boolean num)
     throws CodeException{
+        template=true;
         if(num && ref)
             throw new CodeException("Parametri errati");
         name=n;
@@ -137,6 +141,7 @@ public class TypeElem {
     }
     TypeElem(String name){//tipo primitivo
         this.name=name;
+        template=false;
         subtypes=new Membro[0];
         allineamenti=new int[0];
         extend=null;
@@ -215,11 +220,16 @@ public class TypeElem {
         return hash;
     }
     public int dimension(boolean v)throws CodeException{
+        if(template)
+            throw new CodeException("Impossibile calcolarne la dimensione");
         if(primitive)
             throw new CodeException("Tipo primitivo");
         if(dim==-1)
             allinea(v);
         return dim;
+    }
+    public boolean hasDim(){
+        return !template && !primitive;
     }
     public int alignDimension(boolean v)throws CodeException{
         int d=dimension(v);
@@ -228,7 +238,7 @@ public class TypeElem {
     public int realDim()throws CodeException{
         if(reference)
             return 8;
-        else if(!primitive)
+        else if(template)
             throw new CodeException("Impossibile risalire alla dimensione di un template");
         if(name.equals(":null"))
             return Info.pointerdim;
@@ -237,6 +247,9 @@ public class TypeElem {
             return ind;
         }
         else throw new CodeException("Impossibile risalire alla vera dimensione di "+name);
+    }
+    public boolean hasRealDim(){
+        return reference || !template;
     }
     
     /**
@@ -335,6 +348,9 @@ public class TypeElem {
     }
     public boolean isNum(){
         return number;
+    }
+    public boolean isTemplate(){
+        return template;
     }
     public boolean isUnsignedNum(){
         return Info.unsignNum(name);//Un type-template num non può

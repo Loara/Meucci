@@ -17,7 +17,10 @@
 package comp.code.template;
 
 import comp.code.CodeException;
+import comp.parser.template.NumDich;
 import comp.parser.template.NumTemplate;
+import comp.parser.template.ParamDich;
+import comp.parser.template.TemplateEle;
 import java.util.HashSet;
 
 /**
@@ -26,6 +29,7 @@ import java.util.HashSet;
  */
 public class TNumbers {
     private static TNumbers tnumb;
+    private Substitutor suds;
     static{
         tnumb=null;
     }
@@ -37,6 +41,10 @@ public class TNumbers {
     private HashSet<NumTemplate> hs;
     public TNumbers(){
         hs=new HashSet<>();
+        suds=null;
+    }
+    public void setSubstuitutor(Substitutor sub){
+        suds=sub;
     }
     public boolean add(NumTemplate tn){
         return hs.add(tn);
@@ -45,6 +53,8 @@ public class TNumbers {
         return hs.remove(tn);
     }
     public boolean isIn(String t){
+        if(suds !=null && suds.containsKey(t))
+            return true;
         NumTemplate res=new NumTemplate(t);
         return hs.contains(res);
     }
@@ -54,6 +64,13 @@ public class TNumbers {
                 return t;
         }
         return null;
+    }
+    public NumDich obtain(ParamDich pd)throws CodeException{
+        TemplateEle te=suds.recursiveGet(pd);
+        if(te instanceof NumDich){
+            return (NumDich)te;
+        }
+        else throw new CodeException("Non trovato");
     }
     /**
      * Dice se tname è maggiore di val
@@ -94,6 +111,15 @@ public class TNumbers {
         return 1 << t.dimExp();
     }
     public int expDim(String tname)throws CodeException{
+        if(suds!=null){
+            if(suds.containsKey(tname)){
+                TemplateEle ret=suds.recursiveGet(new ParamDich(tname));
+                if(ret instanceof NumDich){
+                    return ((NumDich)ret).expDim();
+                }
+                else throw new CodeException("Parametro erroneo");
+            }
+        }
         NumTemplate t=find(tname);
         if(t==null)
             throw new CodeException("Impossibile trovare il parametro "+tname);
@@ -131,5 +157,6 @@ public class TNumbers {
     */
     public void clearAll(){
         hs.clear();
+        suds=null;
     }
 }

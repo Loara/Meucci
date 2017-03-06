@@ -163,9 +163,6 @@ public abstract class Callable implements Serializable{
         if(temp.length!=temps.length)
             throw new CodeException("Lunghezza parametri di template diversa: "+temp.length+
                     " contro "+temps.length);
-        Substitutor s=new Substitutor();
-        s.clear();
-        s.addAll(templateNames(), temps);
         Accumulator acc=new Accumulator();//servirà in VarStack
         Variabili vs=new Variabili(dichs, varSt, false, acc);
         Environment.ret=Types.getIstance().find(retType, false);

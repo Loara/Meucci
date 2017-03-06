@@ -17,6 +17,7 @@
 package comp.code;
 
 import comp.code.template.FunzList;
+import comp.code.template.Substitutor;
 import comp.parser.Callable;
 import comp.parser.OpDef;
 import comp.parser.TypeName;
@@ -77,11 +78,13 @@ public class Funz {
     }
     private final HashSet<FElement> s;
     private final FunzList fl;
+    private Substitutor suds;
     public void clearAll(){
         s.clear();
         fl.clearAll();
         glob.clear();
         ext.clear();
+        suds=null;
     }
     public void clearGE(){
         glob.clear();
@@ -90,12 +93,16 @@ public class Funz {
     private Funz(){
         s=new HashSet<>();
         fl=new FunzList();
+        suds=null;
     }
     private static Funz f;
     public static Funz getIstance(){
         if(f==null)
             f=new Funz();
         return f;
+    }
+    public void setSubstitutor(Substitutor sub){
+        suds=sub;
     }
     public void load(Callable f, boolean ext)throws CodeException{
         if(f.templates().length!=0){
@@ -111,9 +118,15 @@ public class Funz {
     /*
     noAdd serve a FunzList per non aggiungere la funzione (e quindi i relativi tipi a
     ClassList)
+    i typeelem sono già sostituiti
     */
     public FElement request(String name, TypeElem[] types, boolean noAdd
-            , TemplateEle... te)throws CodeException{
+            , TemplateEle... ete)throws CodeException{
+        TemplateEle[] te;
+        if(suds!=null && suds.size()>0)
+            te=suds.recursiveGet(ete);
+        else
+            te=ete;
         ArrayList<FElement> e=new ArrayList<>();
         for(FElement i:s){
             if(!i.name.equals(Meth.funzKey(name, te)))//equivalenza sia di nome che template

@@ -23,10 +23,11 @@ import comp.code.Segmenti;
 import comp.code.template.TNumbers;
 import comp.code.TypeElem;
 import comp.code.Types;
-import comp.code.template.Substitutor;
 import comp.code.vars.Variabili;
 import comp.parser.Espressione;
 import comp.parser.TypeName;
+import comp.parser.template.NumDich;
+import comp.parser.template.ParamDich;
 import comp.scanner.IdentToken;
 
 /**
@@ -110,7 +111,13 @@ public class IdentExpr extends Espressione{
                 text.addIstruzione("xor", acc.getAccReg().getReg(), acc.getAccReg().getReg());
                 break;
             default:
-                vars.getVar(text, acc, val);
+                if(TNumbers.getIstance().isIn(val)){
+                    NumDich nd=TNumbers.getIstance().obtain(new ParamDich(val));
+                    text.addIstruzione("mov", acc.getAccReg().getReg(1 << nd.expDim()), 
+                            String.valueOf(nd.getNum()));
+                }
+                else
+                    vars.getVar(text, acc, val);
         }
     }
     public boolean identEq(String t){

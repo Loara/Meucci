@@ -38,10 +38,10 @@ public class Info {
      * Tipi primitivi
      */
     public static final String[] primitive={"char", "boolean", "pt"
-        , "unicode", "real"};
+        , "real"};
     public static final String[] numbers={"int", "long", "byte", "short",
         "uint", "ulong", "ubyte", "ushort"};
-    public static final int[] realDim={1, 1, pointerdim, 4, 8};//dimensione del dato
+    public static final int[] realDim={1, 1, pointerdim, 8};//dimensione del dato
     public static final int[] numDim={4, 8, 1, 2, 4, 8, 1, 2};
     public static final int maxDimExp=3;//2^3=8
     

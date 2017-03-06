@@ -26,9 +26,7 @@ import comp.parser.template.TypeDich;
 import java.util.HashMap;
 
 /**
- * Come Substitutor, solo che può essere utilizzato anche fuori dal toCode in quanto
- * non calcola direttamente le FunzDich, ma le semplifica. Utile nei ClassList
- * e nei FunzList
+ * Non modifica i FunzDich
  * @author loara
  */
 public class WeakSubstitutor extends HashMap<String, TemplateEle>{

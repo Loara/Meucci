@@ -178,8 +178,6 @@ public class TypeDef implements Serializable{
     public void toCode(Segmenti seg, Dichiarazione[] varSt, Environment env, TemplateEle... tparams)throws CodeException{
         if(tparams.length!=tt.length)
             throw new CodeException("Parametri incompatibili");
-        Substitutor s=new Substitutor();
-        s.addAll(templateNames(), tparams);
         Environment.template=tt.length!=0;
         String rax=Register.AX.getReg();
         String rbx=Register.BX.getReg();

@@ -28,7 +28,6 @@ import comp.scanner.IdentToken;
 import comp.scanner.SymbToken;
 import comp.code.TypeElem;
 import comp.code.Types;
-import comp.code.template.Substitutor;
 import comp.parser.TypeName;
 
 /**
@@ -60,24 +59,24 @@ public class Op2Expr extends Espressione{
         System.out.println(i+"Elemento2:");
         epr2.println(inter+2);
     }
-    private String modname;
+    private Funz.FElement request(Variabili var, boolean v)throws CodeException{
+            TypeElem[] tr=new TypeElem[2];
+            tr[0]=epr.returnType(var, v);
+            tr[1]=epr2.returnType(var, v);
+            return Funz.getIstance().request(symb.getString(), tr, v);
+    }
+    private String modname(Variabili var)throws CodeException{
+            Funz.FElement fe=request(var, false);
+            if(fe.isExternFile())
+                Funz.getIstance().ext.add(fe.modname);
+            return fe.modname;
+    }
     @Override
     public TypeElem returnType(Variabili var, boolean v)throws CodeException{
         String reImm=Aritm.retType(var, this, v);
         if(reImm!=null)
             return Types.getIstance().find(new TypeName(reImm), v);
-        if(modname==null)
-            setModname(var, v);
-        return Funz.getIstance().request(modname).Return(v);
-    }
-    private void setModname(Variabili var, boolean v)throws CodeException{
-        TypeElem[] tr=new TypeElem[2];
-        tr[0]=epr.returnType(var, v);
-        tr[1]=epr2.returnType(var, v);
-        Funz.FElement fe=Funz.getIstance().request(symb.getString(), tr, v);
-        modname=fe.modname;
-        if(!v && (Environment.template||fe.isExternFile()))
-            Funz.getIstance().ext.add(modname);
+        return request(var, v).Return(v);
     }
     public String getName(){
         return symb.getString();
@@ -99,9 +98,8 @@ public class Op2Expr extends Espressione{
             Accumulator acc)throws CodeException{
         if(Aritm.analyze(text, var, env, acc, this))
             return;
-        if(modname==null)
-            setModname(var, false);
         acc.pushAll(text);
+        String modname=modname(var);
         FunzExpr.perfCall(modname, returnType(var, false), 
                 new Espressione[]{epr, epr2}, text, var, env, acc);
         acc.popAll(text);

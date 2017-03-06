@@ -181,16 +181,18 @@ public class Modulo {
         TNumbers.getIstance().clearAll();
         Environment.currentModulo=nome;
         HashSet<String> loadedModules=new HashSet<>();//Per evitare di caricare
-        Funz f=Funz.getIstance();
         for(String dep:deps){
             mas.importModulo(dep, nome, loadedModules);
-            int y=0;
         }
+        boolean b;
         for(TypeDef t:type){
-            Types.getIstance().load(t, false);
+            b=Types.getIstance().load(t, false);
+            if(!b)
+                throw new CodeException("Errore interno: impossibile caricare tipo "+t.nome);
         }
-        for(Callable cal:ca)
+        for(Callable cal:ca){
             Funz.getIstance().load(cal, false);
+        }
         Types.getIstance().getClassList().addAll(Ttype);
         Funz.getIstance().getFunzList().addAll(Tca);
         //---

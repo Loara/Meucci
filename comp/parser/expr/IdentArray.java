@@ -97,18 +97,26 @@ public class IdentArray extends Espressione{
     }
     /**
      * Da non confondere con returnType. Da utilizzare solamente in congiunzione di numValue
-     * e preferibilmente dopo un substituteAll
      * @return 
      */
     public boolean isNum(){
         if(elems.length!=0)
             return false;
-        return chiam instanceof NumExpr;
+        if(chiam instanceof NumExpr)
+            return true;
+        if(chiam instanceof IdentExpr){
+            return TNumbers.getIstance().isIn(((IdentExpr)chiam).val());
+        }
+        else return false;
     }
     public long numValue()throws CodeException{
-        if(!(chiam instanceof NumExpr))
-            throw new CodeException("Impossibile stabilire il valore numerico dell'espressione");
-        return ((NumExpr)chiam).value();
+        if(elems.length!=0)
+            throw new CodeException("Non è un numero");
+        if(chiam instanceof NumExpr)
+            return ((NumExpr)chiam).value();
+        if(chiam instanceof IdentExpr)
+            return TNumbers.getIstance().obtain(new ParamDich(((IdentExpr)chiam).val())).getNum();
+        else throw new CodeException("Non è un numero");
     }
     @Override
     public void println(int i){
