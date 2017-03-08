@@ -315,7 +315,7 @@ public class VarStack extends Var{
     }
     private void distruggi(VarEle e, Segmenti seg)throws CodeException{
         int i=relativePOS(e);
-        String u;
+        String u;//u è il primo byte dell'oggetto
         if(i>=0)
             u="[rbp+"+i+"]";
         else
@@ -323,7 +323,8 @@ public class VarStack extends Var{
         int pr=acc.prenota();
         seg.addIstruzione("lea", acc.getReg(pr).getReg(), u);
         seg.addIstruzione("push", acc.getReg(pr).getReg(), null);
-        seg.addIstruzione("call", u, null);
+        seg.addIstruzione("mov", acc.getReg(pr).getReg(), u);
+        seg.addIstruzione("call", "["+acc.getReg(pr).getReg()+"]", null);
         acc.libera(pr);
     }
     /**

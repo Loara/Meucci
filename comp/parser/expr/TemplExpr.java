@@ -22,10 +22,12 @@ import comp.code.Environment;
 import comp.code.Segmenti;
 import comp.code.TypeElem;
 import comp.code.Types;
-import comp.code.template.Substitutor;
 import comp.code.vars.Variabili;
 import comp.parser.Espressione;
 import comp.parser.template.FunzDich;
+import comp.parser.template.NumDich;
+import comp.parser.template.ParamDich;
+import comp.parser.template.TemplateEle;
 
 /**
  * Gestisce funzioni template all'interno del codice
@@ -44,8 +46,13 @@ public class TemplExpr extends Espressione{
         funz.validate();
     }
     @Override
-    public void toCode(Segmenti seg, Variabili var, Environment env, Accumulator acc){
-        //analogo a substituteAll
+    public void toCode(Segmenti seg, Variabili var, Environment env, Accumulator acc)
+    throws CodeException{
+        TemplateEle te=Types.getIstance().getSubstitutor().recursiveGet(funz);
+        if(!(te instanceof NumDich))
+            throw new CodeException("Errore interno");
+        NumDich nd=(NumDich)te;
+        seg.addIstruzione("mov", acc.getAccReg().getReg(1 << nd.expDim()), String.valueOf(nd.getNum()));
     }
     @Override
     public TypeElem returnType(Variabili var, boolean valid)throws CodeException{

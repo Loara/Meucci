@@ -143,13 +143,14 @@ public class Substitutor extends HashMap<String, TemplateEle>{
         return ret;
     }
     public TemplateEle recursiveGet(FunzDich fd)throws CodeException{
-        fd.setParams(recursiveGet(fd.getParams()));
+        //fd.setParams(recursiveGet(fd.getParams())); Non bisogna più sostituire
+        TemplateEle[] newPar=recursiveGet(fd.getParams());
         long ret;
         TypeName val;
         TemplateEle te;
         int dim=fd.dimension();
         if(fd instanceof FunzDich.SIZEOF){
-            te=fd.getParams()[0];
+            te=newPar[0];
             if(te instanceof ParamDich)
                 val=new TypeName(((ParamDich)te).getName());
             else if(te instanceof TypeDich)
@@ -159,7 +160,7 @@ public class Substitutor extends HashMap<String, TemplateEle>{
         }
         else if(fd instanceof FunzDich.SUM){
             ret=0;
-            for(TemplateEle t:fd.getParams()){
+            for(TemplateEle t:newPar){
                 if(t instanceof NumDich){
                     ret+=((NumDich)t).getNum();
                 }
@@ -168,7 +169,7 @@ public class Substitutor extends HashMap<String, TemplateEle>{
         }
         else if(fd instanceof FunzDich.PROD){
             ret=1;
-            for(TemplateEle t:fd.getParams()){
+            for(TemplateEle t:newPar){
                 if(t instanceof NumDich){
                     ret*=((NumDich)t).getNum();
                 }
@@ -176,7 +177,7 @@ public class Substitutor extends HashMap<String, TemplateEle>{
             }
         }
         else if(fd instanceof FunzDich.DIMENSION){
-            te=fd.getParams()[0];
+            te=newPar[0];
             if(te instanceof ParamDich)
                 val=new TypeName(((ParamDich)te).getName());
             else if(te instanceof TypeDich)

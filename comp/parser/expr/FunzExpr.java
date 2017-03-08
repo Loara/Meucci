@@ -25,7 +25,6 @@ import comp.code.Register;
 import comp.code.Segmenti;
 import comp.code.TypeElem;
 import comp.code.XReg;
-import comp.code.template.Substitutor;
 import comp.code.vars.Variabili;
 import comp.parser.Espressione;
 import comp.parser.ParserException;

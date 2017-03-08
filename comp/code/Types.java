@@ -63,6 +63,9 @@ public class Types {
     public void setSubstitutor(Substitutor sub){
         suds=sub;
     }
+    public Substitutor getSubstitutor(){
+        return suds;
+    }
     /**
      * Carica un tipo. Decide automaticamente dove inserirlo
      * @param e

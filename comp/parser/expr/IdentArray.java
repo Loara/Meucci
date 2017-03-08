@@ -22,17 +22,12 @@ import comp.code.Environment;
 import comp.code.Segmenti;
 import comp.code.TypeElem;
 import comp.code.Types;
-import comp.code.template.Substitutor;
 import comp.code.template.TNumbers;
 import comp.code.vars.Variabili;
-import comp.general.Info;
 import comp.parser.Espressione;
 import comp.parser.Membro;
 import comp.parser.ParserException;
-import comp.parser.template.NumDich;
 import comp.parser.template.ParamDich;
-import comp.parser.template.TemplateEle;
-import comp.scanner.IdentToken;
 
 /**
  * Contiene anche i NumExpr
@@ -89,9 +84,8 @@ public class IdentArray extends Espressione{
     @Override
     public void toCode(Segmenti text, Variabili vars, Environment env, Accumulator acc)
     throws CodeException{
-        canRead(vars, false);
-        if(elems.length==0 && chiam instanceof IdentExpr)
-            ((IdentExpr)chiam).toCode(text, vars, env, acc);//gestisce true, false, null, etc.
+        if(elems.length==0)
+            chiam.toCode(text, vars, env, acc);//gestisce true, false, null, etc.
         else
             vars.getVar(this, text, env, acc);//gestisce anche i numeri
     }
@@ -106,6 +100,9 @@ public class IdentArray extends Espressione{
             return true;
         if(chiam instanceof IdentExpr){
             return TNumbers.getIstance().isIn(((IdentExpr)chiam).val());
+        }
+        if(chiam instanceof TemplExpr){
+            return true;
         }
         else return false;
     }

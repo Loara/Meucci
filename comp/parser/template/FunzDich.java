@@ -364,9 +364,12 @@ public abstract class FunzDich implements Serializable, TemplateEle{
     protected TemplateEle[] params;
     //Se è negativo allora il numero di elementi minimo è pari all'opposto
     public abstract int numParams();
+    /*
     public void setParams(TemplateEle[] te){
         params=te;
     }
+    rischiosa data la nuova policy sui template
+*/
     public TemplateEle[] getParams(){
         return params;
     }

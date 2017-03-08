@@ -26,7 +26,9 @@ import comp.parser.template.TypeDich;
 import java.util.HashMap;
 
 /**
- * Non modifica i FunzDich
+ * Serve per generare TypeElem e FElement, in quanto sostituisce ai parametri
+ * template della definizione con i parametri template passati dal chiamante.
+ * L'oggetto così creato deve poi essere comunque passato al Substitutor
  * @author loara
  */
 public class WeakSubstitutor extends HashMap<String, TemplateEle>{
