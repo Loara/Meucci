@@ -68,6 +68,7 @@ public class StaticExpr extends Espressione{
         FElement cos=Funz.getIstance().request(Meth.costructorName(type), esp1, false, type.templates());
         //analogo a :new
         env.push("STATIC_");
+        env.increment("STATIC_");
         int i=env.get("STATIC_");
         seg.bss.add("STATIC_"+i+"_IND\tresb\t1");
         seg.bss.add("\talignb\t8");
