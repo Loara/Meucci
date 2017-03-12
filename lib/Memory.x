@@ -13,7 +13,11 @@ modulo Memory depends Syscalls{
 	Block createBlock(uint i){
 		if(i+u8<u8)//Overflow
 			return null;
-		pt g=sbrk((long)(i+u8));
+		if(i <= u16)
+			i = u16;
+		else
+			i = i - (i & u7) + u16;
+		pt g=sbrk((long)i);
 		Block ret=(Block)g;
 		ret.dim=i;
 		ret.next=null;
@@ -43,7 +47,7 @@ modulo Memory depends Syscalls{
 		return (pt)b+u8;//Allineamento e preservare dim
 	}
 	void free(pt ob){
-		Block b=(Block)(ob-u12);
+		Block b=(Block)(ob-u8);
 		b.next=base;
 		base=b;
 	}
