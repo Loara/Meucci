@@ -56,7 +56,7 @@ public class ReturnIstruz extends Istruzione{
         }
         else{
             if(!Environment.ret.name.equals("void"))
-                throw new CodeException("La funzione non ritorna void");            
+                throw new CodeException("La funzione non ritorna void, ma "+Environment.ret.name);            
         }
     }
     /*

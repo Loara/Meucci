@@ -35,7 +35,6 @@ import comp.parser.ParserException;
 import comp.parser.TypeDef;
 import comp.parser.TypeName;
 import comp.parser.template.NumDich;
-import comp.parser.template.Template;
 import comp.parser.template.TemplateEle;
 import comp.scanner.Analyser;
 import comp.scanner.Analyser.ScanException;
@@ -286,6 +285,7 @@ public class Master {
             sub.addAll(type.templateNames(), temps);
             Types.getIstance().setSubstitutor(sub);
             Funz.getIstance().setSubstitutor(sub);
+            TNumbers.getIstance().setSubstuitutor(sub);
             out.println("\tDEFAULT\tREL");
             out.println("\t%use\taltreg");
             Environment env=new Environment();
@@ -332,6 +332,7 @@ public class Master {
             sub.addAll(funz.templateNames(), temps);
             Types.getIstance().setSubstitutor(sub);
             Funz.getIstance().setSubstitutor(sub);
+            TNumbers.getIstance().setSubstuitutor(sub);
             out.println("\tDEFAULT\tREL");
             out.println("\t%use\taltreg");
             Environment env=new Environment();
