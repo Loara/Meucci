@@ -16,7 +16,7 @@ modulo Memory depends Syscalls{
 		if(i <= u16)
 			i = u16;
 		else
-			i = i - (i & u7) + u16;
+			i = i + (- i & u7) + u8;
 		pt g=sbrk((long)i);
 		Block ret=(Block)g;
 		ret.dim=i;
