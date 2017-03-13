@@ -71,46 +71,37 @@ public class Master {
     public static void main(String[] args)throws Exception{
         Master m=new Master();
         if(args.length<1){
-            System.out.println("Usage: meucci number sources...");
+            System.out.println("Usage: meucc [options] sources...");
             System.out.println();
-            System.out.println("number is a number that contains the options");
-            System.out.println();
-            System.out.println("bit 0 == 1");
+            System.out.println("OPTIONS");
+            System.out.println("-p");
             System.out.println("generates only file headers, no compile anything");
             System.out.println();
-            System.out.println("bit 1 == 1");
+            System.out.println("-c");
             System.out.println("don't assemble files automatically");
             System.out.println();
-            System.out.println("bit 2 == 1");
+            System.out.println("-a");
             System.out.println("don't link files automatically");
             return;
         }
         Stack<String> fil=new Stack<>(String.class);
-        int num=0;
-        try{
-            num=Integer.parseInt(args[0]);
-        }
-        catch(NumberFormatException ex){
-            System.err.printf("Attenzione: i parametri non contengono il numero delle opzioni %n"
-            +"Utilizzato il valore 0%n");
-        }
-        m.compile=(num & 1)==0;
-        m.assemble=(num & 2)==0;
-        m.link=(num & 4)==0;
-        for (String arg : args) {
-            if(arg.equals("/"))
-                break;//Per tagliare l'input
-            if(arg.endsWith(".x"))
-                fil.push(arg);
-        }
+        m.compile=true;
+        m.assemble=true;
+        m.link=true;
+        m.detect(args, fil);
         m.compila(fil.toArray());
         if(!m.assemble || !m.compile)
             return;
+        MPrinter mp;
+        MPrinter ep;
         for(String f:m.createdFile){
             Process p=Runtime.getRuntime().exec(new String[]{"nasm", "-felf64", "-o"+f+".o", f+".asm"});
+            mp= new MPrinter(p.getInputStream(), false);
+            ep= new MPrinter(p.getErrorStream(), true);
+            mp.start();
+            ep.start();
             int ret=p.waitFor();
             if(ret!=0){
-               System.err.println("Errore durante l'assemblaggio di "+f+".asm");
                deleteAll(0, m.createdFile);
                return;
             }
@@ -125,10 +116,27 @@ public class Master {
             s[1+i]=m.createdFile.get(i)+".o";
         }
         Process pr=Runtime.getRuntime().exec(s);
+        mp= new MPrinter(pr.getInputStream(), false);
+        ep= new MPrinter(pr.getErrorStream(), true);
+        mp.start();
+        ep.start();
         int ret=pr.waitFor();
         deleteAll(0, m.createdFile);
-        if(ret!=0){
-            System.err.println("Errore durante il linking");
+    }
+    private void detect(String[] params, Stack<String> fil){
+        for (String param : params) {
+            if (param.equals("-p")) {
+                compile=false;
+            } else if (param.equals("-c")) {
+                assemble=false;
+            }
+            else if(param.equals("-a"))
+                link=false;
+            else if(param.equals("/"))
+                return;
+            else if(param.endsWith(".x")){
+                fil.push(param);
+            }
         }
     }
     private static void deleteAll(int v, ArrayList<String> createdFiles)
