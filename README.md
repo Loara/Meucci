@@ -22,3 +22,7 @@ To run this compiler version it's required:
 
 - nasm assembler
 - ld linker (binutils Linux package)
+
+##Bugs
+
+See `Issues` to knownì all bugs found and/or fixed.
