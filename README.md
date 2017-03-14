@@ -11,7 +11,7 @@ Differently from what has been sain in the manual, you can't (still) compile sou
 
 ## Installation
 
-You need Java 8 or later to install (this version of) Meucci compiler.
+You need Java 8 or later to install (this version of) Meucci compiler. Main class is comp.general.Master
 
 If you've installed Apache Ant, you can simply follow this steps:
 
