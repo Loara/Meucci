@@ -1,4 +1,4 @@
-# Compiler of Meucci Programming Language.
+# Meucci Compiler
 
 Meucci is a new programming language, based on the concept of "module" as a container of methods and data that have the same role in the final program.
 
