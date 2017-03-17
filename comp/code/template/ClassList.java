@@ -22,6 +22,8 @@ import comp.code.Meth;
 import comp.code.TypeElem;
 import comp.parser.Membro;
 import comp.parser.TypeDef;
+import comp.parser.TypeName;
+import comp.parser.template.ParamDich;
 import comp.parser.template.Template;
 import comp.parser.template.TemplateEle;
 
@@ -52,6 +54,12 @@ public class ClassList extends TList<TypeDef>{
         }
         WeakSubstitutor sub=new WeakSubstitutor();
         sub.addAll(t.templateNames(), param);
+        TypeName exs;
+        if(t.extend()==null)
+            exs = null;
+        else{
+            exs = sub.recursiveGet(t.extend());
+        }
         Membro[] mem=new Membro[t.getDich().length];
         for(int i=0; i<mem.length; i++){
             Membro ii=t.getDich()[i];
@@ -64,7 +72,7 @@ public class ClassList extends TList<TypeDef>{
             //non hanno vtables e quindi nessun fmem
         }
         String className=Meth.className(name, param);
-        return new TypeElem(className, t.extend(), mem, 
+        return new TypeElem(className, exs, mem, 
                 !t.modulo().equals(Environment.currentModulo), t.classExplicit());
     }
 }

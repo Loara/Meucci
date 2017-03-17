@@ -70,13 +70,13 @@ public class TypeDef implements Serializable{
         nome=((IdentToken)t.get()).getString();
         Info.isForbitten(nome, t.get().getRiga());
         t.nextEx();
+        tt=Template.parseTemp(t);
         if(t.get() instanceof IdentToken && ((IdentToken)t.get()).getString().equals("extends")){
             if(!(t.get(1) instanceof IdentToken))
                 throw new ParserException("extends errato", t);
             t.nextEx();
             ext=new TypeName(t);
         }
-        tt=Template.parseTemp(t);
         Stack<Membro> s=new Stack<>(Membro.class);
         Stack<FMorg> fmm=new Stack<>(FMorg.class);
         boolean ifTem=tt.length!=0;
@@ -147,7 +147,7 @@ public class TypeDef implements Serializable{
             ffm=fmm.toArray();
             t.next();
         }
-        else throw new ParserException("Tipo non valido: senza parentesi {", t);
+        else throw new ParserException("Tipo "+nome+" non valido: senza parentesi {", t);
     }
     /**
      * Per ClassList
@@ -194,6 +194,9 @@ public class TypeDef implements Serializable{
                     throw new CodeException("Una classe non esplicita non può estenderne una esplicita");
             }
         }
+        if(ext != null){
+            Types.getIstance().find(ext, false);//Controllare la correttezza
+        }
         for(Membro type:types)
             type.chechPack(false);
         if(hasVTable()){//Se classe esplicita non ha bisogno di generare vtable
@@ -238,6 +241,9 @@ public class TypeDef implements Serializable{
                 if(Types.getIstance().find(ext, true).explicit)
                     throw new CodeException("Una classe non esplicita non può estenderne una esplicita");
             }
+        }
+        if(ext != null){
+            Types.getIstance().find(ext, true);//Controllare la correttezza
         }
         //Le classi esplicite garantiscono che i membri lo siano
         //I packed sono explicit
@@ -347,10 +353,11 @@ public class TypeDef implements Serializable{
         seg.addIstruzione("enter","0","0");//indirizzo vtable in r0
         //Environment.template=tt.length!=0;    Già inserito in toCode
         if(ext!=null){
+            TypeName rext=Types.getIstance().translate(ext);
             if(ext.templates().length !=0 || Types.getIstance().find(ext, false).external
                     || vparams.length!=0)
-                Funz.getIstance().ext.add("_VT_INIT_E_"+Meth.className(ext));
-            seg.addIstruzione("call", "_VT_INIT_E_"+Meth.className(ext), null);
+                Funz.getIstance().ext.add("_VT_INIT_E_"+Meth.className(rext));
+            seg.addIstruzione("call", "_VT_INIT_E_"+Meth.className(rext), null);
         }
         int rd;
         TypeElem th=Types.getIstance().find(new TypeName(nome, vparams), false);

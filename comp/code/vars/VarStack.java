@@ -52,43 +52,56 @@ public class VarStack extends Var{
             else
                 allocatedSpace=alld;
         }
-        public final boolean var, destroyable;
+        public final boolean var;
+        public boolean destroyable;
         public final String name;
-        public final int pos, allocatedSpace;//di quanto è stato decrementato l'rsp per allocare spazio
+        public final int pos;//posizione RELATIVA a rbp (posizione reale = rbp - pos)
+        public final int allocatedSpace;//di quanto è stato decrementato l'rsp per allocare spazio
         public final TypeElem type;
     }
     private final ArrayList<VarEle> al;
-    private int rsp, rbp, maxdim, dimargs;
-    private final int topstack=0;//non è importante quanti vale, purchè sia multiplo di 8
+    private int rrsp, maxdim, dimargs;//rsp = rbp - rrsp => rrsp = rbp - rsp
     private final Accumulator acc;
-    private void incPOS(int dim){//cresce verso il basso
-        rsp-=dim;
+    private boolean remainAlign(int cp, int dim, int pd){
+        //ritorna true se dopo l'aggiunta rimane allineato
+        //Bisogna stare attenti in quanto cp è l'rrsp e non l'rsp
+        //anche se sono entrambi alineati allo stesso modo.
+        
+        //Per essere allineato sia cp che cp+dim devono giacere nello stesso blocco
+        //di dimensione pd. se k*pd <= cp < (k+1)*pd allora k*pd <= cp+dim <= (k+1)*pd
+        if(dim == 0)
+            return true;
+        int rcp = (cp & (pd-1));// == cp % pd essendo pd potenza di 2
+        return dim <= (pd-rcp);
     }
     /*
-    Alloca spazio per variabili primitive, Per allocare spazio con :static, utilizzare
+    Alloca spazio per variabili primitive, Per allocare spazio con :stack, utilizzare
     allocAlign
-    ritorna la quantità di memoria utilizzata in modulo
+    ritorna la quantità di memoria EFFETTIVAMENTE incrementata
     */
     private int incPOSAlign(int dim){
-        int cpos=rsp;
-        if(dim<=8){
-            if(((cpos - dim) & 7) <= (cpos & 7) || ((cpos & 7) ==0)){
-                //mantiene allineamento
-                rsp-=dim;
+        int cpos=rrsp;
+        int pd =Info.pointerdim;
+        if(dim <= pd){
+            if(remainAlign(rrsp, dim, pd)){
+                rrsp+=dim;
             }
             else{
-                rsp-=Info.decConv(rsp);
-                rsp-=dim;
+                //prima aggiungi lo spazio vuoto sotto, poi inserisci la variabile
+                //la variabile infatti non è richiesta essere allineata
+                rrsp += Info.alignConv(rrsp);
+                rrsp += dim;
             }
         }
         else{
-            rsp-=Info.decConv(rsp);
-            rsp-=Info.alignConv(dim)+dim;
+            //La cima deve essere allineata (pensa agli xmm)
+            rrsp += dim;
+            rrsp += Info.alignConv(rrsp);
         }
-        return cpos-rsp;
+        return rrsp - cpos;
     }
     private void decPOS(int dim){
-        rsp+=dim;
+        rrsp+=dim;
     }
     /*
     rbp=8 byte 64 bit
@@ -99,13 +112,9 @@ public class VarStack extends Var{
     */
     public VarStack(FunzParam[] args, Accumulator acc)throws CodeException{
         al=new ArrayList<>();
-        rsp=topstack;
         maxdim=0;
-        rbp=0;
         initArgs(args);
-        incPOS(8);//return adress
-        incPOS(8);//rbp
-        rbp=rsp;//vedere sopra
+        rrsp = 0;//all'inizio rsp punta esattamente a ciò che punta rbp
         this.acc=acc;
     }
     /**
@@ -115,13 +124,9 @@ public class VarStack extends Var{
      */
     public VarStack(Accumulator acc)throws CodeException{
         al=new ArrayList<>();
-        rsp=topstack;
         maxdim=0;
-        rbp=0;
         initArgs(null);
-        incPOS(8);
-        incPOS(8);
-        rbp=rsp;
+        rrsp = 0;
         this.acc=acc;
     }
     /**
@@ -135,10 +140,19 @@ public class VarStack extends Var{
         dimargs=0;
         if(args==null)
             return;
-        for (FunzParam arg : args) {
-            incPOS(8);
+        int len = args.length;
+        /*
+        rrsp non ancora utilizzato
+        Sia i l'i-esimo parametro (da sinistra) passato alla funzione.
+        Allora la sua posizione assoluta è
+        rbp + 8*(len - i - 1) + 16 = rbp + 8*(len -i + 1)
+        la posizione relativa diviene allora
+        8*(i - len - 1).
+        */
+        for (int i=0; i<len; i++) {
             dimargs+=8;
-            VarEle ve=new VarEle(true, false, arg.getIdent(), arg.dich.getRType(), rsp, 8);
+            VarEle ve=new VarEle(true, false, args[i].getIdent()
+                    , args[i].dich.getRType(), Info.pointerdim * (i-len-1), Info.pointerdim);
             al.add(ve);
         }
     }
@@ -150,40 +164,30 @@ public class VarStack extends Var{
      */
     public void addVar(TypeName type, String ident)throws CodeException{
         int adim =incPOSAlign(Types.getIstance().find(type, false).realDim());//utilizzare solo in toCode
-        VarEle ve=new VarEle(true, false, ident, type, rsp, adim);//si possono sempre modificare
-        int dimInter=rbp-rsp;
-        if(dimInter>maxdim)
-            maxdim=dimInter;
+        VarEle ve=new VarEle(true, false, ident, type, rrsp, adim);//si possono sempre modificare
+        if(rrsp>maxdim)
+            maxdim=rrsp;
         al.add(ve);
     }
     /**
-     * Alloca spazio (in byte) allineato nello stack. Dato che lo stack cresce verso il basso,
-     * mentre l'accesso della memoria è verso l'alto, solo l'ultimo byte deve essere allineato.
+     * Alloca spazio (in byte) con inizio allineato, da usare ad esempio 
+     * su blocchi creati tramite :stack
      * @param i 
      * @param destructor 
      * @return Valore da Sottrarre a rbp per ottenere la risorsa
      * @throws comp.code.CodeException
      */
-    public int allocAlign(int i, boolean destructor)throws CodeException{
+    public VarEle allocAlign(int i, boolean destructor)throws CodeException{
         if(i<=0)
-            return -1;
-        int initRSP=rsp;
-        rsp-=i;
-        rsp-=Info.decConv(rsp);
-        al.add(new VarEle(false, destructor, "alloca", null, rsp, rsp-initRSP));
-        int dimInter=rbp-rsp;//positivo
-        if(dimInter>maxdim)
-            maxdim=dimInter;
-        return dimInter;
-    }
-    /**
-     * ritorna la posizione di {@code te} rispetto all'rbp
-     * (per la posizione assoluta và aggiunto all'rbp;
-     * @param te
-     * @return 
-     */
-    private int relativePOS(VarEle te){
-        return te.pos-rbp;
+            throw new CodeException("Dimensione nulla");
+        int initRSP=rrsp;
+        rrsp += i;
+        rrsp += Info.alignConv(rrsp);
+        VarEle ret = new VarEle(false, destructor, "alloca", null, rrsp, rrsp-initRSP);
+        al.add(ret);
+        if(rrsp>maxdim)
+            maxdim=rrsp;
+        return ret;//ritorna ret e non la posizione per poter gestire meglio le eccezioni
     }
     @Override
     public boolean isIn(String ident){
@@ -217,10 +221,7 @@ public class VarStack extends Var{
     public static int pushDim(int adim){
         return 8;
     }
-    public String varInfo(String n, int d)throws CodeException{
-        VarEle ve=get(n);
-        if(ve.type.realDim()!=d)
-            throw new CodeException("Dimensioni errate "+ve.type.name+" "+ve.type.realDim()+" "+d);
+    public String varInfo(VarEle ve)throws CodeException{
         String r;
         switch(ve.type.realDim()){
             case 1:
@@ -238,63 +239,60 @@ public class VarStack extends Var{
             default:
                 r="";
         }
-        int sc=ve.pos-rbp;
-            if(sc>=0)
+        int sc = -ve.pos;//posizione = rbp - ve.pos
+            if(sc == 0)
+                r += " [rbp]";//impossibile, ma non si sa mai
+            else if(sc > 0)
                 r+=" [rbp+"+sc+"]";
             else
                 r+=" [rbp"+sc+"]";
+        return r;
+    }
+    /*
+    Come VarInfo, solo non si interessa della dimensione del blocco (ideale per blocchi
+    allocati con :stack)
+    */
+    public String varPos(VarEle ve){
+        String r;
+        int sc = -ve.pos;//posizione = rbp - ve.pos
+            if(sc == 0)
+                r = "[rbp]";//impossibile, ma non si sa mai
+            else if(sc > 0)
+                r = "[rbp+"+sc+"]";
+            else
+                r = "[rbp"+sc+"]";
         return r;
     }
     @Override
     public void getVar(Segmenti text, String ident, Register reg)throws CodeException{
         VarEle ve=get(ident);
         if(ve.type.xmmReg())
-            throw new CodeException("Varore reale");
-        String u;
-        int i=relativePOS(ve);
-        if(i>=0)
-            u="[rbp+"+i+"]";
-        else
-            u="[rbp"+i+"]";
+            throw new CodeException("Valore reale");
+        String u = varInfo(ve);
         getGVar(text, u, reg, ve.type.realDim());
     }
     @Override
     public void setVar(Segmenti text, String ident, Register reg)throws CodeException{
         VarEle ve=get(ident);
-            String u;
-            int i=relativePOS(ve);
-            if(i>=0)
-                u="[rbp+"+i+"]";
-            else
-                u="[rbp"+i+"]";
         if(ve.type.xmmReg())
             throw new CodeException("Valore reale");
+        String u = varInfo(ve);
         setGVar(text, u, reg, ve.type.realDim());
     }
     @Override
     public void xgetVar(Segmenti text, String ident, XReg reg)throws CodeException{
         VarEle ve=get(ident);
-        String u;
-        int i=relativePOS(ve);
-        if(i>=0)
-            u="[rbp+"+i+"]";
-        else
-            u="[rbp"+i+"]";
         if(!ve.type.xmmReg())
             throw new CodeException("Varore reale");
+        String u = varInfo(ve);
         getXVar(text, u, reg);
     }
     @Override
     public void xsetVar(Segmenti text, String ident, XReg reg)throws CodeException{
         VarEle ve=get(ident);
-            String u;
-            int i=relativePOS(ve);
-            if(i>=0)
-                u="[rbp+"+i+"]";
-            else
-                u="[rbp"+i+"]";
         if(!ve.type.xmmReg())
             throw new CodeException("Valore non reale");
+        String u = varInfo(ve);
         setXVar(text, u, reg);
     }
     public int getDimArgs(){
@@ -309,17 +307,12 @@ public class VarStack extends Var{
      */
     public void addBlock(){
         try{
-            al.add(new VarEle(false, false, "block", null, rsp, 0));
+            al.add(new VarEle(false, false, "block", null, rrsp, 0));
         }
         catch(CodeException e){}//inutilizzato
     }
     private void distruggi(VarEle e, Segmenti seg)throws CodeException{
-        int i=relativePOS(e);
-        String u;//u è il primo byte dell'oggetto
-        if(i>=0)
-            u="[rbp+"+i+"]";
-        else
-            u="[rbp"+i+"]";
+        String u = varPos(e);//u è il primo byte dell'oggetto
         int pr=acc.prenota();
         seg.addIstruzione("lea", acc.getReg(pr).getReg(), u);
         seg.addIstruzione("push", acc.getReg(pr).getReg(), null);

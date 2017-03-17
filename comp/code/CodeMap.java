@@ -61,9 +61,9 @@ public class CodeMap extends ArrayList<String>{
             if(op1.equals(o2)){
                 if(op2.equals(o1))
                     return;//inutile aggiungere
-                if(!op1.startsWith("[")){
-                    if(!op2.startsWith("[") || !o1.startsWith("[")){
-                        if(o1.startsWith("[") && Info.isNum(op2.charAt(0))){
+                if(!op1.contains("[")){
+                    if(!op2.contains("[") || !o1.contains("[")){
+                        if(o1.contains("[") && Info.isNum(op2.charAt(0))){
                             //settare numero a memoria
                             if(op1.endsWith("b")){
                                 op2 = "byte "+op2;

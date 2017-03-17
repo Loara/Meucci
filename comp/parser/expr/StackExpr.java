@@ -26,7 +26,7 @@ import comp.code.Register;
 import comp.code.Segmenti;
 import comp.code.TypeElem;
 import comp.code.Types;
-import comp.code.template.Substitutor;
+import comp.code.vars.VarStack.VarEle;
 import comp.code.vars.Variabili;
 import comp.parser.Espressione;
 import comp.parser.TypeName;
@@ -68,8 +68,12 @@ public class StackExpr extends Espressione{
         FElement cos=Funz.getIstance().request(Meth.costructorName(type), esp1, false, type.templates());
         //analogo a :new
         acc.pushAll(seg);
-        int l=var.allocStack(tp.dimension(false), !tp.explicit);
-        seg.addIstruzione("lea",Register.AX.getReg(),"[rbp-"+l+"]");
+        //Bisogna stare attenti ora che possono essere generate eccezioni:
+        //Il blocco non deve essere settato subito per permettere l'esecuzione
+        //del distruttore, ma deve essere garantita la corretta terminazione
+        //del costruttore per poter invocare il distruttore
+        VarEle vel=var.allocStack(tp.dimension(false), false);
+        seg.addIstruzione("lea",Register.AX.getReg(),var.getVarStack().varPos(vel));
         if(tp.explicit){
             if(Environment.template || type.templates().length!=0 || tp.external)
                 Funz.getIstance().ext.add(cos.modname);
@@ -97,6 +101,7 @@ public class StackExpr extends Espressione{
         }
         seg.addIstruzione("call",cos.modname,null);//costruttore vero
         seg.addIstruzione("pop",acc.getAccReg().getReg(), null);//vero valore di ritorno
+        vel.destroyable = !tp.explicit;
         acc.popAll(seg);
     }
     @Override
