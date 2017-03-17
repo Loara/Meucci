@@ -113,6 +113,12 @@ public class Types {
         }
         throw new CodeException("Tipo sconosciuto: "+t);
     }
+    public TypeName translate(TypeName tn)throws CodeException{
+        if(suds != null)
+            return suds.recursiveGet(tn);
+        else
+            return tn;
+    }
     /*
     il validate serve a sapere se è richiamato all'interno di un validate,
     nel qual caso non deve essere aggiunta la notifica in ClassList
@@ -121,8 +127,9 @@ public class Types {
         if(suds!=null){
             t=suds.recursiveGet(t);
         }
-        if(t.templates().length==0)
+        if(t.templates().length==0){
             return find(t.getName());
+        }
         String mname=Meth.className(t);
         for(TypeElem i:Telems){
             if(i.name.equals(mname))

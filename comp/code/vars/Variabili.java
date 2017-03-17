@@ -21,6 +21,7 @@ import comp.code.CodeException;
 import comp.code.Environment;
 import comp.code.Segmenti;
 import comp.code.TypeElem;
+import comp.code.vars.VarStack.VarEle;
 import comp.parser.Dichiarazione;
 import comp.parser.FunzParam;
 import comp.parser.expr.IdentArray;
@@ -55,7 +56,7 @@ public class Variabili {
     public void addGhostVar(Dichiarazione var)throws CodeException{
         gvar.addVar(var.getRType(), var.getIdent());
     }
-    public int allocStack(int i, boolean des)throws CodeException{
+    public VarEle allocStack(int i, boolean des)throws CodeException{
         return vars.allocAlign(i, des);
     }
     /*
