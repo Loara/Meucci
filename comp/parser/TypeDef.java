@@ -467,41 +467,6 @@ public class TypeDef implements Serializable{
             }
         }
     }
-    /*
-     * Genera funzioni di accesso di default
-     * 
-    private void generateAccessFunz(Segmenti seg, Membro mem, boolean get, int rd,
-            TemplateEle... vparams)
-            throws CodeException{
-        String rnome=Meth.className(nome, vparams);
-        if(mem.params.length!=0)
-            throw new CodeException("Impossibile generare funzione di default");
-        String rbx=Register.BX.getReg();
-        TypeElem te=Types.getIstance().find(mem.getType(), false);
-        String[] yte=templateNames();
-        if(get){
-            seg.addLabel(Meth.generate(mem, rnome, true, Environment.currentModulo, vparams, yte));
-            //il puntatore alla classe si trova in rbp+16 (primo argomento)
-            //il ritorno và in rax
-            seg.addIstruzione("enter","0","0");
-            seg.addIstruzione("mov",rbx,"[rbp+16]");
-            seg.addIstruzione("mov",Register.AX.getReg(te.realDim()),"["+rbx+"+"+rd+"]");
-            seg.addIstruzione("leave", null, null);
-            seg.addIstruzione("ret", String.valueOf(Info.pointerdim), null);
-        }
-        else{
-            seg.addLabel(Meth.generate(mem, rnome, false, Environment.currentModulo, vparams, yte));
-            //il puntatore alla classe si trova in rbp+16 (primo argomento)
-            //il valore da aggiungere si trova in rbp+24 (secondo argomento)
-            seg.addIstruzione("enter","0","0");
-            seg.addIstruzione("mov",rbx,"[rbp+16]");
-            seg.addIstruzione("mov",Register.AX.getReg(te.realDim()),"[rbp+24]");//elementi in stack hanno sempre 8 byte di dimensione
-            seg.addIstruzione("mov","["+rbx+"+"+rd+"]",Register.AX.getReg(te.realDim()));
-            seg.addIstruzione("leave", null, null);
-            seg.addIstruzione("ret", String.valueOf(2*Info.pointerdim), null);
-        }
-    }
-*/
     public void println(int i){
         String h=Info.cSpace(i);
         System.out.println(h+"Type: "+nome);

@@ -29,6 +29,7 @@ public class Environment extends HashMap<String, Integer>{
     public static TypeElem ret;//tipo di ritorno funzione/operazione
     public static String currentModulo;
     public static boolean template;
+    public static String[] errors;
     public Environment(){
         stackvals=new Stack<>(String.class);
     }

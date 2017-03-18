@@ -36,8 +36,9 @@ public class Funz {
         public final TypeName ret;
         public final TypeName[] trequest;
         public final boolean oper, external, templ;
+        public final String[] errors;
         public FElement(String nome, String mnome, TypeName[] tr, TypeName rit,
-                boolean operatore, boolean ex, boolean template){
+                boolean operatore, boolean ex, boolean template, String[] err){
             name=nome;
             modname=mnome;
             trequest=tr;
@@ -45,6 +46,7 @@ public class Funz {
             oper=operatore;
             external=ex;
             templ=template;
+            errors = err;
         }
         public FElement(Callable ca, boolean ex, TemplateEle... params)throws CodeException{
             //Non deve effettuare la sostituzione, in quanto è stata fatta da FunzList
@@ -56,6 +58,7 @@ public class Funz {
             trequest=ca.types();
             external=ex;
             templ=params.length!=0;
+            errors = ca.errors();
         }
         public TypeElem Return(boolean validate)throws CodeException{
             return Types.getIstance().find(ret, validate);

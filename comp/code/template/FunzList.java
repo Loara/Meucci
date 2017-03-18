@@ -112,7 +112,8 @@ public class FunzList extends TList<Callable>{
             throw new CodeException(error);
         }
         FElement fe=new FElement(Meth.funzKey(filt[0].getName(), param), Meth.modName(filt[0], param), 
-                pars, retT, false, !filt[0].getModulo().equals(Environment.currentModulo), true);
+                pars, retT, false, !filt[0].getModulo().equals(Environment.currentModulo), true, 
+                filt[0].errors());
         //meglio questo che utilizzare direttamente il costruttore con Callable:
         //poichè sui Callable non deve essere effettuato la sostituzione
         if(!noAdd && isIn(fe.modname, param)==null){
