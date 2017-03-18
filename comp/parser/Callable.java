@@ -24,7 +24,6 @@ import comp.code.Meth;
 import comp.code.Segmenti;
 import comp.code.TypeElem;
 import comp.code.Types;
-import comp.code.template.Substitutor;
 import comp.code.vars.Variabili;
 import comp.general.Info;
 import comp.general.Stack;
@@ -41,6 +40,7 @@ import java.io.Serializable;
 
 /**
  * Tutto ciò che si può chiamare (funzioni, operazioni, ...)
+ * 
  * @author loara
  */
 public abstract class Callable implements Serializable{
@@ -51,11 +51,12 @@ public abstract class Callable implements Serializable{
     protected Template[] temp;//solo per funzioni
     private String mod;
     protected boolean noglobal;
+    protected String[] errors;//Errori che può generare. CONTA l'ordine
     protected Callable(String m){
         //non fa niente
         mod=m;
     }
-    public Callable(Token n, FunzParam[] d, MultiIstr i, String mod){
+    public Callable(Token n, FunzParam[] d, MultiIstr i, String mod, String[] errors){
         nome=n;
         dichs=d;
         istr=i;
@@ -63,6 +64,7 @@ public abstract class Callable implements Serializable{
         retType=new TypeName("void");
         temp=new Template[0];
         this.mod=mod;
+        this.errors=errors;
     }
     /**
      * Da modificare
@@ -92,6 +94,8 @@ public abstract class Callable implements Serializable{
             retType=new TypeName("void");
             nome=new IdentToken(((IdentToken)t.get()).getString(), t.getInd());
             t.nextEx();
+            errors = new String[0];//Attualmente non si possono generare errori da
+            //costruttori o distruttori
         }
         else{
             if(!(t.get() instanceof IdentToken))
@@ -125,6 +129,17 @@ public abstract class Callable implements Serializable{
             dichs=es.toArray();
         }
         t.nextEx();
+        if(t.get() instanceof IdentToken && ((IdentToken)t.get()).getString().equals("errors")){
+            Stack<String> sta = new Stack<>(String.class);
+            t.nextEx();
+            while(t.get() instanceof IdentToken){
+                sta.push(((IdentToken)t.get()).getString());
+                t.nextEx();
+            }
+            errors = sta.toArray();
+        }
+        else
+            errors = new String[0];
         Istruzione i=IstrExe.toIstr(t);
         if(i instanceof MultiIstr)
             istr=(MultiIstr)i;
@@ -148,6 +163,9 @@ public abstract class Callable implements Serializable{
         }
         return n;
     }
+    public String[] errors(){
+        return errors;
+    }
     public FunzParam[] getElems(){
         return dichs;
     }
@@ -167,6 +185,7 @@ public abstract class Callable implements Serializable{
         Variabili vs=new Variabili(dichs, varSt, false, acc);
         Environment.ret=Types.getIstance().find(retType, false);
         Environment.template=temp.length!=0;
+        Environment.errors=errors;
         String mname=Meth.modName(this, temps);
         if(!noglobal)//Per le FunzMem
             Funz.getIstance().glob.add(mname+":function");

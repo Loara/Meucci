@@ -584,6 +584,11 @@ public class Master {
         for(TypeName t:fe.trequest)
             out.writeObject(t);
         out.writeBoolean(fe.oper);
+        int y = fe.errors.length;
+        out.writeInt(y);
+        for(int i = 0; i<y; i++){
+            out.writeUTF(fe.errors[i]);//Conta l'ordine
+        }
     }
     private FElement importCall(ObjectInputStream in, boolean ext)throws IOException,
             ClassNotFoundException{
@@ -596,7 +601,10 @@ public class Master {
         for(int j=0; j<i; j++)
             ty[j]=(TypeName)in.readObject();
         boolean op=in.readBoolean();
-        return new FElement(name, modname, ty, ret, op, ext, false);
+        String[] err = new String[in.readInt()];
+        for(int u =0; u<err.length; u++)
+            err[u]=in.readUTF();
+        return new FElement(name, modname, ty, ret, op, ext, false, err);
     }
     private void writeTemplates(Modulo mod)throws IOException{
         if(mod.Tca.length==0 && mod.Ttype.length==0)
