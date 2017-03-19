@@ -17,10 +17,8 @@
 package comp.parser.istruz;
 
 import comp.code.Accumulator;
-import comp.code.CodeException;
 import comp.code.Environment;
 import comp.code.Segmenti;
-import comp.code.template.Substitutor;
 import comp.code.vars.Variabili;
 import comp.parser.Istruzione;
 import comp.scanner.ASMToken;
@@ -33,10 +31,6 @@ public class ASMIstr extends Istruzione{
     public ASMToken asm;
     public ASMIstr(ASMToken a){
         asm=a;
-    }
-    @Override
-    public void println(int r){
-        
     }
     @Override
     public void validate(Variabili vars, Environment env){

@@ -34,7 +34,6 @@ import java.io.Serializable;
  * @author loara
  */
 public abstract class Istruzione implements Serializable{
-    public abstract void println(int ie);
     public abstract void toCode(Segmenti text, Variabili var, Environment env,
             Accumulator acc)throws CodeException;
     public abstract void validate(Variabili var, Environment env)throws CodeException;

@@ -21,11 +21,9 @@ import comp.code.CodeException;
 import comp.code.Environment;
 import comp.code.Register;
 import comp.code.Segmenti;
-import comp.code.template.Substitutor;
 import comp.code.vars.Variabili;
 import comp.parser.Espressione;
 import comp.parser.Istruzione;
-import comp.general.Info;
 
 /**
  *
@@ -35,17 +33,6 @@ public class ReturnIstruz extends Istruzione{
     public final Espressione e;
     public ReturnIstruz(Espressione e){
         this.e=e;
-    }
-    @Override
-    public void println(int ee){
-        String i="";
-        for(int j=0; j<ee; j++){
-            i+=" ";
-        }
-        System.out.println(i+"Return");
-        if(e!=null){
-            e.println(ee+Info.inde);
-        }
     }
     @Override
     public void validate(Variabili vars, Environment env)throws CodeException{

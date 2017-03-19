@@ -20,11 +20,9 @@ import comp.code.Accumulator;
 import comp.code.CodeException;
 import comp.code.Environment;
 import comp.code.Segmenti;
-import comp.code.template.Substitutor;
 import comp.code.vars.Variabili;
 import comp.parser.Espressione;
 import comp.parser.Istruzione;
-import comp.general.Info;
 
 /**
  *
@@ -34,21 +32,6 @@ public class ForIstr extends Istruzione{
     public ClassisIstr frist, after;
     public Istruzione doi;
     public Espressione wh;
-    @Override
-    public void println(int ee){
-        String i="";
-        for(int h=0; h<ee; h++)
-            i+=" ";
-        System.out.println(i+"For:");
-        System.out.println(i+"from:");
-        frist.println(ee+Info.inde);
-        System.out.println(i+"whil:");
-        wh.println(ee+Info.inde);
-        System.out.println(i+"step:");
-        after.println(ee+Info.inde);
-        System.out.println(i+"do:");
-        doi.println(ee+Info.inde);
-    }
     @Override
     public void validate(Variabili var, Environment env)throws CodeException{
             env.increment("FOR");

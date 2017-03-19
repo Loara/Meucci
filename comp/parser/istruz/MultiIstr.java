@@ -20,10 +20,8 @@ import comp.code.Accumulator;
 import comp.code.CodeException;
 import comp.code.Environment;
 import comp.code.Segmenti;
-import comp.code.template.Substitutor;
 import comp.code.vars.Variabili;
 import comp.parser.Istruzione;
-import comp.general.Info;
 
 /**
  *
@@ -33,23 +31,6 @@ public class MultiIstr extends Istruzione{
     public final Istruzione[] m;
     public MultiIstr(Istruzione[] i){
         m=i;
-    }
-    @Override
-    public void println(int e){
-        String i="";
-        for(int j=0; j<e; j++){
-            i+=" ";
-        }
-        System.out.println(i+"Multi:");
-        if(m==null){
-            System.out.println(i+"Empty");
-        }
-        else{
-            for(Istruzione ex:m){
-                System.out.println(i+"Istruzione:");
-                ex.println(e+Info.inde);
-            }
-        }
     }
     @Override
     public void validate(Variabili var, Environment env)throws CodeException{

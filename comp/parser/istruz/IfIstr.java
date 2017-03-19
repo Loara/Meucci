@@ -20,11 +20,9 @@ import comp.code.Accumulator;
 import comp.code.CodeException;
 import comp.code.Environment;
 import comp.code.Segmenti;
-import comp.code.template.Substitutor;
 import comp.code.vars.Variabili;
 import comp.parser.Espressione;
 import comp.parser.Istruzione;
-import comp.general.Info;
 import comp.parser.expr.IdentExpr;
 
 /**
@@ -34,21 +32,6 @@ import comp.parser.expr.IdentExpr;
 public class IfIstr extends Istruzione{
     public Istruzione ifi, ele;
     public Espressione con;
-    @Override
-    public void println(int ee){
-        String t="";
-        for(int i=0; i<ee; i++){
-            t+=" ";
-        }
-        System.out.println(t+"If:");
-        con.println(ee+Info.inde);
-        System.out.println(t+"Then:");
-        ifi.println(ee+Info.inde);
-        if(ele!=null){
-            System.out.println(t+"Else:");
-            ele.println(ee+Info.inde);
-        }
-    }
     @Override
     public void validate(Variabili var, Environment env)throws CodeException{
             con.validate(var);
