@@ -37,11 +37,12 @@ public class Accumulator {
     private final int[] occup, xoc;
     private int acc, xacc;
     public static class AcElem{
-        int reg;
+        //int reg;
+        //Non ha senso ricordare da quale registro è stato pushato il valore
+        //L'importante è il numero associato a quel valore
         int val;
         boolean xmm;
-        public AcElem(int r, int v, boolean x){
-            reg=r;
+        public AcElem(int v, boolean x){
             val=v;
             xmm=x;
         }
@@ -352,7 +353,7 @@ public class Accumulator {
                     continue;
                 text.addIstruzione("sub","rsp","16");
                 text.addIstruzione("movsd","qword[rsp]",xregs[i].getReg());
-                qv.push(new AcElem(i, xoc[i], true));
+                qv.push(new AcElem(xoc[i], true));
                 xoc[i]=-1;
             }
         }
@@ -368,11 +369,15 @@ public class Accumulator {
                 if(find)
                     continue;
                 text.addIstruzione("push",regs[i].getReg(),null);
-                qv.push(new AcElem(i, occup[i], false));
+                qv.push(new AcElem(occup[i], false));
                 occup[i]=-1;
             }
         }
     }
+    /*
+    I registri rax, xmm0 e rdx DEVONO essere lasciati inalterati, in quanto contengolo
+    rispettivamente valore di ritorno (gp o xmm) e condizione di errore
+    */
     public void popAll(Segmenti text)throws CodeException{
         for(int i=0; i<occup.length; i++){
             occup[i]=-1;
@@ -380,18 +385,30 @@ public class Accumulator {
         for(int i=0; i<xoc.length; i++){
             xoc[i] = -1;
         }
+        if(qv.size()==0)
+            return;
         AcElem p=qv.pop();
-        int j;
+        int j = 1;//esclude rax
+        int xj = 1;//esclude xmm0
         while(p!=null){
-            j=p.reg;
             if(p.xmm){
-                xoc[j]=p.val;
-                text.addIstruzione("movsd",xregs[j].getReg(),"qword[rsp]");
-                text.addIstruzione("add","rsp","16");                
+                if(xj==xacc)
+                    xj++;
+                if(xj>=xregs.length)
+                    throw new CodeException("Errore interno: registri xmm finiti");
+                xoc[xj]=p.val;
+                text.addIstruzione("movsd",xregs[xj].getReg(),"qword[rsp]");
+                text.addIstruzione("add","rsp","16");
+                xj++;
             }
             else{
+                while(regs[j]==Register.DX || j==acc)
+                    j++;
+                if(j>=regs.length)
+                    throw new CodeException("Errore interno: registri gp finiti");
                 occup[j]=p.val;
                 text.addIstruzione("pop",regs[j].getReg(), null);
+                j++;
             }
             p=qv.pop();
         }

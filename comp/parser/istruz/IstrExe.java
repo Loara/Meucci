@@ -121,6 +121,7 @@ public class IstrExe {
                     Istruzione i, f;
                     if(t.get() instanceof EolToken){
                         i=null;
+                        t.nextEx();
                     }
                     else{
                         i=toIstr(t, true);
@@ -128,8 +129,10 @@ public class IstrExe {
                             throw new ParserException("Istruzione non adatta al for", t);
                     }
                     Espressione e;
-                    if(t.get() instanceof EolToken)
+                    if(t.get() instanceof EolToken){
                         e=null;
+                        t.nextEx();
+                    }
                     else{
                         e=toExpr(t);
                     }
@@ -157,6 +160,65 @@ public class IstrExe {
                     fi.doi=doi;
                     return fi;
             }
+            //try
+            if(idt.getString().equals("try")){
+                t.nextEx();
+                Istruzione u=toIstr(t, true);
+                if(!(u instanceof MultiIstr))
+                    throw new ParserException("Non è un blocco try", t);
+                MultiIstr mi=(MultiIstr)u;
+                Stack<String> en=new Stack<>(String.class);
+                Stack<MultiIstr> mu=new Stack<>(MultiIstr.class);
+                while(t.get() instanceof IdentToken && 
+                        ((IdentToken)t.get()).getString().equals("catch")){
+                    t.nextEx();
+                    if(!(t.get() instanceof PareToken && ((PareToken)t.get()).s=='('))
+                        throw new ParserException("Catch errato", t);
+                    t.nextEx();
+                    if(t.get() instanceof IdentToken)
+                        en.push(((IdentToken)t.get()).getString());
+                    else
+                        throw new ParserException("Valore errore non valido", t);
+                    t.nextEx();
+                    if(!(t.get() instanceof PareToken && ((PareToken)t.get()).s==')'))
+                        throw new ParserException("Catch errato", t);
+                    t.nextEx();
+                    u=IstrExe.toIstr(t, true);
+                    if(!(u instanceof MultiIstr))
+                       throw new ParserException("Non è un blocco catch", t);
+                    mu.push((MultiIstr)u);
+                }
+                MultiIstr def;
+                if(t.get() instanceof IdentToken && ((IdentToken)t.get())
+                        .getString().equals("default")){
+                    t.nextEx();
+                    u=IstrExe.toIstr(t, true);
+                    if(!(u instanceof MultiIstr))
+                       throw new ParserException("Non è un blocco default", t);
+                    def=(MultiIstr)u;
+                }
+                else
+                    def=null;
+                return new TryIstr(mi, en.toArray(), mu.toArray(), def, idt.getRiga());
+            }
+            //throw
+            if(idt.getString().equals("throw")){
+                t.nextEx();
+                ThrowIstr ti;
+                if(t.get() instanceof IdentToken)
+                    ti=new ThrowIstr(((IdentToken)t.get()).getString());
+                else
+                    throw new ParserException("Valore errore non valido", idt.getRiga());
+                t.nextEx();
+                if(checkEol){
+                    if(t.get() instanceof EolToken){
+                        t.nextEx();
+                        return ti;
+                    }
+                    else throw new ParserException("Manca ;", t);
+                }
+                else return ti;
+            }
             //dichiarazione
             int i=t.getInd();
             TemplateEle[] te=Template.detectTemplate(t);
@@ -171,14 +233,17 @@ public class IstrExe {
                     if(!t.next()){
                         throw new FineArrayException();
                     }
-                        Espressione e=toExpr(t);
-                        if(!checkEol || t.get() instanceof EolToken){
-                            t.next();
+                    Espressione e=toExpr(t);
+                    if(checkEol){
+                        if(t.get() instanceof EolToken){
+                            t.nextEx();
                             return new ClassisIstr(d, ug, null, e);
                         }
                         else{
                             throw new ParserException("Dichiarazione errata, manca ;", t);
                         }
+                    }
+                    else return new ClassisIstr(d, ug, null, e);
                 }
                 else if(!checkEol || t.get() instanceof EolToken){
                     t.next();

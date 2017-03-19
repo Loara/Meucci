@@ -16,7 +16,9 @@
  */
 package comp.code;
 
+import comp.general.Info;
 import comp.general.Stack;
+import comp.general.Stack.SEl;
 import java.util.HashMap;
 
 /**
@@ -30,8 +32,20 @@ public class Environment extends HashMap<String, Integer>{
     public static String currentModulo;
     public static boolean template;
     public static String[] errors;
+    public static class TryBlock{
+        public String tryName;
+        public String[] exc;
+        public boolean hasDef;
+        public TryBlock(String t, String[] ex, boolean def){
+            tryName=t;
+            exc=ex;
+            hasDef=def;
+        }
+    }
+    private final Stack<TryBlock> trb;
     public Environment(){
         stackvals=new Stack<>(String.class);
+        trb=new Stack<>(TryBlock.class);
     }
     public void increment(String k){
         if(!containsKey(k)){
@@ -52,5 +66,39 @@ public class Environment extends HashMap<String, Integer>{
     }
     public String getSt(){
         return stackvals.getLast();
+    }
+    public String getErrorHandler(String err){
+        SEl<TryBlock> y = trb.getEx();
+        while(y != null && !y.ele().hasDef && !Info.isIn(err, y.ele().exc)){
+            y = y.next();
+        }
+        if(y == null)
+            return null;
+        if(y.ele().hasDef){
+            if(!Info.isIn(err, y.ele().exc))
+                return encode(y.ele().tryName);//Mandato in default
+        }
+        return encode(y.ele().tryName, err);
+    }
+    public TryBlock getTry(String err){
+        SEl<TryBlock> y = trb.getEx();
+        while(y != null && !y.ele().hasDef && !Info.isIn(err, y.ele().exc)){
+            y = y.next();
+        }
+        if(y == null)
+            return null;
+        return y.ele();
+    }
+    public void addTry(String name, String[] err, boolean def){
+        trb.push(new TryBlock(name, err, def));
+    }
+    public void removeTry(){
+        trb.pop();
+    }
+    public static String encode(String tryName, String error){
+        return tryName+"_"+error;
+    }
+    public static String encode(String tryName){
+        return tryName+"_@default";
     }
 }

@@ -20,6 +20,7 @@ import comp.code.Accumulator;
 import comp.code.CodeException;
 import comp.code.Environment;
 import comp.code.Funz;
+import comp.code.Funz.FElement;
 import comp.code.Segmenti;
 import comp.code.vars.Variabili;
 import comp.code.immop.Aritm;
@@ -28,7 +29,6 @@ import comp.scanner.IdentToken;
 import comp.scanner.SymbToken;
 import comp.code.TypeElem;
 import comp.code.Types;
-import comp.code.template.Substitutor;
 import comp.parser.TypeName;
 
 /**
@@ -66,11 +66,11 @@ public class Op2Expr extends Espressione{
             tr[1]=epr2.returnType(var, v);
             return Funz.getIstance().request(symb.getString(), tr, v);
     }
-    private String modname(Variabili var)throws CodeException{
-            Funz.FElement fe=request(var, false);
+    private FElement modname(Variabili var)throws CodeException{
+            FElement fe=request(var, false);
             if(fe.isExternFile())
                 Funz.getIstance().ext.add(fe.modname);
-            return fe.modname;
+            return fe;
     }
     @Override
     public TypeElem returnType(Variabili var, boolean v)throws CodeException{
@@ -100,9 +100,7 @@ public class Op2Expr extends Espressione{
         if(Aritm.analyze(text, var, env, acc, this))
             return;
         acc.pushAll(text);
-        String modname=modname(var);
-        FunzExpr.perfCall(modname, returnType(var, false), 
-                new Espressione[]{epr, epr2}, text, var, env, acc);
-        acc.popAll(text);
+        FElement modname=modname(var);
+        FunzExpr.perfCall(modname, new Espressione[]{epr, epr2}, text, var, env, acc);
     }
 }

@@ -1,0 +1,72 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package comp.parser.istruz;
+
+import comp.code.Accumulator;
+import comp.code.CodeException;
+import comp.code.Environment;
+import comp.code.Segmenti;
+import comp.code.vars.Variabili;
+import comp.parser.Istruzione;
+import comp.parser.ParserException;
+
+/**
+ *
+ * @author loara
+ */
+public class TryIstr extends Istruzione{
+    private final MultiIstr tr;
+    private final String[] exname;
+    private final MultiIstr[] mexc;
+    private final MultiIstr defaul;
+    public TryIstr(MultiIstr ty, String[] err, MultiIstr[] me, MultiIstr def, int r)throws ParserException{
+        tr=ty;
+        exname=err;
+        mexc=me;
+        defaul=def;
+        eqErr(r);
+    }
+    public TryIstr(MultiIstr ty, String[] err, MultiIstr[] me, int r)throws ParserException{
+        this(ty, err, me, null, r);
+    }
+    private void eqErr(int y)throws ParserException{
+        if(exname == null || exname.length == 0)
+            throw new ParserException("Blocco try senza alcun catch", y);
+        for(int i=0; i<exname.length; i++){
+            for(int j=i+1; j<exname.length; j++){
+                if(exname[i].equals(exname[j]))
+                    throw new ParserException("Due blocchi catch uguali: "+exname[i], y);
+            }
+        }
+    }
+    @Override
+    public void validate(Variabili var, Environment env)throws CodeException{
+        tr.validate(var, env);
+        for(MultiIstr m:mexc)
+            m.validate(var, env);
+        if(defaul != null)
+            defaul.validate(var, env);
+    }
+    @Override
+    public void toCode(Segmenti text, Variabili var, Environment env,
+            Accumulator acc)throws CodeException{
+        env.increment("TRY");
+        String n = "TRY"+env.get("TRY");
+        env.addTry(n, exname, defaul != null);
+        var.getVarStack().addTryBlock(n);
+        tr.toCode(text, var, env, acc);
+        var.getVarStack().removeTryBlock(text);
+        env.removeTry();
+        for(int i =0; i<mexc.length; i++){
+            text.addLabel(Environment.encode(n, exname[i]));
+            mexc[i].toCode(text, var, env, acc);
+        }
+        if(defaul != null){
+            text.addLabel(Environment.encode(n));
+            defaul.toCode(text, var, env, acc);
+        }
+    }
+}

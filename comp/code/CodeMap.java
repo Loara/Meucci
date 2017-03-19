@@ -42,6 +42,8 @@ public class CodeMap extends ArrayList<String>{
         }
     }
     public void addLabel(String t){
+        if(opc.startsWith("j") && t.equals(op1))
+            opc = null;//salto inutile
         //non è necessario il flush, lo esegue in automatico
         //la funzione add
         add(t+":");
@@ -94,7 +96,7 @@ public class CodeMap extends ArrayList<String>{
                 }
             }
         }
-        if(opc!=null && "leave".equals(oc) && "mov".equals(opc)){
+        if("leave".equals(oc) && "mov".equals(opc)){
             if(!op2.contains("[") && op2.contains("a")){//ax
                 //mov rbx,rax   inutile
                 //leave

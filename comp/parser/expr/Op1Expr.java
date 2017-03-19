@@ -17,9 +17,9 @@
 package comp.parser.expr;
 
 import comp.code.*;
+import comp.code.Funz.FElement;
 import comp.code.vars.Variabili;
 import comp.code.immop.Aritm2;
-import comp.code.template.Substitutor;
 import comp.parser.Espressione;
 import comp.scanner.SymbToken;
 
@@ -49,11 +49,11 @@ public class Op1Expr extends Espressione{
             tr[0]=epr.returnType(var, v);
             return Funz.getIstance().request(symb.getString(), tr, v);
     }
-    private String modname(Variabili var)throws CodeException{
+    private FElement modname(Variabili var)throws CodeException{
             Funz.FElement fe=request(var, false);
             if(fe.isExternFile())
                 Funz.getIstance().ext.add(fe.modname);
-            return fe.modname;
+            return fe;
     }
     @Override
     public TypeElem returnType(Variabili var, boolean v)throws CodeException{
@@ -78,10 +78,9 @@ public class Op1Expr extends Espressione{
     public void toCode(Segmenti text, Variabili var, Environment env, Accumulator acc)throws CodeException{
         if(Aritm2.analyze(text, var, env, acc, this))
             return;
-        String modname=modname(var);
+        FElement modname=modname(var);
         acc.pushAll(text);
-        FunzExpr.perfCall(modname, returnType(var, false), 
-                new Espressione[]{epr}, text, var, env, acc);
-        acc.popAll(text);
+        FunzExpr.perfCall(modname, new Espressione[]{epr}, text, var, env, acc);
+        //popAll automatico
     }
 }

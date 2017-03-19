@@ -69,7 +69,13 @@ public class Stack<T> {
             return null;
         return frist.ele();
     }
-    private static class SEl<T>{
+    /*
+    Utilizzare con cautela
+    */
+    public SEl<T> getEx(){
+        return frist;
+    }
+    public static class SEl<T>{
         private final T cl;
         private SEl<T> next;
         public SEl(T el){
