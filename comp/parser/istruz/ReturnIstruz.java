@@ -69,11 +69,13 @@ public class ReturnIstruz extends Istruzione{
             var.getVarStack().destroyAll(text);
             text.addIstruzione("xor",Register.AX.getReg(),Register.AX.getReg());
         }
-            text.addIstruzione("leave",null, null);
-            int p=var.getVarStack().getDimArgs();
-            if(p>0)
-                text.addIstruzione("ret",""+p,null);
-            else
-                text.addIstruzione("ret", null, null);
+        text.addIstruzione("xor", Register.DX.getReg(), Register.DX.getReg());//Nessuna eccezione
+        //lanciata
+        text.addIstruzione("leave",null, null);
+        int p=var.getVarStack().getDimArgs();
+        if(p>0)
+            text.addIstruzione("ret",""+p,null);
+        else
+            text.addIstruzione("ret", null, null);
     }
 }

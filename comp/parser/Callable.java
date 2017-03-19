@@ -218,6 +218,7 @@ public abstract class Callable implements Serializable{
         Variabili vs=new Variabili(dichs, varSt, true, null);
         Environment.ret=Types.getIstance().find(retType, true);
         Environment.template=true;
+        Environment.errors=errors;
         istr.validate(vs, env);
         Template.removeTemplateConditions(temp);
     }

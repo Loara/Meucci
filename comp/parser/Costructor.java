@@ -25,14 +25,12 @@ import comp.code.Meth;
 import comp.code.Segmenti;
 import comp.code.TypeElem;
 import comp.code.Types;
-import comp.code.template.Substitutor;
 import comp.code.vars.Variabili;
 import comp.general.VScan;
 import comp.parser.expr.FunzExpr;
 import comp.parser.expr.IdentArray;
 import comp.parser.istruz.ClassisIstr;
 import comp.parser.template.Template;
-import comp.parser.template.TemplateEle;
 import comp.scanner.IdentToken;
 import comp.scanner.Token;
 
@@ -144,8 +142,7 @@ public class Costructor extends Callable{
                     parames, false, te.extend.templates());
             if(fel.isExternFile())
                 Funz.getIstance().ext.add(fel.modname);
-            FunzExpr.perfCall(fel.modname, Types.getIstance().find("void")
-                    , calling, text, var, env, acc);
+            FunzExpr.perfCall(fel, calling, text, var, env, acc);
         }
     }
 }

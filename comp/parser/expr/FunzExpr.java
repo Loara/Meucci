@@ -26,6 +26,7 @@ import comp.code.Segmenti;
 import comp.code.TypeElem;
 import comp.code.XReg;
 import comp.code.vars.Variabili;
+import comp.general.Info;
 import comp.parser.Espressione;
 import comp.parser.ParserException;
 import comp.parser.template.TemplateEle;
@@ -76,11 +77,11 @@ public class FunzExpr extends Espressione{
             }
             return Funz.getIstance().request(nome, tr, v, params);
     }
-    private String modname(Variabili var)throws CodeException{
+    private FElement modname(Variabili var)throws CodeException{
             FElement fe=request(var, false);
             if(fe.isExternFile())
                 Funz.getIstance().ext.add(fe.modname);
-            return fe.modname;
+            return fe;
     }
     @Override
     public void validate(Variabili var)throws CodeException{
@@ -94,14 +95,74 @@ public class FunzExpr extends Espressione{
     @Override
     public void toCode(Segmenti text, Variabili var, Environment env, Accumulator acc
         )throws CodeException{
-        String modname=modname(var);
         acc.pushAll(text);//bisogna farlo prima altrimenti inquina lo stack
         //per la chiamata a funzione
         //non sono importanti i registri prenotati dopo, verranno rilasciati
-        perfCall(modname, returnType(var, false), values, text, var, env, acc);
-        acc.popAll(text);
+        perfCall(modname(var), values, text, var, env, acc);
     }
-    /**
+    public static void perfCall(FElement fe, Espressione[] values, Segmenti text,
+            Variabili vars, Environment env, Accumulator acc)throws CodeException
+    {
+        for(Espressione e:values){
+            e.toCode(text, vars, env, acc);
+            TypeElem t=e.returnType(vars, false);
+            if(t.xmmReg()){
+                text.addIstruzione("movq", acc.getAccReg().getReg(), acc.getXAccReg().getReg());
+                text.addIstruzione("push", acc.getAccReg().getReg(), null);
+            }
+            else{
+                text.addIstruzione("push", acc.getAccReg().getReg(), null);
+            }
+            text.addIstruzione("call", fe.modname, null);
+            acc.popAll(text);//salva rax, xmm0 e rdx
+            if(fe.errors.length>0){
+                String trb;//Il catch su cui saltare
+                int yy;
+                env.increment("ERC");
+                yy=env.get("ERC");
+                text.addIstruzione("test", Register.DX.getReg(4), Register.DX.getReg(4));
+                text.addIstruzione("jz", "ERC"+yy, null);//rdx=0, più velose senza errori
+                for(int i=0; i<fe.errors.length; i++){
+                    text.addIstruzione("cmp", Register.DX.getReg(4), ""+(i+1));
+                    trb=env.getErrorHandler(fe.errors[i]);
+                    if(trb != null){
+                        env.increment("ERRY");
+                        int y=env.get("ERRY");
+                        text.addIstruzione("jne", "ERRY"+y, null);
+                        vars.getVarStack().destroyTry(text, env.getTry(fe.errors[i]).tryName);
+                        text.addIstruzione("jmp", trb, null);
+                        text.addLabel("ERRY"+y);
+                    }
+                    else{
+                        int ind =Info.indexOf(fe.errors[i], fe.errors);
+                        if(ind != -1){
+                            vars.getVarStack().destroyAll(text);
+                            text.addIstruzione("mov", Register.DX.getReg(4), String.valueOf(ind+1));
+                            text.addIstruzione("leave", null, null);
+                            int p=vars.getVarStack().getDimArgs();
+                            if(p>0)
+                                text.addIstruzione("ret",""+p,null);
+                            else
+                                text.addIstruzione("ret", null, null);
+                        }
+                        else{
+                            //Terminare
+                        }
+                    }
+                }
+                text.addLabel("ERC"+yy);
+                TypeElem rettype=fe.Return(false);
+                if(rettype.name.equals("void"))
+                    return;
+                if(rettype.xmmReg())
+                    text.addIstruzione("movsd", acc.getXAccReg().getReg(), XReg.XMM0.getReg());
+                else
+                    text.addIstruzione("mov", acc.getAccReg().getReg(rettype.realDim()
+                        ), Register.AX.getReg(rettype.realDim()));
+            }
+        }
+    }
+    /*
      * Nota: non effettua il pushall
      * @param modname
      * @param rettype
@@ -111,8 +172,7 @@ public class FunzExpr extends Espressione{
      * @param env
      * @param acc
      * @throws CodeException 
-     */
-    public static void perfCall(String modname, TypeElem rettype, Espressione[] vals, Segmenti text,
+    public static void perffCall(String modname, TypeElem rettype, Espressione[] vals, Segmenti text,
             Variabili vars, Environment env, Accumulator acc)throws CodeException{
         for(Espressione e:vals){
             e.toCode(text, vars, env, acc);
@@ -134,8 +194,9 @@ public class FunzExpr extends Espressione{
             text.addIstruzione("mov", acc.getAccReg().getReg(rettype.name
                 ), Register.AX.getReg(rettype.name));
     }
+    */
     /**
-     * Nota: non effettua il pushall
+     * Nota: non effettua il pushall, ma il popall e il libera sì
      * Come il precedente, solo non chiama da label ma da puntatore memorizzato 
      * in registro salvato.
      * @param fd    il registro che punta alla vtable
@@ -164,6 +225,8 @@ public class FunzExpr extends Espressione{
             }
         }
         text.addIstruzione("call", "["+acc.getReg(fd).getReg()+"+"+offset+"]", null);
+        acc.libera(fd);
+        acc.popAll(text);//Niente eccezioni (per ora)
         if(rettype.name.equals("void"))
             return;
         if(rettype.xmmReg())

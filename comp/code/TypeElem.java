@@ -460,9 +460,8 @@ public class TypeElem {
                 throw new CodeException("Membro non trovato");
             text.addIstruzione("push",acc.getAccReg().getReg(), null);//indirizzo oggetto
             //i valori di default tanto sono già stati aggiunti
+            //acc.libera(tic)lanciato automaticamente all'interno di perfCall
             FunzExpr.perfCall(tic, sc2, ter, elem.getVals(), text, var, env, acc);
-            acc.libera(tic);
-            acc.popAll(text);
         }
         return ter;
     }
@@ -528,9 +527,6 @@ public class TypeElem {
             text.addIstruzione("push",acc.getReg(input).getReg(), null);//valore da settare, sempre qword
             FunzExpr.perfCall(tic, sc2, Types.getIstance().find(new TypeName("void"), 
                     false), elem.getVals(), text, var, env, acc);
-            acc.libera(tic);
-            //acc.rilascia(input);
-            acc.popAll(text);
         }
                 
     }
@@ -581,9 +577,6 @@ public class TypeElem {
             text.addIstruzione("push",acc.getAccReg().getReg(), null);//valore da settare
             text.addIstruzione("movsd", "[rsp]", acc.getXReg(input).getReg());
             FunzExpr.perfCall(tic, sc2, ter, elem.getVals(), text, var, env, acc);
-            acc.libera(tic);
-            //acc.rilascia(input);
-            acc.popAll(text);
         }
                 
     }

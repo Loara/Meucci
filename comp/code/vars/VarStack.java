@@ -311,6 +311,16 @@ public class VarStack extends Var{
         }
         catch(CodeException e){}//inutilizzato
     }
+    /**
+     * Aggiunge un blocco try (che non sostituisce i blocchi normali)
+     * @param tryname 
+     */
+    public void addTryBlock(String tryname){
+        try{
+            al.add(new VarEle(false, false, "try_"+tryname, null, rrsp, 0));
+        }
+        catch(CodeException e){}//inutilizzato
+    }
     private void distruggi(VarEle e, Segmenti seg)throws CodeException{
         String u = varPos(e);//u è il primo byte dell'oggetto
         int pr=acc.prenota();
@@ -336,9 +346,24 @@ public class VarStack extends Var{
             decPOS(e.allocatedSpace);
         }
     }
+    /*
+    In realtà fà una sola iterazione, ma non si sa mai. Da chiamare quando si esce dal
+    blocco try normalmente (niente eccezioni)
+    */
+    public void removeTryBlock(Segmenti seg)throws CodeException{
+        VarEle e=al.remove(al.size()-1);
+        decPOS(e.allocatedSpace);
+        while(!(e.name.startsWith("try_") && !e.var)){
+            if(e.destroyable){
+                distruggi(e, seg);
+            }
+            e=al.remove(al.size()-1);
+            decPOS(e.allocatedSpace);
+        }
+    }
     /**
      * Distrugge tutto lo spazio allocato e distruttibile, senza eliminarli dallo stack.
-     * Da chiamare immediatamente prima dei return o delle eccezioni.
+     * Da chiamare immediatamente prima dei return o errori/eccezioni.
      * @param seg
      * @throws CodeException 
      */
@@ -346,6 +371,28 @@ public class VarStack extends Var{
         for(VarEle ve:al){
             if(ve.destroyable)
                 distruggi(ve, seg);
+        }
+    }
+    /**
+     * Distrugge lo spazio allocato e distruttibile all'interno del RELATIVO
+     * BLOCCO TRY (ed eventualmente quelli contenuti), senza eliminarli dallo stack.
+     * Da chiamare prima di passare dal blocco try a quello catch relativo.
+     * @param seg
+     * @param tryname
+     * @throws CodeException 
+     */
+    public void destroyTry(Segmenti seg, String tryname)throws CodeException{
+        int ind=al.size()-1;
+        VarEle e=al.get(ind);
+        ind--;
+        while(!(e.name.equals("try_"+tryname) && !e.var)){
+            if(e.destroyable){
+                distruggi(e, seg);
+            }
+            if(ind<0)
+                break;//Non si sa mai
+            e=al.get(ind);
+            ind--;
         }
     }
 }
