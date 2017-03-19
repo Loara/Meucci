@@ -22,7 +22,6 @@ import comp.code.Environment;
 import comp.code.Segmenti;
 import comp.code.TypeElem;
 import comp.code.Types;
-import comp.code.template.Substitutor;
 import comp.code.vars.Variabili;
 import comp.parser.Dichiarazione;
 import comp.parser.Espressione;
@@ -67,27 +66,6 @@ public class ClassisIstr extends Istruzione{
             }
         }
         else return null;
-    }
-    @Override
-    public void println(int ee){
-        String i="";
-        for(int j=0; j<ee; j++){
-            i+=" ";
-        }
-        if(d!=null){
-            System.out.println(i+"Dichiarazione: "+d.toString());
-            if(epr!=null)
-                epr.println(ee+Info.inde);
-        }
-        else if(e!=null){
-            System.out.println(i+"Assegnazione: ");
-            if(epr!=null)
-                epr.println(ee+Info.inde);
-        }
-        else{
-            System.out.println(i+"Espressione:");
-            epr.println(ee+Info.inde);
-        }
     }
     @Override
     public void validate(Variabili var, Environment env)throws CodeException{

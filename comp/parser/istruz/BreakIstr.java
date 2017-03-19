@@ -20,7 +20,6 @@ import comp.code.Accumulator;
 import comp.code.CodeException;
 import comp.code.Environment;
 import comp.code.Segmenti;
-import comp.code.template.Substitutor;
 import comp.code.vars.Variabili;
 import comp.parser.Istruzione;
 
@@ -29,14 +28,6 @@ import comp.parser.Istruzione;
  * @author loara
  */
 public class BreakIstr extends Istruzione{
-    @Override
-    public void println(int e){
-        String i="";
-        for(int j=0; j<e; j++){
-            i+=" ";
-        }
-        System.out.println(i+"Break");
-    }
     @Override
     public void validate(Variabili vars, Environment env)throws CodeException{
         String r=env.getSt();

@@ -24,7 +24,6 @@ import comp.code.Funz.FElement;
 import comp.code.Segmenti;
 import comp.code.TypeElem;
 import comp.code.Types;
-import comp.code.template.Substitutor;
 import comp.code.vars.Variabili;
 import comp.parser.Espressione;
 import comp.parser.Istruzione;
@@ -72,9 +71,5 @@ public class DesIstr extends Istruzione{
             Funz.getIstance().ext.add(fe.modname);
         seg.addIstruzione("call", fe.modname, null);
         acc.restoreAccumulator(rd);        
-    }
-    @Override
-    public void println(int i){
-        
     }
 }

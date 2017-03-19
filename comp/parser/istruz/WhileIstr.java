@@ -20,11 +20,9 @@ import comp.code.Accumulator;
 import comp.code.CodeException;
 import comp.code.Environment;
 import comp.code.Segmenti;
-import comp.code.template.Substitutor;
 import comp.code.vars.Variabili;
 import comp.parser.Espressione;
 import comp.parser.Istruzione;
-import comp.general.Info;
 
 /**
  *
@@ -33,17 +31,6 @@ import comp.general.Info;
 public class WhileIstr extends Istruzione{
     public Espressione e;
     public Istruzione d;
-    @Override
-    public void println(int ee){
-        String i="";
-        for(int j=0; j<ee; j++){
-            i+=" ";
-        }
-        System.out.println(i+"While:");
-        e.println(ee+Info.inde);
-        System.out.println(i+"Then:");
-        d.println(ee+Info.inde);
-    }
     @Override
     public void validate(Variabili var, Environment env)throws CodeException{
             env.increment("WHILE");
