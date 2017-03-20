@@ -6,7 +6,7 @@ This compiler works currently only on Linux systems.
 
 ## Errors in the manual
 
-Instead of what I wrote in the manual, you can't compile sources with `mecc`, but you have to use `java -jar Meucci.jar option_number sources...`
+Instead of what I wrote in the manual, you can't compile sources with `mecc`, but you have to use `java -jar Meucci.jar [options] sources...`. Type `java -jar Meucci.jar` to get all the options currently available.
 
 ## Installation
 
