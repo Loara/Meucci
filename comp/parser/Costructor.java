@@ -91,6 +91,8 @@ public class Costructor extends Callable{
         Template.addTemplateConditions(temp);
         Variabili vs=new Variabili(dichs, varSt, true, null);
         Environment.ret=Types.getIstance().find(retType, true);
+        Environment.template=true;
+        Environment.errors=errors;
         TypeElem te=Types.getIstance().find(classname, true);
         if(te.extend==null){
             if(costruct!=null){

@@ -20,29 +20,35 @@ import comp.general.Info;
 import java.util.ArrayList;
 
 /**
- *
+ * Meglio non estenderlo da ArrayList per facilitare il debugging
  * @author loara
  */
-public class CodeMap extends ArrayList<String>{
+public class CodeMap{
+    private final ArrayList<String> cname;
     private String opc, op1, op2;
-    @Override
+    public CodeMap(){
+        cname=new ArrayList<>();
+    }
+    public ArrayList<String> toArrayList(){
+        return cname;
+    }
     public boolean add(String t){
         flush();
-        return super.add(t);
+        return cname.add(t);
     }
     public void flush(){
         if(opc!=null){
             if(op1==null)
-                super.add("\t"+opc);
+                cname.add("\t"+opc);
             else if(op2==null)
-                super.add("\t"+opc+"\t"+op1);
+                cname.add("\t"+opc+"\t"+op1);
             else
-                super.add("\t"+opc+"\t"+op1+","+op2);
+                cname.add("\t"+opc+"\t"+op1+","+op2);
             opc=null;
         }
     }
     public void addLabel(String t){
-        if(opc.startsWith("j") && t.equals(op1))
+        if(opc != null && opc.startsWith("j") && t.equals(op1))
             opc = null;//salto inutile
         //non è necessario il flush, lo esegue in automatico
         //la funzione add
@@ -118,5 +124,8 @@ public class CodeMap extends ArrayList<String>{
         opc=a;
         op1=b;
         op2=c;
+    }
+    public int size(){
+        return cname.size();
     }
 }

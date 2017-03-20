@@ -29,6 +29,7 @@ import comp.code.vars.Variabili;
 import comp.general.Info;
 import comp.parser.Espressione;
 import comp.parser.ParserException;
+import comp.parser.istruz.TryIstr;
 import comp.parser.template.TemplateEle;
 import comp.scanner.IdentToken;
 
@@ -90,7 +91,9 @@ public class FunzExpr extends Espressione{
             values[i].validate(var);
             esp1[i]=values[i].returnType(var, true);
         }
-        Funz.getIstance().request(nome, esp1, true, params);
+        FElement fe=Funz.getIstance().request(nome, esp1, true, params);
+        if(!Info.containedIn(fe.errors, Environment.errors))
+            throw new CodeException("Errori di "+fe.name+" non gestiti correttamente");
     }
     @Override
     public void toCode(Segmenti text, Variabili var, Environment env, Accumulator acc
@@ -98,7 +101,10 @@ public class FunzExpr extends Espressione{
         acc.pushAll(text);//bisogna farlo prima altrimenti inquina lo stack
         //per la chiamata a funzione
         //non sono importanti i registri prenotati dopo, verranno rilasciati
-        perfCall(modname(var), values, text, var, env, acc);
+        FElement fe=modname(var);
+        if(!TryIstr.checkThrows(fe.errors, env))
+            throw new CodeException("Errori di "+fe.name+" non gestiti correttamente");
+        perfCall(fe, values, text, var, env, acc);
     }
     public static void perfCall(FElement fe, Espressione[] values, Segmenti text,
             Variabili vars, Environment env, Accumulator acc)throws CodeException
@@ -113,54 +119,55 @@ public class FunzExpr extends Espressione{
             else{
                 text.addIstruzione("push", acc.getAccReg().getReg(), null);
             }
-            text.addIstruzione("call", fe.modname, null);
-            acc.popAll(text);//salva rax, xmm0 e rdx
-            if(fe.errors.length>0){
-                String trb;//Il catch su cui saltare
-                int yy;
-                env.increment("ERC");
-                yy=env.get("ERC");
-                text.addIstruzione("test", Register.DX.getReg(4), Register.DX.getReg(4));
-                text.addIstruzione("jz", "ERC"+yy, null);//rdx=0, più velose senza errori
-                for(int i=0; i<fe.errors.length; i++){
-                    text.addIstruzione("cmp", Register.DX.getReg(4), ""+(i+1));
-                    trb=env.getErrorHandler(fe.errors[i]);
-                    if(trb != null){
-                        env.increment("ERRY");
-                        int y=env.get("ERRY");
-                        text.addIstruzione("jne", "ERRY"+y, null);
-                        vars.getVarStack().destroyTry(text, env.getTry(fe.errors[i]).tryName);
-                        text.addIstruzione("jmp", trb, null);
-                        text.addLabel("ERRY"+y);
-                    }
-                    else{
-                        int ind =Info.indexOf(fe.errors[i], fe.errors);
-                        if(ind != -1){
-                            vars.getVarStack().destroyAll(text);
-                            text.addIstruzione("mov", Register.DX.getReg(4), String.valueOf(ind+1));
-                            text.addIstruzione("leave", null, null);
-                            int p=vars.getVarStack().getDimArgs();
-                            if(p>0)
-                                text.addIstruzione("ret",""+p,null);
-                            else
-                                text.addIstruzione("ret", null, null);
-                        }
-                        else{
-                            //Terminare
-                        }
-                    }
-                }
-                text.addLabel("ERC"+yy);
-                TypeElem rettype=fe.Return(false);
-                if(rettype.name.equals("void"))
-                    return;
-                if(rettype.xmmReg())
-                    text.addIstruzione("movsd", acc.getXAccReg().getReg(), XReg.XMM0.getReg());
-                else
-                    text.addIstruzione("mov", acc.getAccReg().getReg(rettype.realDim()
-                        ), Register.AX.getReg(rettype.realDim()));
-            }
         }
+        text.addIstruzione("call", fe.modname, null);
+        acc.popAll(text);//non modifica rax, xmm0 e rdx
+        //C'è un problema: dopo aver effettuato il pushall e viene generata un eccezione
+        //durante l'esecuzione dei parametri (prima della chiamata alla funzione
+        //vera e propria), chi pulisce lo stack? Non ci sarebbero problemi di esecuzione
+        //ma solamente uno spreco di memoria
+        //Una soluzione: far gestire il pushall da VarStack e non Accumulator, la
+        //risoluzione verrà effettuata durante l'ottimizzazione delle letture in memora
+        if(fe.errors.length>0){
+            String trb;//Il catch su cui saltare
+            int yy;
+            env.increment("ERC");
+            yy=env.get("ERC");
+            text.addIstruzione("test", Register.DX.getReg(4), Register.DX.getReg(4));
+            text.addIstruzione("jz", "ERC"+yy, null);//rdx=0, più velose senza errori
+            for(int i=0; i<fe.errors.length; i++){
+                text.addIstruzione("cmp", Register.DX.getReg(4), ""+(i+1));
+                trb=env.getErrorHandler(fe.errors[i]);
+                if(trb != null){
+                    env.increment("ERRY");
+                    int y=env.get("ERRY");
+                    text.addIstruzione("jne", "ERRY"+y, null);
+                    vars.getVarStack().destroyTry(text, env.getTry(fe.errors[i]).tryName);
+                    text.addIstruzione("jmp", trb, null);
+                    text.addLabel("ERRY"+y);
+                }
+                else{
+                    int ind =Info.indexOf(fe.errors[i], fe.errors);
+                    vars.getVarStack().destroyAll(text);
+                    text.addIstruzione("mov", Register.DX.getReg(4), String.valueOf(ind+1));
+                    text.addIstruzione("leave", null, null);
+                    int p=vars.getVarStack().getDimArgs();
+                    if(p>0)
+                        text.addIstruzione("ret",""+p,null);
+                    else
+                        text.addIstruzione("ret", null, null);
+                }
+            }
+            text.addLabel("ERC"+yy);
+        }
+        TypeElem rettype=fe.Return(false);
+        if(rettype.name.equals("void"))
+            return;
+        if(rettype.xmmReg())
+            text.addIstruzione("movsd", acc.getXAccReg().getReg(), XReg.XMM0.getReg());
+        else
+            text.addIstruzione("mov", acc.getAccReg().getReg(rettype.realDim()
+                ), Register.AX.getReg(rettype.realDim()));
     }
     /*
      * Nota: non effettua il pushall

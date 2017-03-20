@@ -26,7 +26,6 @@ import comp.code.Register;
 import comp.code.Segmenti;
 import comp.code.TypeElem;
 import comp.code.Types;
-import comp.code.template.Substitutor;
 import comp.code.vars.Variabili;
 import comp.parser.Espressione;
 import comp.parser.TypeName;
@@ -36,7 +35,7 @@ import comp.parser.TypeName;
  * @author loara
  */
 public class NewExpr extends Espressione{
-    private TypeName type;
+    private final TypeName type;
     private final Espressione[] exp;
     public NewExpr(TypeName ty, Espressione[] data){
         type=ty;
@@ -99,7 +98,7 @@ public class NewExpr extends Espressione{
             esp.toCode(seg, var, env, acc);
             seg.addIstruzione("push",acc.getAccReg().getReg(),null);
         }
-        seg.addIstruzione("call",cos.modname,null);//costruttore vero
+        seg.addIstruzione("call",cos.modname,null);//costruttore vero, non genera eccezioni
         seg.addIstruzione("pop",a.getReg(), null);//vero valore di ritorno
         acc.popAll(seg);
     }

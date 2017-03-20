@@ -20,7 +20,9 @@ import comp.code.*;
 import comp.code.Funz.FElement;
 import comp.code.vars.Variabili;
 import comp.code.immop.Aritm2;
+import comp.general.Info;
 import comp.parser.Espressione;
+import comp.parser.istruz.TryIstr;
 import comp.scanner.SymbToken;
 
 /**
@@ -71,14 +73,20 @@ public class Op1Expr extends Espressione{
     @Override
     public void validate(Variabili var)throws CodeException{
         epr.validate(var);
-        if(!Aritm2.validate(var, this))
-            Funz.getIstance().request(symb.getString(), new TypeElem[]{epr.returnType(var, true)}, true);
+        if(!Aritm2.validate(var, this)){
+            FElement fe=Funz.getIstance().request(symb.getString(), 
+                    new TypeElem[]{epr.returnType(var, true)}, true);
+        if(!Info.containedIn(fe.errors, Environment.errors))
+            throw new CodeException("Errori di "+fe.name+" non gestiti correttamente");
+        }
     }
     @Override
     public void toCode(Segmenti text, Variabili var, Environment env, Accumulator acc)throws CodeException{
         if(Aritm2.analyze(text, var, env, acc, this))
             return;
         FElement modname=modname(var);
+        if(!TryIstr.checkThrows(modname.errors, env))
+            throw new CodeException("Errori di "+modname.name+" non gestiti correttamente");
         acc.pushAll(text);
         FunzExpr.perfCall(modname, new Espressione[]{epr}, text, var, env, acc);
         //popAll automatico
