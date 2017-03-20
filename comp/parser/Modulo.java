@@ -206,8 +206,8 @@ public class Modulo {
             Accumulator acc=new Accumulator();
             Variabili vars=new Variabili(new FunzParam[0], internal, false, acc);
             Static.toCode(text, vars, env, acc);
-            text.text.set(i, "\tenter\t"+vars.getVarStack().internalVarsMaxDim()+",0");
-            if(!text.text.get(text.text.size()-2).equals("\tleave")){
+            text.text.toArrayList().set(i, "\tenter\t"+vars.getVarStack().internalVarsMaxDim()+",0");
+            if(!text.text.toArrayList().get(text.text.size()-2).equals("\tleave")){
                 text.addIstruzione("leave", null, null);
                 text.addIstruzione("ret", null, null);
             }
@@ -253,7 +253,7 @@ public class Modulo {
         text.stat.stream().forEach((t) -> {
             out.println(t);
         });
-        text.vtors.stream().forEach((t) ->{
+        text.vtors.toArrayList().stream().forEach((t) ->{
             out.println(t);
         });
         
@@ -275,7 +275,7 @@ public class Modulo {
         });
         
         out.println("\tsection\t.text");
-        text.text.stream().forEach((t) -> {
+        text.text.toArrayList().stream().forEach((t) -> {
             out.println(t);
         });
         if(main)

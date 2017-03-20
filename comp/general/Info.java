@@ -177,6 +177,19 @@ public class Info {
         }
         return -1;
     }
+    @SuppressWarnings("unchecked")
+    public static <T extends Comparable> boolean containedIn(T[] el, T[] ar){
+        if(el.length > ar.length)
+            return false;
+        if(el.length == 0)
+            return true;
+        for (T el1 : el) {
+            if (!isIn(el1, ar)) {
+                return false;
+            }
+        }
+        return true;
+    }
     public static boolean isTemplatePare(VScan<Token> t, boolean open){
         char p=open ? '[' : ']';
         return (t.get() instanceof PareToken

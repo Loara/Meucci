@@ -26,7 +26,6 @@ import comp.code.Register;
 import comp.code.Segmenti;
 import comp.code.TypeElem;
 import comp.code.Types;
-import comp.code.template.Substitutor;
 import comp.code.vars.Variabili;
 import comp.parser.Espressione;
 import comp.parser.TypeName;
@@ -36,7 +35,7 @@ import comp.parser.TypeName;
  * @author loara
  */
 public class StaticExpr extends Espressione{
-    private TypeName type;
+    private final TypeName type;
     private final Espressione[] exp;
     public StaticExpr(TypeName t, Espressione[] data){
         type=t;

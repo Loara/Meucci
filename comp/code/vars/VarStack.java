@@ -24,9 +24,9 @@ import comp.code.TypeElem;
 import comp.code.Types;
 import comp.code.XReg;
 import comp.general.Info;
+import comp.general.Stack;
 import comp.parser.FunzParam;
 import comp.parser.TypeName;
-import java.util.ArrayList;
 
 /**
  * Variabili stack, NOTA: prima si incrementa rsp, poi si aggiunge la variabile
@@ -59,7 +59,7 @@ public class VarStack extends Var{
         public final int allocatedSpace;//di quanto è stato decrementato l'rsp per allocare spazio
         public final TypeElem type;
     }
-    private final ArrayList<VarEle> al;
+    private final Stack<VarEle> al;
     private int rrsp, maxdim, dimargs;//rsp = rbp - rrsp => rrsp = rbp - rsp
     private final Accumulator acc;
     private boolean remainAlign(int cp, int dim, int pd){
@@ -100,18 +100,11 @@ public class VarStack extends Var{
         }
         return rrsp - cpos;
     }
-    private void decPOS(int dim){
-        rrsp+=dim;
-    }
     /*
-    rbp=8 byte 64 bit
-    ebp=4 byte 32 bit
-    bp=2 byte 16 bit
-    solo questi valori sono ammessi
     rsp punta al primo valore UTILIZZATO, non libero
     */
     public VarStack(FunzParam[] args, Accumulator acc)throws CodeException{
-        al=new ArrayList<>();
+        al=new Stack<>(VarEle.class);
         maxdim=0;
         initArgs(args);
         rrsp = 0;//all'inizio rsp punta esattamente a ciò che punta rbp
@@ -123,7 +116,7 @@ public class VarStack extends Var{
      * @throws CodeException 
      */
     public VarStack(Accumulator acc)throws CodeException{
-        al=new ArrayList<>();
+        al=new Stack<>(VarEle.class);
         maxdim=0;
         initArgs(null);
         rrsp = 0;
@@ -153,7 +146,7 @@ public class VarStack extends Var{
             dimargs+=8;
             VarEle ve=new VarEle(true, false, args[i].getIdent()
                     , args[i].dich.getRType(), Info.pointerdim * (i-len-1), Info.pointerdim);
-            al.add(ve);
+            al.push(ve);
         }
     }
     /**
@@ -167,7 +160,7 @@ public class VarStack extends Var{
         VarEle ve=new VarEle(true, false, ident, type, rrsp, adim);//si possono sempre modificare
         if(rrsp>maxdim)
             maxdim=rrsp;
-        al.add(ve);
+        al.push(ve);
     }
     /**
      * Alloca spazio (in byte) con inizio allineato, da usare ad esempio 
@@ -184,19 +177,25 @@ public class VarStack extends Var{
         rrsp += i;
         rrsp += Info.alignConv(rrsp);
         VarEle ret = new VarEle(false, destructor, "alloca", null, rrsp, rrsp-initRSP);
-        al.add(ret);
+        al.push(ret);
         if(rrsp>maxdim)
             maxdim=rrsp;
         return ret;//ritorna ret e non la posizione per poter gestire meglio le eccezioni
     }
     @Override
     public boolean isIn(String ident){
-        return al.stream().anyMatch((v) -> (v.var&&v.name.equals(ident)));
+        VarEle[] vele=al.toArray();
+        for (VarEle vele1 : vele) {
+            if (vele1.name.equals(ident)) {
+                return true;
+            }
+        }
+        return false;
     }
     @Override
     public TypeElem type(String ident)throws CodeException{
         VarEle f=null;
-        for(VarEle v:al){
+        for(VarEle v:al.toArray()){
             if(v.var&&v.name.equals(ident)){
                 f=v;
                 break;
@@ -208,9 +207,10 @@ public class VarStack extends Var{
     }
     public VarEle get(String ident)throws CodeException{
         VarEle f=null;
+        VarEle[] vele=al.toArray();
         for(int i=al.size()-1; i>=0; i--){//meglio
-            if(al.get(i).var&&al.get(i).name.equals(ident)){
-                f=al.get(i);
+            if(vele[i].var && vele[i].name.equals(ident)){
+                f=vele[i];
                 break;
             }
         }
@@ -307,7 +307,7 @@ public class VarStack extends Var{
      */
     public void addBlock(){
         try{
-            al.add(new VarEle(false, false, "block", null, rrsp, 0));
+            al.push(new VarEle(false, false, "block", null, rrsp, 0));
         }
         catch(CodeException e){}//inutilizzato
     }
@@ -317,7 +317,7 @@ public class VarStack extends Var{
      */
     public void addTryBlock(String tryname){
         try{
-            al.add(new VarEle(false, false, "try_"+tryname, null, rrsp, 0));
+            al.push(new VarEle(false, false, "try_"+tryname, null, rrsp, 0));
         }
         catch(CodeException e){}//inutilizzato
     }
@@ -336,14 +336,14 @@ public class VarStack extends Var{
      * @throws comp.code.CodeException
      */
     public void removeBlock(Segmenti seg)throws CodeException{
-        VarEle e=al.remove(al.size()-1);
-        decPOS(e.allocatedSpace);
+        VarEle e=al.pop();
+        rrsp -= e.allocatedSpace;
         while(!(e.name.equals("block") && !e.var)){
-            e=al.remove(al.size()-1);
+            e=al.pop();
             if(e.destroyable){
                 distruggi(e, seg);
             }
-            decPOS(e.allocatedSpace);
+            rrsp -= e.allocatedSpace;
         }
     }
     /*
@@ -351,14 +351,14 @@ public class VarStack extends Var{
     blocco try normalmente (niente eccezioni)
     */
     public void removeTryBlock(Segmenti seg)throws CodeException{
-        VarEle e=al.remove(al.size()-1);
-        decPOS(e.allocatedSpace);
+        VarEle e=al.pop();
+        rrsp -= e.allocatedSpace;
         while(!(e.name.startsWith("try_") && !e.var)){
             if(e.destroyable){
                 distruggi(e, seg);
             }
-            e=al.remove(al.size()-1);
-            decPOS(e.allocatedSpace);
+            e=al.pop();
+            rrsp -= e.allocatedSpace;
         }
     }
     /**
@@ -368,7 +368,7 @@ public class VarStack extends Var{
      * @throws CodeException 
      */
     public void destroyAll(Segmenti seg)throws CodeException{
-        for(VarEle ve:al){
+        for(VarEle ve:al.toArray()){
             if(ve.destroyable)
                 distruggi(ve, seg);
         }
@@ -383,7 +383,8 @@ public class VarStack extends Var{
      */
     public void destroyTry(Segmenti seg, String tryname)throws CodeException{
         int ind=al.size()-1;
-        VarEle e=al.get(ind);
+        VarEle[] vele = al.toArray();
+        VarEle e=vele[ind];
         ind--;
         while(!(e.name.equals("try_"+tryname) && !e.var)){
             if(e.destroyable){
@@ -391,7 +392,7 @@ public class VarStack extends Var{
             }
             if(ind<0)
                 break;//Non si sa mai
-            e=al.get(ind);
+            e=vele[ind];
             ind--;
         }
     }

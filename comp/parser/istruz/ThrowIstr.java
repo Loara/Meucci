@@ -25,7 +25,7 @@ public class ThrowIstr extends Istruzione{
     }
     @Override
     public void validate(Variabili var, Environment env){
-        
+        //Un throw è sempre valido, anche se non contemplato
     }
     @Override
     public void toCode(Segmenti text, Variabili vars, Environment env, Accumulator acc)
@@ -42,7 +42,10 @@ public class ThrowIstr extends Istruzione{
                 text.addIstruzione("ret", null, null);
         }
         else{
-            //termina programma
+            //Esci, temporaneo
+            text.addIstruzione("mov", "rax", "60");
+            text.addIstruzione("mov", "rdi", "1");
+            text.addIstruzione("syscall", null, null);
         }
     }
 }

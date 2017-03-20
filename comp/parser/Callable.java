@@ -197,7 +197,7 @@ public abstract class Callable implements Serializable{
         this.postCode(text, vs, env, acc);
         boolean ret="ret".equals(text.text.prevIstr()[0]);
         int i=vs.getVarStack().internalVarsMaxDim();
-        text.text.set(mem-1, "\tenter\t"+(Info.alignConv(i)+i)+",0");//deve essere allineato.
+        text.text.toArrayList().set(mem-1, "\tenter\t"+(Info.alignConv(i)+i)+",0");//deve essere allineato.
         i=vs.getVarStack().getDimArgs();//gli argomenti passati dalla funzione
         if(!ret){
             text.addIstruzione("leave", null, null);

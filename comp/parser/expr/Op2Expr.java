@@ -29,7 +29,9 @@ import comp.scanner.IdentToken;
 import comp.scanner.SymbToken;
 import comp.code.TypeElem;
 import comp.code.Types;
+import comp.general.Info;
 import comp.parser.TypeName;
+import comp.parser.istruz.TryIstr;
 
 /**
  *
@@ -90,9 +92,12 @@ public class Op2Expr extends Espressione{
         epr.validate(var);
         epr2.validate(var);
         boolean b=Aritm.validate(var, this);
-        if(!b)
-            Funz.getIstance().request(symb.getString(), new TypeElem[]{epr.returnType(var, true), 
+        if(!b){
+            FElement fe=Funz.getIstance().request(symb.getString(), new TypeElem[]{epr.returnType(var, true), 
                 epr2.returnType(var, true)}, true);
+        if(!Info.containedIn(fe.errors, Environment.errors))
+            throw new CodeException("Errori di "+fe.name+" non gestiti correttamente");
+        }
     }
     @Override
     public void toCode(Segmenti text, Variabili var, Environment env, 
@@ -101,6 +106,8 @@ public class Op2Expr extends Espressione{
             return;
         acc.pushAll(text);
         FElement modname=modname(var);
+        if(!TryIstr.checkThrows(modname.errors, env))
+            throw new CodeException("Errori di "+modname.name+" non gestiti correttamente");
         FunzExpr.perfCall(modname, new Espressione[]{epr, epr2}, text, var, env, acc);
     }
 }

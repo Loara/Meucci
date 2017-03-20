@@ -76,6 +76,8 @@ public class Destructor extends Callable{
         Template.addTemplateConditions(temp);
         Variabili vs=new Variabili(dichs, varSt, true, null);
         Environment.ret=Types.getIstance().find(retType, true);
+        Environment.template=true;
+        Environment.errors=errors;
         TemplateEle[] telem=Template.conversion(temp);
         TypeName tne=new TypeName(classname, telem);
         TypeElem te=Types.getIstance().find(tne, true);

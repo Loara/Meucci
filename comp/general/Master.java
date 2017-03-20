@@ -324,7 +324,7 @@ public class Master {
             });
         
             out.println("\tsection\t.text");
-            seg.text.stream().forEach((t) -> {
+            seg.text.toArrayList().stream().forEach((t) -> {
                 out.println(t);
             });
             Funz.getIstance().clearGE();
@@ -371,7 +371,7 @@ public class Master {
             });
         
             out.println("\tsection\t.text");
-            seg.text.stream().forEach((t) -> {
+            seg.text.toArrayList().stream().forEach((t) -> {
                 out.println(t);
             });
             Funz.getIstance().clearGE();
