@@ -48,9 +48,9 @@ public class Info {
     //Ordine crescente per ricerca binaria
     //Nomi vietati per nomi funzioni normali, variabili, nome tipi
     public static final String[] forbittenNames=new String[]{"break", "catch", "continue", 
-        "default", "depends", "destroy", "else", "end", "explicit", "extends", "for", "ghost", 
+        "default", "depends", "destroy", "else", "end", "errors", "explicit", "extends", "for", "ghost", 
         "if", "init", "modulo", "new", "num", "number", "override", "packed", "read", "reference", 
-        "return", "shadow", "static", "super", "this", "try", "typ", "type", "while"};
+        "return", "shadow", "static", "super", "this", "throw", "try", "typ", "type", "while"};
     
     public static String[] primitive(){
         String[] ret=new String[primitive.length+numbers.length];
