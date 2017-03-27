@@ -16,7 +16,7 @@
 
 \author{De Donato Paolo}
 \title{\textbf{\huge Il linguaggio Meucci\\
-\large Versione 0.9.9}}
+\large Versione 2.0.0}}
 \date{}
 
 \begin{document}
@@ -474,6 +474,92 @@ uint MCD(uint a, uint b){
   return a;
  else
   return MCD(b, a :mod b);
+}
+\end{verbatim}
+\end{codeenv}
+
+\section{Gestione errori}
+Nella versione 2.0.0 del compilatore \e possibile gestire gli errori (chiamati eccezioni in C++ e Java) \emph{solamente per funzioni ed operazioni}. Spesso infatti durante l'esecuzione di un programma possono nascere degli errori che possono essere previsti ma non risolti durante la compilazione (basti pensare agli errori dovuti  all'errato input dell'utente). Per poter gestire queste condizioni eccezionali \e possibile rendere una qualunque funzione o operazione capace di \emph{generare errori}. Molti programmatori alle prime armi sottovalutano l'utilit\ac a della gestione degli errori, ma col crescere delle dimensioni dei programmi cresce conseguentemente la necessti\ac a della gestione degli errori.
+
+\subsection{Dichiarazione e generazione di errori}
+Per rendere una funzione (od operazione) capace di generare errori \e necessario specificare i possibili errori che essa genera. A differenza di altri linguaggi come il C++ o il Java in cui le eccezioni sono particolari classi, in Meucci gli errori non sono oggetti a s\'e stanti, e quindi il programmatore non deve creare nuovi oggetti per ogni errore generato, con un conseguente guadagno in prestazioni.
+
+Per dichiarare gli errori che una funzione pu\ac o generare bisogna inserire tra la parentesi tonda chiusa e la parentesi graffa aperta la parola chiave \emph{errors} seguita dai nomi degli errori separati da uno spazio. I nomi degli errori seguono le stesse regole dei nomi delle variabili.
+\begin{codeenv}
+\begin{verbatim}
+void funzione(int par1, ulong par2)errors err1 err2 err3{
+ ...
+\end{verbatim}
+\end{codeenv}
+
+Per generare un errore si utilizza l'istruzione \emph{throw} seguita dal nome dell'errore da generare e da un punto e virgola:
+
+\begin{codeenv}
+\begin{verbatim}
+throw err2;
+\end{verbatim}
+\end{codeenv}
+\ac E possibile generare un errore non dichiarato dalla funzione, ma ci\ac o causer\ac a l'\emph{immediata terminazione} del programma, in quanto non può essere gestito.
+
+\subsection{Gestione errori}
+Se vogliamo utilizzare una funzione che potrebbe generare errori possiamo seguire due strade:
+\begin{enumerate}
+\item Dichiarare gli stessi errori nella funzione utilizzatrice facendo propagare l'errore;
+\item Utilizzare un blocco try-catch per gestire l'errore. 
+\end{enumerate}
+Un blocco \emph{try-catch} \e uno speciale blocco che cattura e gestisce gli errori generati. Esso \e composto da:
+\begin{itemize}
+\item Un blocco \emph{try}: \e semplicemente un blocco di istruzioni. Quando una delle istruzioni contenute genera un errore salta l'esecuzione al blocco catch che gestisce il relativo errore;
+\begin{codeenv}
+\begin{verbatim}
+try{
+ istruzione1
+ istruzione2
+ ...
+}
+\end{verbatim}
+\end{codeenv}
+\item Un blocco \emph{catch}: ci possono essere pi\ac u blocchi catch, ciascuno che gestisce un errore diverso. Le istruzioni contenute in esso verranno eseguite solamente se \e stato generato il relativo errore all'interno del blocco try;
+\begin{codeenv}
+\begin{verbatim}
+catch(errName){
+ istruzione1
+ istruzione2
+ ...
+}
+\end{verbatim}
+\end{codeenv}
+\item Opzionalmente un blocco \emph{default}: tale blocco viene eseguito solamente se \e stata generato un errore che non pu\ac o essere gestito da nessun blocco catch.
+\begin{codeenv}
+\begin{verbatim}
+default{
+ istruzione1
+ istruzione2
+ ...
+}
+\end{verbatim}
+\end{codeenv}
+\end{itemize}
+
+Esempio: Nel seguente esempio \e stato utilizzato un blocco try-catch per controllare l'esecuzione dell'istruzione \code{int var = funzione();}:
+
+\begin{codeenv}
+\begin{verbatim}
+try{
+ int var = funzione();
+}
+catch(Err1){
+ //Se viene generato Err1 l'esecuzione passa qui:
+ println("Err1");
+}
+catch(Err2){
+ //Se viene generato Err2 l'esecuzione passa qui:
+ println("Err2");
+}
+default{
+ //Se viene generato un errore che non e' 
+ //Err1 ne' Err2 l'esecuzione passa qui:
+ println("ErrGenerico");
 }
 \end{verbatim}
 \end{codeenv}
