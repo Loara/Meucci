@@ -162,7 +162,6 @@ public class IstrExe {
             }
             //try
             if(idt.getString().equals("try")){
-                t.nextEx();
                 Istruzione u=toIstr(t, true);
                 if(!(u instanceof MultiIstr))
                     throw new ParserException("Non è un blocco try", t);
@@ -203,7 +202,6 @@ public class IstrExe {
             }
             //throw
             if(idt.getString().equals("throw")){
-                t.nextEx();
                 ThrowIstr ti;
                 if(t.get() instanceof IdentToken)
                     ti=new ThrowIstr(((IdentToken)t.get()).getString());

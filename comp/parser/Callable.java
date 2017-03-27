@@ -21,6 +21,7 @@ import comp.code.CodeException;
 import comp.code.Environment;
 import comp.code.Funz;
 import comp.code.Meth;
+import comp.code.Register;
 import comp.code.Segmenti;
 import comp.code.TypeElem;
 import comp.code.Types;
@@ -200,6 +201,7 @@ public abstract class Callable implements Serializable{
         text.text.toArrayList().set(mem-1, "\tenter\t"+(Info.alignConv(i)+i)+",0");//deve essere allineato.
         i=vs.getVarStack().getDimArgs();//gli argomenti passati dalla funzione
         if(!ret){
+            text.addIstruzione("xor", Register.DX.getReg(), Register.DX.getReg());
             text.addIstruzione("leave", null, null);
             if(i>0)
                 text.addIstruzione("ret",String.valueOf(i), null);
