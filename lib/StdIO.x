@@ -14,45 +14,93 @@ modulo StdIO depends Syscalls Strings Arrays{
 		print(s);
 		newLine();
 	}
-	void print(int c, uint base){
+	void print(ulong c, uint base){
 		if(base <= u1B || (base > codec.lenght))
 			return;
-		if(c == 0){
+		if(c == u0l){
 			putChar('0');
 			return;
 		}
-		uint value;
-		if(c < 0){
-			putChar('-');
-			value=(uint)(-c);
-		}
-		else
-			value=(uint)c;
+		ulong b = (ulong)base;
 		//Determina lunghezza stringa
 		uint car = u1;
 		{
-			uint v = base;
-			while(value >= v){
+			ulong v = c;
+			while(v >= b){
 				car =+ u1;
-				v =* base;
+				v =/ b;
 			}
 		}
-		Array[char] ar = :stack Array[char](car);
+		Array[char] ar = :stack DynArray[char](car);
 		//Conversione
 		for(uint i = car - u1; i >= u0; i =- u1){
-			ar.elem[i] = codec :at (value :mod base);
-			value =/ base;
+			ar.elem[i] = codec :at (uint)(c :mod b);
+			c =/ b;
 		}
 		Pwrite(1, dataPointer[char](ar), (ulong)(ar.length));
-		//Il bug era semplice da intuire: la chiamata automatica al distruttore
-		//ha "sbagliato il tiro" in quanto esegue il puntatore e non l'istruzione
-		//che punta 
 	}
-	void print(int c){
-		print(c, u10);
+	void print(long c, uint base){
+		if(c < 0l){
+			putChar('-');
+			print((ulong)(-c), base);
+		}
+		else
+			print((ulong)c, base);
+	}
+	void print(long a){
+		print(a, u10);
+	}
+	void print(ulong a){
+		print(a, u10);
+	}
+	void print(int a){
+		print((long)a, u10);
+	}
+	void print(uint a){
+		print((ulong)a, u10);
+	}
+	void print(short a){
+		print((long)a, u10);
+	}
+	void print(ushort a){
+		print((ulong)a, u10);
+	}
+	void print(byte a){
+		print((long)a, u10);
+	}
+	void print(ubyte a){
+		print((ulong)a, u10);
+	}
+	void println(long a){
+		print(a, u10);
+		newLine();
+	}
+	void println(ulong a){
+		print(a, u10);
+		newLine();
 	}
 	void println(int a){
-		print(a);
+		print((long)a, u10);
+		newLine();
+	}
+	void println(uint a){
+		print((ulong)a, u10);
+		newLine();
+	}
+	void println(short a){
+		print((long)a, u10);
+		newLine();
+	}
+	void println(ushort a){
+		print((ulong)a, u10);
+		newLine();
+	}
+	void println(byte a){
+		print((long)a, u10);
+		newLine();
+	}
+	void println(ubyte a){
+		print((ulong)a, u10);
 		newLine();
 	}
 }

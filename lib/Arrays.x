@@ -21,10 +21,17 @@ modulo Arrays depends Memory{
 				}
 			}
 		};
-		init(uint size){
-			pt memory=allocate((uint)#SIZEOF(T)*size);
-			this.memory=(pointer[T])memory;
+		init(uint size, pointer[T] data){
+			this.memory = data;
 			this.length=size;
+		};
+		end(){
+
+		};
+	}
+	type DynArray[typ T] extends Array[T]{
+		init(uint size){
+			super(size, (pointer[T])allocate((uint)#SIZEOF(T)*size));
 		};
 		end(){
 			free((pt)this.memory);
@@ -47,7 +54,7 @@ modulo Arrays depends Memory{
 		}
 	}
 	Array[T] toArray[typ T, num L 2](StaticArray[T, L] sa){
-		Array[T] ar = :new Array[T](L);
+		Array[T] ar = :new DynArray[T](L);
 		for(uint i=u0; i<L; i =+ u1)
 			ar.elem[i]=sa.elem[i];
 		return ar;

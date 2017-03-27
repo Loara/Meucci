@@ -3,6 +3,22 @@ modulo Syscalls depends Pointers{
 	static{
 		ci=null;
 	}
+	uint open(pt name, int flag, int mode){
+		%a{
+	mov	eax, 2
+	mov	rdi,[rbp+32]
+	mov	esi,[rbp+24]
+	mov	edx,[rbp+16]
+	syscall
+		}
+	}
+	int close(int fd){
+		%a{
+	mov	eax,3
+	mov	edi,[rbp+16]
+	syscall
+		}
+	}
 	long Pwrite(int fd, pt buf, ulong size){
 		%a{
 	mov	eax,1
@@ -25,7 +41,7 @@ modulo Syscalls depends Pointers{
 		char value;
 		%a{
 	mov	eax,0
-	mov	edi,_stdin
+	mov	edi,0
 	lea	rsi,[rbp-1]
 	mov	edx,1
 	syscall
@@ -35,7 +51,7 @@ modulo Syscalls depends Pointers{
 	void putChar(char c){
 		%a{
 	mov	eax,1
-	mov	edi,_stdout
+	mov	edi,1
 	lea	rsi,[rbp+16]
 	mov	edx,1
 	syscall
@@ -76,5 +92,30 @@ modulo Syscalls depends Pointers{
 		if(ci==null)
 			ci=brk(null);
 		return ci;
+	}
+	pt mmap(pt addr, ulong size, int prot, int flags, int fd, ulong off){
+		%a{
+	mov	eax, 9
+	mov	rdi, [rbp+56]
+	mov	rsi, [rbp+48]
+	mov	edx, [rbp+40]
+	mov	r10d, [rbp+32]
+	mov	r8d, [rbp+24]
+	mov	r9, [rbp+16]
+	syscall
+		}
+	}
+	pt mmap(ulong size){
+		//MAP_PRIVATE 2
+		//MAP_ANONYMOUS	0x20
+		return mmap(null, size, 3, 34, -1, u0l);
+	}
+	int munmap(pt addr, ulong size){
+		%a{
+	mov	eax, 11
+	mov	rdi, [rbp+24]
+	mov	rsi, [rbp+16]
+	syscall
+		}
 	}
 }

@@ -13,10 +13,10 @@ modulo Memory depends Syscalls{
 	Block createBlock(uint i){
 		if(i+u8<u8)//Overflow
 			return null;
-		if(i <= u16)
+		if(i <= u8)
 			i = u16;
 		else
-			i = i + (- i & u7) + u8;
+			i = i + (- i & u7) + u8;//Sicurezza che dim non verrà toccato
 		pt g=sbrk((long)i);
 		Block ret=(Block)g;
 		ret.dim=i;
