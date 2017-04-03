@@ -16,6 +16,7 @@
  */
 package comp.parser;
 
+import comp.general.Lingue;
 import comp.general.VScan;
 import comp.parser.template.Template;
 import comp.scanner.PareToken;
@@ -45,17 +46,17 @@ public class FMorg implements Serializable{
                     FunzMem fm=new FunzMem(t, type, ctype, ctemplate, name, modulo);
                     if(fm.getAccess()){
                         if(get!=null)
-                            throw new ParserException("Riscrittura funzione get", t);
+                            throw new ParserException(Lingue.getIstance().format("m_par_getovw"), t);
                         get=fm;
                     }
                     else{
                         if(set!=null)
-                            throw new ParserException("Riscrittura funzione get", t);
+                            throw new ParserException(Lingue.getIstance().format("m_par_setovw"), t);
                         set=fm;
                     }
                 }
                 t.nextEx();
             }
-            else throw new ParserException("Blocco funzioni di accesso non valido", t);
+            else throw new ParserException(Lingue.getIstance().format("m_par_errblk"), t);
     }
 }

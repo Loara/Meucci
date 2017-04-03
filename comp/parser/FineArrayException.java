@@ -16,12 +16,14 @@
  */
 package comp.parser;
 
+import comp.general.Lingue;
+
 /**
  *
  * @author loara
  */
 public class FineArrayException extends ParserException{
     public FineArrayException(){
-        super("Fine prematura", -1);
+        super(Lingue.getIstance().format("m_par_enderr"), -1);
     }
 }

@@ -17,9 +17,7 @@
 package comp.parser;
 
 import comp.code.CodeException;
-import comp.code.Environment;
-import comp.code.Types;
-import comp.code.vars.Variabili;
+import comp.general.Lingue;
 import comp.parser.template.*;
 import comp.general.VScan;
 import comp.parser.template.Template;
@@ -49,7 +47,7 @@ public class TypeName implements Serializable{
             t.nextEx();
             params=Template.detectTemplate(t);
         }
-        else throw new ParserException("Utilizzo non valido del tipo", t);
+        else throw new ParserException(Lingue.getIstance().format("m_par_invtyp"), t);
     }
     public TypeName(String name, TemplateEle... te){
         typename=name;

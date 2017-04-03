@@ -33,9 +33,14 @@ public class Lingue {
     }
     private final ResourceBundle rb, rbP;
     public String format(String s, Object... obj){
-        if(obj.length==0)
-            return rb.getString(s);
+        ResourceBundle ch;
+        if(s.startsWith("m_par_"))
+            ch=rbP;
         else
-            return MessageFormat.format(rb.getString(s), obj);
+            ch=rb;
+        if(obj.length==0)
+            return ch.getString(s);
+        else
+            return MessageFormat.format(ch.getString(s), obj);
     }
 }
