@@ -70,7 +70,7 @@ public class Master {
     
     public static void main(String[] args)throws Exception{
         Master m=new Master();
-        if(args.length>1){
+        if(args.length<1){
             System.out.println(Lingue.getIstance().format("m_option"));
             return;
         }

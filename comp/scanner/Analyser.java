@@ -18,6 +18,7 @@ package comp.scanner;
 
 import comp.general.CompException;
 import comp.general.Info;
+import comp.general.Lingue;
 import comp.general.Master;
 import comp.general.Stack;
 import comp.general.VScan;
@@ -242,7 +243,7 @@ public class Analyser {
     }
     public static class ScanException extends CompException{
         public ScanException(int r){
-            super("file "+Master.currentFile+": token non riconosciuto", r);
+            super(Lingue.getIstance().format("m_scanerr"), r);
         }
     }
 }

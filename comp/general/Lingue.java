@@ -22,12 +22,16 @@ public class Lingue {
     }
     public Lingue(){
         Locale def = Locale.getDefault();
-        if(def.equals(Locale.ITALY))
+        if(def.equals(Locale.ITALY)){
             rb = ResourceBundle.getBundle("comp.general.Mess", Locale.ITALIAN);
-        else
+            rbP = ResourceBundle.getBundle("comp.general.Mess-parser", Locale.ITALIAN);
+        }
+        else{
             rb = ResourceBundle.getBundle("comp.general.Mess", Locale.ENGLISH);
+            rbP = ResourceBundle.getBundle("comp.general.Mess-parser", Locale.ENGLISH);
+        }
     }
-    private final ResourceBundle rb;
+    private final ResourceBundle rb, rbP;
     public String format(String s, Object... obj){
         if(obj.length==0)
             return rb.getString(s);
