@@ -36,7 +36,7 @@ import comp.parser.TypeName;
  * @author loara
  */
 public class StackExpr extends Espressione{
-    private TypeName type;
+    private final TypeName type;
     private final Espressione[] exp;
     public StackExpr(TypeName t, Espressione[] data){
         type=t;

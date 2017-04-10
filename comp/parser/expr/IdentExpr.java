@@ -36,7 +36,7 @@ import comp.scanner.IdentToken;
  * @author loara
  */
 public class IdentExpr extends Espressione{
-    private String val;
+    private final String val;
     //public long valNum; Non serve più, la sostituzione la effettua l'IdentArray
     public IdentExpr(IdentToken it){
         val=it.getString();

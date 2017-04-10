@@ -43,10 +43,10 @@ public class IdentArray extends Espressione{
             doubledot=new boolean[0];
             if(ex instanceof IdentExpr || ex instanceof NumExpr || ex instanceof TemplExpr)
                 chiam=ex;
-            else throw new ParserException("Non è un IdentExpr o un numero", 0);
+            //else throw new ParserException("Non è un IdentExpr o un numero", 0);
+            //Gestito da ExprGen
         }
         else{
-            if(ie.length!=dd.length)throw new ParserException("Lunghezze discordanti", 0);
             elems=ie;
             chiam=ex;
             doubledot=dd;

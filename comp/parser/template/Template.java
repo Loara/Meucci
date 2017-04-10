@@ -21,6 +21,7 @@ import comp.code.CodeException;
 import comp.code.Types;
 import comp.code.template.TNumbers;
 import comp.general.Info;
+import comp.general.Lingue;
 import comp.general.Stack;
 import comp.general.VScan;
 import comp.parser.ParserException;
@@ -69,7 +70,7 @@ public abstract class Template implements Serializable{
                 String typ=((IdentToken)t.get()).getString();
                 t.nextEx();
                 if(!(t.get() instanceof IdentToken))
-                    throw new ParserException("Nome template non valido", t);
+                    throw new ParserException(Lingue.getIstance().format("m_par_invnam"), t);
                 String name=((IdentToken)t.get()).getString();
                 Info.isForbitten(name, t.get().getRiga());
                 t.nextEx();
@@ -81,23 +82,22 @@ public abstract class Template implements Serializable{
                         tt.add(parseTyp(t, name));
                         break;
                     default:
-                        throw new ParserException("Categoria template non valida ("+typ+")\n"
-                                + "Sono valide le seguenti: num typ", t);
+                        throw new ParserException(Lingue.getIstance().format("m_par_cattem"), t);
                 }
             }
             else
-                throw new ParserException("Template erroneo", t);
+                throw new ParserException(Lingue.getIstance().format("m_par_generr", "template"), t);
             if(chiusaPare(t))
                 return Info.toAr(Template.class, tt);
             do{
                 if(!(t.get() instanceof VirgToken))
-                    throw new ParserException("Manca ,", t);
+                    throw new ParserException(Lingue.getIstance().format("m_par_comma"), t);
                 t.nextEx();
                 if(t.get() instanceof IdentToken){
                     String typ=((IdentToken)t.get()).getString();
                     t.nextEx();
                     if(!(t.get() instanceof IdentToken))
-                        throw new ParserException("Nome template non valido", t);
+                        throw new ParserException(Lingue.getIstance().format("m_par_invnam"), t);
                     String name=((IdentToken)t.get()).getString();
                     t.nextEx();
                     switch(typ){
@@ -108,11 +108,11 @@ public abstract class Template implements Serializable{
                             tt.add(parseTyp(t, name));
                             break;
                         default:
-                            throw new ParserException("Categoria template non valida", t);
+                            throw new ParserException(Lingue.getIstance().format("m_par_cattem"), t);
                     }
                 }
                 else
-                    throw new ParserException("Template erroneo", t);
+                    throw new ParserException(Lingue.getIstance().format("m_par_generr", "template"), t);
             }
             while(!chiusaPare(t));
             return Info.toAr(Template.class, tt);
@@ -134,17 +134,17 @@ public abstract class Template implements Serializable{
         if(t.get() instanceof IntToken){
             dim=(int)((IntToken)t.get()).s;
             if(dim<0 || dim>Info.maxDimExp)
-                throw new ParserException("Dimensione parametro template troppo alta", t);
+                throw new ParserException(Lingue.getIstance().format("m_par_dimtem"), t);
             t.nextEx();
         }
-        else throw new ParserException("Manca dimensione di "+name, t);
+        else throw new ParserException(Lingue.getIstance().format("m_par_timman", name), t);
         if(t.get() instanceof SymbToken && ((SymbToken)t.get()).getString().equals(">")){
             t.nextEx();
             if(t.get() instanceof IntToken){
                 bi=true;
                 inf=((IntToken)t.get()).s;
             }
-            else throw new ParserException("Condizione template erronea", t);
+            else throw new ParserException(Lingue.getIstance().format("m_par_nucter"), t);
             t.nextEx();
         }
         if(t.get() instanceof SymbToken && ((SymbToken)t.get()).getString().equals("<")){
@@ -159,7 +159,7 @@ public abstract class Template implements Serializable{
                 else
                     sup=((IntToken)t.get()).s;
             }
-            else throw new ParserException("Condizione template erronea", t);
+            else throw new ParserException(Lingue.getIstance().format("m_par_nucter"), t);
             t.nextEx();
         }
         else if(dim<Info.maxDimExp){
@@ -179,18 +179,16 @@ public abstract class Template implements Serializable{
             t.nextEx();
             num=true;
             if(ref)
-                throw new ParserException("Impossibile utilizzare contemporaneamente i seguenti parametri:"
-                +"\n number e reference", t);
+                throw new ParserException(Lingue.getIstance().format("m_par_bthcon", "number", "reference"), t);
         }
         if(t.get() instanceof IdentToken && ((IdentToken)t.get()).getString().equals("extends")){
             t.nextEx();
             if(!ref)
                 ref=true;
             if(num)
-                throw new ParserException("Impossibile utilizzare contemporaneamente i seguenti parametri:"
-                +"\n number e extends", t);
+                throw new ParserException(Lingue.getIstance().format("m_par_bthcon", "number", "extends"), t);
             if(!(t.get() instanceof IdentToken))
-                throw new ParserException("Tipo non valido", t);
+                throw new ParserException(Lingue.getIstance().format("m_par_invtyp"), t);
             ext=new TypeName(t);
         }
         return new TypTemplate(name, ref, num, ext);

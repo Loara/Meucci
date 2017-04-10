@@ -26,7 +26,6 @@ import comp.code.vars.Variabili;
 import comp.parser.Espressione;
 import comp.parser.template.FunzDich;
 import comp.parser.template.NumDich;
-import comp.parser.template.ParamDich;
 import comp.parser.template.TemplateEle;
 
 /**
@@ -56,7 +55,7 @@ public class TemplExpr extends Espressione{
     }
     @Override
     public TypeElem returnType(Variabili var, boolean valid)throws CodeException{
-        return Types.getIstance().find("ulong");
+        return funz.retType();
     }
     @Override
     public void println(int i){

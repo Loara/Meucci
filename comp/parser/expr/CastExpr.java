@@ -22,7 +22,6 @@ import comp.code.Environment;
 import comp.code.Segmenti;
 import comp.code.TypeElem;
 import comp.code.Types;
-import comp.code.template.Substitutor;
 import comp.code.vars.Variabili;
 import comp.general.Info;
 import comp.parser.Espressione;
@@ -33,7 +32,7 @@ import comp.parser.TypeName;
  * @author loara
  */
 public class CastExpr extends Espressione{
-    private TypeName type;
+    private final TypeName type;
     private final Espressione esp;
     public CastExpr(TypeName type, Espressione es){
         this.type=type;
