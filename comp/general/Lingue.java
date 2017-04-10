@@ -21,15 +21,19 @@ public class Lingue {
         return lin;
     }
     public Lingue(){
+        /*
         Locale def = Locale.getDefault();
         if(def.equals(Locale.ITALY)){
-            rb = ResourceBundle.getBundle("comp.general.Mess", Locale.ITALIAN);
-            rbP = ResourceBundle.getBundle("comp.general.Mess-parser", Locale.ITALIAN);
+        */
+            rb = ResourceBundle.getBundle("comp.languages.Mess", Locale.ITALIAN);
+            rbP = ResourceBundle.getBundle("comp.languages.Mess-parser", Locale.ITALIAN);
+        /*
         }
         else{
-            rb = ResourceBundle.getBundle("comp.general.Mess", Locale.ENGLISH);
-            rbP = ResourceBundle.getBundle("comp.general.Mess-parser", Locale.ENGLISH);
+            rb = ResourceBundle.getBundle("comp.languages.Mess", Locale.ENGLISH);
+            rbP = ResourceBundle.getBundle("comp.languages.Mess-parser", Locale.ENGLISH);
         }
+        */
     }
     private final ResourceBundle rb, rbP;
     public String format(String s, Object... obj){
