@@ -230,14 +230,14 @@ public abstract class Template implements Serializable{
                 else if(s.get() instanceof HashToken){
                     s.nextEx();
                     if(!(s.get() instanceof IdentToken))
-                        throw new ParserException("Funzione template non valida", s);
+                        throw new ParserException(Lingue.getIstance().format("m_par_invtem"), s);
                     String fname=((IdentToken)s.get()).getString();
                     s.nextEx();
                     if(!(s.get() instanceof PareToken))
-                        throw new ParserException("Funzione template non valida", s);
+                        throw new ParserException(Lingue.getIstance().format("m_par_invtem"), s);
                     else{
                         if(((PareToken)s.get()).s!='(')
-                            throw new ParserException("Funzione template non valida", s);
+                            throw new ParserException(Lingue.getIstance().format("m_par_invtem"), s);
                         s.nextEx();
                         if(s.get() instanceof PareToken && ((PareToken)s.get()).s==')'){
                             s.nextEx();
@@ -248,7 +248,7 @@ public abstract class Template implements Serializable{
                         while(!(s.get() instanceof PareToken) ||
                                 ((PareToken)s.get()).s!=')'){
                             if(!(s.get() instanceof VirgToken))
-                                throw new ParserException("Funzione template non valida", s);
+                                throw new ParserException(Lingue.getIstance().format("m_par_invtem"), s);
                             s.nextEx();
                             ss.push(detect(s));
                         }
@@ -256,7 +256,7 @@ public abstract class Template implements Serializable{
                         return FunzDich.istance(fname, ss.toArray(), s);
                     }
                 }
-                else throw new ParserException("Parametro non valido", s);
+                else throw new ParserException(Lingue.getIstance().format("m_par_invpam"), s);
     }
     public static TemplateEle[] detectTemplate(VScan<Token> s)throws ParserException{
             if(Info.isTemplatePare(s, true)){
@@ -266,7 +266,7 @@ public abstract class Template implements Serializable{
                 if(!Info.isTemplatePare(s, false)){
                     do{
                         if(!(s.get() instanceof VirgToken))
-                            throw new ParserException("Manca ,", s);
+                            throw new ParserException(Lingue.getIstance().format("m_par_comma"), s);
                         s.nextEx();
                         ss.push(detect(s));
                     }
