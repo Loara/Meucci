@@ -107,6 +107,7 @@ public class Types {
             if(t.equals(i.name))
                 return i;
         }
+        //Serve per i tipi template all'interno dei validate
         for(TypeElem i:Telems){
             if(t.equals(i.name))
                 return i;
@@ -144,6 +145,36 @@ public class Types {
             +t.getName());
         Telems.add(tt);
         return tt;
+    }
+    /*
+    Controlla solo l'esistenza del tipo, non lo definisce. Utile nei validate
+    per ridurre i tempi
+    */
+    public void esiste(String t)throws CodeException{
+        for(TypeElem i:elems){
+            if(t.equals(i.name))
+                return;
+        }
+        for(TypeElem i:Telems){
+            if(t.equals(i.name))
+                return;
+        }
+        throw new CodeException("Tipo sconosciuto: "+t);
+    }
+    public void esiste(TypeName t)throws CodeException{
+        if(suds!=null){
+            t=suds.recursiveGet(t);
+        }
+        if(t.templates().length==0){
+            esiste(t.getName());
+            return;
+        }
+        String mname=Meth.className(t);
+        for(TypeElem i:Telems){
+            if(i.name.equals(mname))
+                return;
+        }
+        cl.esiste(t.getName(), t.templates());
     }
     public ClassList getClassList(){
         return cl;

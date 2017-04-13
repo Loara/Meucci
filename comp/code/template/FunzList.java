@@ -52,14 +52,6 @@ public class FunzList extends TList<Callable>{
     noAdd da impostare a true se è utilizzato durante il validate, in modo da
     non generare un file inutile
     */
-    /*
-    Bisogna ASSOLUTAMENTE cambiare l'algoritmo di sostituzione
-    genera troppi errori utilizzare un substituteAll per sostituire ogni ricorrenza
-    in quanto, una volta effettuata la sostituzione, se si vuole generare una
-    nuova sostituzione dell'oggetto o si deve rileggerlo dal file oppure
-    bisognerebbe ogni volta clonarlo. La soluzione migliore resta quella di utilizzare
-    una mediazione nella ricerca che sostituisce automaticamente durante la ricerca
-    */
             
     public FElement generate(String name, TemplateEle[] param, TypeElem[] fpdec, boolean noAdd)
             throws CodeException{
@@ -120,5 +112,54 @@ public class FunzList extends TList<Callable>{
             nos.add(new Notifica(name, filt[0].getModulo(), param));
         }
         return fe;
+    }   
+    public void esiste(String name, TemplateEle[] param, TypeElem[] fpdec)
+            throws CodeException{
+        Callable[] t=find0(name);
+        Stack<Callable> sf=new Stack<>(Callable.class);
+        boolean just;
+        TypeName[] pars=null;
+        TypeName retT=null;
+        for(Callable f:t){
+            if(!f.getName().equals(name))
+                continue;
+            if(f.templates().length!=param.length)
+                continue;
+            if(f.getElems().length!=fpdec.length)
+                continue;
+            just=true;
+            for(int i=0; i<param.length; i++){
+                if(!f.templates()[i].isCompatible(param[i])){
+                    just=false;
+                    break;
+                }
+            }
+            if(!just)
+                continue;
+            WeakSubstitutor sub=new WeakSubstitutor();//substitutor temporaneo
+            sub.addAll(f.templateNames(), param);
+            pars=new TypeName[f.getElems().length];
+            for(int i=0; i<pars.length; i++){
+                pars[i]=sub.recursiveGet(f.getElems()[i].dich.getRType());
+            }
+            for(int i=0; i<fpdec.length; i++){
+                if(!fpdec[i].ifEstende(pars[i], true)){
+                    just=false;
+                    break;
+                }
+            }
+            if(!just)
+                continue;
+            sf.push(f);
+            retT=sub.recursiveGet(f.getReturn());
+        }
+        Callable[] filt=sf.toArray();
+        if(filt.length!=1){
+            String error="Trovate "+filt.length+" funzioni distinte per "+Meth.funzKey(name, param)+":";
+            for(Callable c:filt){
+                error+="\n"+Meth.modName(c, param);
+            }
+            throw new CodeException(error);
+        }
     }
 }
