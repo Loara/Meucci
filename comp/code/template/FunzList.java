@@ -21,6 +21,7 @@ import comp.code.Environment;
 import comp.code.Funz.FElement;
 import comp.code.Meth;
 import comp.code.TypeElem;
+import comp.general.Lingue;
 import comp.general.Stack;
 import comp.parser.Callable;
 import comp.parser.TypeName;
@@ -46,7 +47,7 @@ public class FunzList extends TList<Callable>{
         if(ret.length==1)
             return ret[0];
         else
-            throw new CodeException("Trovate "+ret.length+" funzioni per "+name);
+            throw new CodeException(Lingue.getIstance().format("m_cod_foufunn", ret.length, name));
     }
     /*
     noAdd da impostare a true se è utilizzato durante il validate, in modo da
@@ -55,8 +56,6 @@ public class FunzList extends TList<Callable>{
             
     public FElement generate(String name, TemplateEle[] param, TypeElem[] fpdec, boolean noAdd)
             throws CodeException{
-        if(param.length==0)
-            throw new CodeException("");
         Callable[] t=find0(name);
         Stack<Callable> sf=new Stack<>(Callable.class);
         boolean just;
@@ -97,7 +96,7 @@ public class FunzList extends TList<Callable>{
         }
         Callable[] filt=sf.toArray();
         if(filt.length!=1){
-            String error="Trovate "+filt.length+" funzioni distinte per "+Meth.funzKey(name, param)+":";
+            String error=Lingue.getIstance().format("m_cod_foufunn", filt.length, name)+":";
             for(Callable c:filt){
                 error+="\n"+Meth.modName(c, param);
             }
@@ -118,8 +117,7 @@ public class FunzList extends TList<Callable>{
         Callable[] t=find0(name);
         Stack<Callable> sf=new Stack<>(Callable.class);
         boolean just;
-        TypeName[] pars=null;
-        TypeName retT=null;
+        TypeName[] pars;
         for(Callable f:t){
             if(!f.getName().equals(name))
                 continue;
@@ -151,11 +149,10 @@ public class FunzList extends TList<Callable>{
             if(!just)
                 continue;
             sf.push(f);
-            retT=sub.recursiveGet(f.getReturn());
         }
         Callable[] filt=sf.toArray();
         if(filt.length!=1){
-            String error="Trovate "+filt.length+" funzioni distinte per "+Meth.funzKey(name, param)+":";
+            String error=Lingue.getIstance().format("m_cod_foufunn", filt.length, name)+":";
             for(Callable c:filt){
                 error+="\n"+Meth.modName(c, param);
             }

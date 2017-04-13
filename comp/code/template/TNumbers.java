@@ -17,6 +17,7 @@
 package comp.code.template;
 
 import comp.code.CodeException;
+import comp.general.Lingue;
 import comp.parser.template.NumDich;
 import comp.parser.template.NumTemplate;
 import comp.parser.template.ParamDich;
@@ -38,7 +39,7 @@ public class TNumbers {
             tnumb=new TNumbers();
         return tnumb;
     }
-    private HashSet<NumTemplate> hs;
+    private final HashSet<NumTemplate> hs;
     public TNumbers(){
         hs=new HashSet<>();
         suds=null;
@@ -70,7 +71,7 @@ public class TNumbers {
         if(te instanceof NumDich){
             return (NumDich)te;
         }
-        else throw new CodeException("Non trovato");
+        else throw new CodeException(Lingue.getIstance().format("m_cod_temnufn"));
     }
     /**
      * Dice se tname è maggiore di val
