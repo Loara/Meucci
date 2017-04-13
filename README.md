@@ -10,7 +10,7 @@ Instead of what I wrote in the manual, you can't compile sources with `mecc`, bu
 
 ## Installation
 
-You have to install Java 8 or later to use the Meucci compiler. The main class is comp.general.Master.
+You have to install Java 8 or later to use the Meucci compiler. The main class is *comp.general.Master*.
 
 If you have installed "Apache Ant", you can simply follow these step:
 
