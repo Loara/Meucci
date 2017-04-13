@@ -18,6 +18,7 @@ package comp.code;
 
 import comp.code.vars.Variabili;
 import comp.general.Info;
+import comp.general.Lingue;
 import comp.parser.expr.IdentEle;
 import comp.parser.Membro;
 import comp.parser.TypeName;
@@ -84,7 +85,7 @@ public class VTable {
                 return j;
             }
             else if(f!=-1)
-                throw new CodeException("Parametri di accesso scorretti");
+                throw new CodeException(Lingue.getIstance().format("m_cod_errpacc"));
         }
         return -1;
     }

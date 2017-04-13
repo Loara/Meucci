@@ -19,6 +19,7 @@ package comp.code;
 import comp.code.template.ClassList;
 import comp.code.template.Substitutor;
 import comp.general.Info;
+import comp.general.Lingue;
 import comp.parser.Membro;
 import comp.parser.TypeDef;
 import comp.parser.TypeName;
@@ -112,7 +113,7 @@ public class Types {
             if(t.equals(i.name))
                 return i;
         }
-        throw new CodeException("Tipo sconosciuto: "+t);
+        throw new CodeException(Lingue.getIstance().format("m_cod_typnfnd", t));
     }
     public TypeName translate(TypeName tn)throws CodeException{
         if(suds != null)
@@ -137,12 +138,9 @@ public class Types {
                 return i;
         }
         if(t.templates().length==0){
-            throw new CodeException("Impossibile trovare il tipo "+t.getName());
+        throw new CodeException(Lingue.getIstance().format("m_cod_typnfnd", t.getName()));
         }
         TypeElem tt=cl.generate(t.getName(), t.templates(), validate);
-        if(tt==null)
-            throw new CodeException("Impossibile trovate classe template di nome "
-            +t.getName());
         Telems.add(tt);
         return tt;
     }
@@ -159,7 +157,7 @@ public class Types {
             if(t.equals(i.name))
                 return;
         }
-        throw new CodeException("Tipo sconosciuto: "+t);
+        throw new CodeException(Lingue.getIstance().format("m_cod_typnfnd", t));
     }
     public void esiste(TypeName t)throws CodeException{
         if(suds!=null){

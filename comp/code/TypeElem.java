@@ -360,27 +360,27 @@ public class TypeElem {
         for(Membro m:subtypes){
             if(m.dich.getIdent().equals(el)){
                 if(external && m.shadow)
-                    throw new CodeException("Impossibile leggere "+el);
+                    throw new CodeException(Lingue.getIstance().format("m_cod_cannmb", el, name));
                 return;
             }
         }
         if(extend!=null)
             Types.getIstance().find(extend, v).canWrite(el, v);
         else
-            throw new CodeException("Membro non trovato: "+el);
+            throw new CodeException(Lingue.getIstance().format("m_cod_nfndmb", el, name));
     }
     public void canWrite(String el, boolean v)throws CodeException{
         for(Membro m:subtypes){
             if(m.dich.getIdent().equals(el)){
-                if(external && m.shadow && m.read)
-                    throw new CodeException("Impossibile scrivere "+el);
+                if(external && (m.shadow || m.read))
+                    throw new CodeException(Lingue.getIstance().format("m_cod_canwmb", el, name));
                 return;
             }
         }
         if(extend!=null)
             Types.getIstance().find(extend, v).canWrite(el, v);
         else
-            throw new CodeException("Membro non trovato: "+el+" in "+name);
+            throw new CodeException(Lingue.getIstance().format("m_cod_nfndmb", el, name));
     }
     public boolean directAccess(String ident, boolean dd)throws CodeException{
         for(Membro m:subtypes){
@@ -391,7 +391,7 @@ public class TypeElem {
         if(extend!=null)
             return Types.getIstance().find(extend, false).directAccess(ident, dd);
         else
-            throw new CodeException("Tipo non trovato");
+            throw new CodeException(Lingue.getIstance().format("m_cod_nfndmb", ident, name));
     }
             /**
              * Stampa in {@code text} e {@code data} la lettura di un elemento. 
@@ -408,7 +408,7 @@ public class TypeElem {
     public TypeElem getTypeElement(Segmenti text, Variabili var, Environment env, 
             IdentEle elem, Accumulator acc, boolean dd) throws CodeException{
         if(primitive)
-            throw new CodeException(name+" e' un tipo primitivo");
+            throw new CodeException(Lingue.getIstance().format("m_cod_prmtype"));
         //Controlla se può leggerlo
         canRead(elem.getIdent(), false);
         Membro m=information(elem.getIdent(), false);
@@ -456,7 +456,7 @@ public class TypeElem {
                     "["+acc.getAccReg().getReg()+"]");
             int sc2=vt.getReadAcc(elem, var, env);
             if(sc2==-1)
-                throw new CodeException("Membro non trovato");
+                throw new CodeException(Lingue.getIstance().format("m_cod_nfndmb", elem, name));
             text.addIstruzione("push",acc.getAccReg().getReg(), null);//indirizzo oggetto
             //i valori di default tanto sono già stati aggiunti
             //acc.libera(tic)lanciato automaticamente all'interno di perfCall
@@ -480,14 +480,16 @@ public class TypeElem {
     public void setValueElement(Segmenti text, Variabili var, Environment env, 
             IdentEle elem, int input, Accumulator acc, boolean dd)throws CodeException{
         if(primitive)
-            throw new CodeException(name+" e' un tipo primitivo");
+            throw new CodeException(Lingue.getIstance().format("m_cod_prmtype"));
         canWrite(elem.getIdent(), false);
         Membro m=information(elem.getIdent(), false);
         TypeElem ter=Types.getIstance().find(m.getType(), false);
         if(directAccess(m.getIdent(), dd)){
+            /*
             if(ter.xmmReg()){
                 throw new CodeException("Tipi incompatibili: "+elem.getIdent()+" è reale");
             }
+            */
             int sc=getElement(elem.getIdent(), false);//se è ghost genera errore
             if(m.packed!=null){
                 int rd=acc.saveAccumulator();
@@ -521,7 +523,7 @@ public class TypeElem {
                     "["+acc.getAccReg().getReg()+"]");
             int sc2=vt.getWriteAcc(elem, var, env);
             if(sc2==-1)
-                throw new CodeException("Membro "+elem.getIdent()+" in "+name+" non trovato");
+                throw new CodeException(Lingue.getIstance().format("m_cod_nfndmb", elem, name));
             text.addIstruzione("push",acc.getAccReg().getReg(),null);//indirizzo oggetto
             text.addIstruzione("push",acc.getReg(input).getReg(), null);//valore da settare, sempre qword
             FunzExpr.perfCall(tic, sc2, Types.getIstance().find(new TypeName("void"), 
@@ -532,16 +534,18 @@ public class TypeElem {
     public void setXValueElement(Segmenti text, Variabili var, Environment env, 
         IdentEle elem, int input, Accumulator acc, boolean dd)throws CodeException{
         if(primitive)
-            throw new CodeException(name+" e' un tipo primitivo");
+            throw new CodeException(Lingue.getIstance().format("m_cod_prmtype"));
         canWrite(elem.getIdent(), false);
         Membro m=information(elem.getIdent(), false);
         TypeElem ter=Types.getIstance().find(m.getType(), false);
         if(directAccess(m.getIdent(), dd)){
             int sc=getElement(elem.getIdent(), false);
+            /*
             if(!ter.xmmReg()){
                 throw new CodeException("Tipi incompatibili: "+elem.getIdent()+
                         " non è reale");
             }
+            */
             if(m.packed!=null){
                 int rd=acc.saveAccumulator();
                 String pointer;
@@ -571,7 +575,7 @@ public class TypeElem {
                     "["+acc.getAccReg().getReg()+"]");
             int sc2=vt.getWriteAcc(elem, var, env);
             if(sc2==-1)
-                throw new CodeException("Membro non ritrovato");
+                throw new CodeException(Lingue.getIstance().format("m_cod_nfndmb", elem, name));
             text.addIstruzione("push",acc.getAccReg().getReg(),null);//indirizzo oggetto
             text.addIstruzione("push",acc.getAccReg().getReg(), null);//valore da settare
             text.addIstruzione("movsd", "[rsp]", acc.getXReg(input).getReg());
@@ -588,7 +592,8 @@ public class TypeElem {
             if(subtypes[i].dich.getIdent().equals(name)){
                 //Gli override vengono esclusi dal costruttore
                 if(subtypes[i].ghost)
-                    throw new CodeException(subtypes[i].dich.getIdent()+" è ghost");
+                    throw new CodeException(Lingue.getIstance().
+                            format("m_cod_mbrghst", subtypes[i].dich.getIdent()));
                 return allineamenti[i];
             }
         }
