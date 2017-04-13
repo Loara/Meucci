@@ -27,19 +27,23 @@ public class Lingue {
         */
             rb = ResourceBundle.getBundle("comp.languages.Mess", Locale.ITALIAN);
             rbP = ResourceBundle.getBundle("comp.languages.Mess-parser", Locale.ITALIAN);
+            rbC = ResourceBundle.getBundle("comp.languages.Mess-code", Locale.ITALIAN);
         /*
         }
         else{
             rb = ResourceBundle.getBundle("comp.languages.Mess", Locale.ENGLISH);
             rbP = ResourceBundle.getBundle("comp.languages.Mess-parser", Locale.ENGLISH);
+            rbC = ResourceBundle.getBundle("comp.languages.Mess-code", Locale.ENGLISH);
         }
         */
     }
-    private final ResourceBundle rb, rbP;
+    private final ResourceBundle rb, rbP, rbC;
     public String format(String s, Object... obj){
         ResourceBundle ch;
         if(s.startsWith("m_par_"))
             ch=rbP;
+        else if(s.startsWith("m_cod_"))
+            ch=rbC;
         else
             ch=rb;
         if(obj.length==0)

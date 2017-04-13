@@ -18,6 +18,7 @@ package comp.code;
 
 import comp.code.vars.Variabili;
 import comp.general.Info;
+import comp.general.Lingue;
 import comp.general.Stack;
 import comp.parser.Espressione;
 import comp.parser.expr.IdentEle;
@@ -78,7 +79,7 @@ public class TypeElem {
         external=ex;
         dim=-1;
         if(explicit && extend==null && subtypes.length==0)
-            throw new CodeException("Tipo esplicito "+name+" vuoto");
+            throw new CodeException(Lingue.getIstance().format("m_cod_typexpe", name));
     }
     public TypeElem(String n, TypeName e, Membro[] s, boolean ex, boolean explicit){
         name=n;
@@ -108,7 +109,7 @@ public class TypeElem {
     throws CodeException{
         template=true;
         if(num && ref)
-            throw new CodeException("Parametri errati");
+            throw new CodeException(Lingue.getIstance().format("m_cod_errpara"));
         name=n;
         extend=e;
         Stack<Membro> m=new Stack<>(Membro.class);
@@ -181,8 +182,7 @@ public class TypeElem {
             int rd=Types.getIstance().find(subtypes[i].getType(), v).realDim();
             if(subtypes[i].packed!=null){
                 if(!(subtypes[i].packed instanceof NumDich))
-                    throw new CodeException("La lunghezza di "+subtypes[i].getIdent()
-                            +" in "+name+" deve essere una costante");
+                    throw new CodeException(Lingue.getIstance().format("m_cod_packukn"));
                 allineamenti[i]=ofs+Info.alignConv(ofs);//sempre allineato;
                 ofs=allineamenti[i]+(rd*(int)((NumDich)subtypes[i].packed).getNum());
                 //Errore, da gestire opportunamente
@@ -221,9 +221,9 @@ public class TypeElem {
     }
     public int dimension(boolean v)throws CodeException{
         if(template)
-            throw new CodeException("Impossibile calcolarne la dimensione");
+            throw new CodeException(Lingue.getIstance().format("m_cod_ukndimn"));
         if(primitive)
-            throw new CodeException("Tipo primitivo");
+            throw new CodeException(Lingue.getIstance().format("m_cod_prmtype"));
         if(dim==-1)
             allinea(v);
         return dim;
@@ -239,14 +239,14 @@ public class TypeElem {
         if(reference)
             return 8;
         else if(template)
-            throw new CodeException("Impossibile risalire alla dimensione di un template");
+            throw new CodeException(Lingue.getIstance().format("m_cod_ukndimn"));
         if(name.equals(":null"))
             return Info.pointerdim;
         int ind=Info.realDim(name);
         if(ind!=-1){
             return ind;
         }
-        else throw new CodeException("Impossibile risalire alla vera dimensione di "+name);
+        else throw new CodeException(Lingue.getIstance().format("m_cod_ukndimn"));
     }
     public boolean hasRealDim(){
         return reference || !template;
@@ -285,8 +285,7 @@ public class TypeElem {
             case 0:
                 return null;
             default:
-                throw new CodeException("Trovati "+m.size()+" diverse interpretazioni di "
-                        +name);
+                throw new CodeException(Lingue.getIstance().format("m_cod_dividnm", m.size(), name));
         }
     }
     private void information0(String name, boolean v, Stack<Membro> mems)throws CodeException{
@@ -310,11 +309,11 @@ public class TypeElem {
         boolean correct=(il.getType().equals(over.getType()))
                 &&(il.read==over.read)
                 &&(il.shadow==over.shadow);
-        if(!correct) throw new CodeException("Override illegale");
-        if(il.explicit) throw new CodeException("Override illegale");
-        if(il.shadow) throw new CodeException("Override illegale");
+        if(!correct) throw new CodeException(Lingue.getIstance().format("m_cod_illovrr"));
+        if(il.explicit) throw new CodeException(Lingue.getIstance().format("m_cod_illovrr"));
+        if(il.shadow) throw new CodeException(Lingue.getIstance().format("m_cod_illovrr"));
         correct=il.compatible(over.params);
-        if(!correct) throw new CodeException("Override illegale");
+        if(!correct) throw new CodeException(Lingue.getIstance().format("m_cod_illovrr"));
     }
     public boolean hasVTable()throws CodeException{
         return !explicit;//Per via del distruttore

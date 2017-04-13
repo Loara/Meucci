@@ -18,6 +18,7 @@ package comp.code;
 
 import comp.code.template.FunzList;
 import comp.code.template.Substitutor;
+import comp.general.Lingue;
 import comp.parser.Callable;
 import comp.parser.OpDef;
 import comp.parser.TypeName;
@@ -156,19 +157,20 @@ public class Funz {
                 s.add(fer);
                 return fer;
             }
-            String err="Errore: trovate "+e.size()+" funzioni per "+name+Meth.paramsName(te)+":\n";
+            String err=Lingue.getIstance().format("m_cod_foufunn", e.size(), 
+                    Meth.funzKey(name, te))+":\n";
             err = e.stream().map((ex) -> ex.modname+"\n").reduce(err, String::concat);
             throw new CodeException(err);
         }
     }
     public FElement request(String modname)throws CodeException{
         if(modname==null)
-            throw new CodeException("Funzione non trovata");
+            throw new CodeException(Lingue.getIstance().format("m_cod_funnfon"));
         for(FElement e:s){
             if(modname.equals(e.modname))
                 return e;
         }
-        throw new CodeException("Funzione non trovata");
+        throw new CodeException(Lingue.getIstance().format("m_cod_funnfon"));
     }
     public FElement requestDestructor(TypeName tn, boolean noAdd)throws CodeException{
         TypeElem te=Types.getIstance().find(tn, noAdd);
@@ -216,19 +218,20 @@ public class Funz {
                 fl.esiste(name, te, types);
                 return;
             }
-            String err="Errore: trovate "+e.size()+" funzioni per "+name+Meth.paramsName(te)+":\n";
+            String err=Lingue.getIstance().format("m_cod_foufunn", e.size(), 
+                    Meth.funzKey(name, te))+":\n";
             err = e.stream().map((ex) -> ex.modname+"\n").reduce(err, String::concat);
             throw new CodeException(err);
         }
     }
     public void esiste(String modname)throws CodeException{
         if(modname==null)
-            throw new CodeException("Funzione non trovata");
+            throw new CodeException(Lingue.getIstance().format("m_cod_funnfon"));
         for(FElement e:s){
             if(modname.equals(e.modname))
                 return;
         }
-        throw new CodeException("Funzione non trovata");
+        throw new CodeException(Lingue.getIstance().format("m_cod_funnfon"));
     }
     public void esisteDestructor(TypeName tn)throws CodeException{
         TypeElem te=Types.getIstance().find(tn, true);//E' necessario comunque per via dei template
