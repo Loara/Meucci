@@ -2,7 +2,7 @@
 
 Meucci is a new programming language, based on the concept of "module" as a container of methods and data that have the same role in the final program.
 
-This compiler works currently only on Linux systems with Intel64 (x86_64) or AMD64 processors with SSE2 extension.
+This compiler works currently only on **Linux** systems with **Intel64** (x86_64) or **AMD64** processors with SSE2 extension if you want to use floating point arithmetic.
 
 ## Errors in the manual
 
