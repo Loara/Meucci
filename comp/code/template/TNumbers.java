@@ -83,7 +83,7 @@ public class TNumbers {
     public boolean maggioreDi(String tname, long numb)throws CodeException{
         NumTemplate t=find(tname);
         if(t==null)
-            throw new CodeException("Impossibile trovare il parametro "+tname);
+            throw new CodeException(Lingue.getIstance().format("m_cod_pnftemp"));
         if(t.hasMin()){
             return t.getMin()>=numb;
         }
@@ -99,7 +99,7 @@ public class TNumbers {
     public boolean minoreDi(String tname, long numb)throws CodeException{
         NumTemplate t=find(tname);
         if(t==null)
-            throw new CodeException("Impossibile trovare il parametro "+tname);
+            throw new CodeException(Lingue.getIstance().format("m_cod_pnftemp"));
         if(t.hasMax()){
             return t.getMax()<=numb;
         }
@@ -108,7 +108,7 @@ public class TNumbers {
     public int dimension(String tname)throws CodeException{
         NumTemplate t=find(tname);
         if(t==null)
-            throw new CodeException("Impossibile trovare il parametro "+tname);
+            throw new CodeException(Lingue.getIstance().format("m_cod_pnftemp"));
         return 1 << t.dimExp();
     }
     public int expDim(String tname)throws CodeException{
@@ -118,44 +118,14 @@ public class TNumbers {
                 if(ret instanceof NumDich){
                     return ((NumDich)ret).expDim();
                 }
-                else throw new CodeException("Parametro erroneo");
+                else throw new CodeException(Lingue.getIstance().format("m_cod_pnftemp"));
             }
         }
         NumTemplate t=find(tname);
         if(t==null)
-            throw new CodeException("Impossibile trovare il parametro "+tname);
+            throw new CodeException(Lingue.getIstance().format("m_cod_pnftemp"));
         return t.dimExp();
     }
-    /*
-    Non più utilizzato
-    public boolean maggioreDi(ParamDich tname, ParamDich tnum){
-        NumTemplate t=find(tname);
-        NumTemplate tn=find(tnum);
-        if(t==null || tn==null)
-            return false;
-        if(t.getMin()!=null){
-            if(t.getMin() instanceof NumDich){
-                long val=((NumDich)t.getMin()).getNum();
-                return minoreDi(tnum.getName(), val);
-            }
-            if(maggioreDi((ParamDich)t.getMin(), tnum))
-                return true;
-        }
-        if(tn.getMax()!=null){
-            if(tn.getMax() instanceof NumDich){
-                long val=((NumDich)t.getMax()).getNum();
-                return maggioreDi(tname.getName(), val);//ci sono casi in cui questo controllo non è
-                //superfluo
-            }
-            if(maggioreDi(tname, (ParamDich)tn.getMax()))
-                return true;
-        }
-        return false;
-    }
-    public boolean minoreDi(ParamDich tname, ParamDich tnum){
-        return maggioreDi(tnum, tname);
-    }
-    */
     public void clearAll(){
         hs.clear();
         suds=null;

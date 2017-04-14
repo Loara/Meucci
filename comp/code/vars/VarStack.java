@@ -24,6 +24,7 @@ import comp.code.TypeElem;
 import comp.code.Types;
 import comp.code.XReg;
 import comp.general.Info;
+import comp.general.Lingue;
 import comp.general.Stack;
 import comp.parser.FunzParam;
 import comp.parser.TypeName;
@@ -172,7 +173,7 @@ public class VarStack extends Var{
      */
     public VarEle allocAlign(int i, boolean destructor)throws CodeException{
         if(i<=0)
-            throw new CodeException("Dimensione nulla");
+            throw new CodeException("");
         int initRSP=rrsp;
         rrsp += i;
         rrsp += Info.alignConv(rrsp);
@@ -202,7 +203,7 @@ public class VarStack extends Var{
             }
         }
         if(f==null)
-            throw new CodeException("Errore: "+ident+" non dichiarata.");
+            throw new CodeException(Lingue.getIstance().format("m_cod_uknvarb", ident));
         return f.type;
     }
     public VarEle get(String ident)throws CodeException{
@@ -215,7 +216,7 @@ public class VarStack extends Var{
             }
         }
         if(f==null)
-            throw new CodeException("Variabile sconosciuta :"+ident);
+            throw new CodeException(Lingue.getIstance().format("m_cod_uknvarb", ident));
         return f;
     }
     public static int pushDim(int adim){
@@ -266,32 +267,29 @@ public class VarStack extends Var{
     @Override
     public void getVar(Segmenti text, String ident, Register reg)throws CodeException{
         VarEle ve=get(ident);
+        /*
         if(ve.type.xmmReg())
             throw new CodeException("Valore reale");
+        Verificato automaticamente
+        */
         String u = varInfo(ve);
         getGVar(text, u, reg, ve.type.realDim());
     }
     @Override
     public void setVar(Segmenti text, String ident, Register reg)throws CodeException{
         VarEle ve=get(ident);
-        if(ve.type.xmmReg())
-            throw new CodeException("Valore reale");
         String u = varInfo(ve);
         setGVar(text, u, reg, ve.type.realDim());
     }
     @Override
     public void xgetVar(Segmenti text, String ident, XReg reg)throws CodeException{
         VarEle ve=get(ident);
-        if(!ve.type.xmmReg())
-            throw new CodeException("Varore reale");
         String u = varInfo(ve);
         getXVar(text, u, reg);
     }
     @Override
     public void xsetVar(Segmenti text, String ident, XReg reg)throws CodeException{
         VarEle ve=get(ident);
-        if(!ve.type.xmmReg())
-            throw new CodeException("Valore non reale");
         String u = varInfo(ve);
         setXVar(text, u, reg);
     }

@@ -22,7 +22,6 @@ import comp.code.Register;
 import comp.code.Segmenti;
 import comp.code.TypeElem;
 import comp.code.XReg;
-import comp.parser.expr.IdentEle;
 
 /**
  *
