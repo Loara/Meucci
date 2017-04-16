@@ -102,7 +102,7 @@ public class Info {
     public static void isForbitten(String name, int r)throws ParserException{
         boolean b=binarySearch(forbittenNames, name, 0, forbittenNames.length);
         if(b)
-            throw new ParserException("Il valore "+name+" è riservato", r);
+            throw new ParserException(Lingue.getIstance().format("m_par_forbnm", name), r);
     }
     /**
      * 

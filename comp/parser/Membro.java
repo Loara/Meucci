@@ -165,28 +165,28 @@ public class Membro implements Serializable{
         if(validate){
             if(packed instanceof NumDich){
                 if(((NumDich)packed).expDim()>2)
-                    throw new CodeException("Numero troppo grande");
+                    throw new CodeException(Lingue.getIstance().format("m_cod_bignume"));
                 return;
             }
             if(packed instanceof FunzDich){
                 if(((FunzDich)packed).dimension()>2)
-                    throw new CodeException("Numero troppo grande");
+                    throw new CodeException(Lingue.getIstance().format("m_cod_bignume"));
                 return;
             }
             if(packed instanceof ParamDich){
                 if(TNumbers.getIstance().expDim(((ParamDich)packed).getName())>2){
-                    throw new CodeException("Numero troppo grande");
+                    throw new CodeException(Lingue.getIstance().format("m_cod_bignume"));
                 }
             }
             else
-                throw new CodeException("Non è una costante");
+                throw new CodeException(Lingue.getIstance().format("m_cod_costnis"));
         }
         else{
             if(!(packed instanceof NumDich))
-                throw new CodeException("Non è una costante");
+                throw new CodeException(Lingue.getIstance().format("m_cod_costnis"));
             else{
                 if(((NumDich)packed).expDim()>2)
-                    throw new CodeException("Numero troppo grande");
+                    throw new CodeException(Lingue.getIstance().format("m_cod_bignume"));
             }
         }
     }

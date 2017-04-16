@@ -97,12 +97,12 @@ public class Costructor extends Callable{
         TypeElem te=Types.getIstance().find(classname, true);
         if(te.extend==null){
             if(costruct!=null){
-                throw new CodeException("Chiamata erronea di costruttore inesistente");
+                throw new CodeException(Lingue.getIstance().format("m_cod_supcaly"));
             }
         }
         else{
             if(costruct==null){
-                throw new CodeException("Non è specificata alcuna chiamata al costruttore del sovrattipo");
+                throw new CodeException(Lingue.getIstance().format("m_cod_supcaln"));
             }
             TypeElem[] parames;
             Espressione[] expre=costruct.getValues();
@@ -125,11 +125,11 @@ public class Costructor extends Callable{
         TypeElem te=Types.getIstance().find(classname, true);
         if(te.extend==null){
             if(costruct!=null)
-                throw new CodeException("Chiamata erronea di costruttore inesistente");
+                throw new CodeException(Lingue.getIstance().format("m_cod_supcaly"));
         }
         else{
             if(costruct==null){
-                throw new CodeException("Non è specificata alcuna chiamata al costruttore del sovrattipo");
+                throw new CodeException(Lingue.getIstance().format("m_cod_supcaln"));
             }
             TypeElem[] parames;
             Espressione[] expre=costruct.getValues();
