@@ -26,6 +26,7 @@ import comp.code.Types;
 import comp.code.template.Notifica;
 import comp.code.template.TNumbers;
 import comp.code.vars.Variabili;
+import comp.general.Lingue;
 import comp.general.Master;
 import comp.general.Stack;
 import comp.general.VScan;
@@ -87,7 +88,7 @@ public class Modulo {
             }
             
             if(!(t.get() instanceof PareToken && ((PareToken)t.get()).s=='{'))
-                throw new ParserException("Corpo mod non valido", t);
+                throw new ParserException(Lingue.getIstance().format("m_par_invmod", nome), t);
             t.nextEx();
             Stack<TypeDef> td=new Stack<>(TypeDef.class), Ttd=new Stack<>(TypeDef.class);
             Stack<Callable> cal=new Stack<>(Callable.class), Tcal=new Stack<>(Callable.class);
@@ -95,15 +96,15 @@ public class Modulo {
             MultiIstr mit=null;
             while(!(t.get() instanceof PareToken && ((PareToken)t.get()).s=='}')){
                 if(!(t.get() instanceof IdentToken))
-                    throw new ParserException("Impossibile analizzare elemento", t);
+                    throw new ParserException(Lingue.getIstance().format("m_par_errele"), t);
                 IdentToken id=(IdentToken)t.get();
                 if(id.getString().equals("static")){
                     if(mit!=null)
-                        throw new ParserException("Non ci possono essere due inizializzatori",t);
+                        throw new ParserException(Lingue.getIstance().format("m_par_stcerr"),t);
                     t.nextEx();
                     Istruzione i=IstrExe.toIstr(t);
                     if(!(i instanceof MultiIstr))
-                        throw new ParserException("Istruzione non valida", t);
+                        throw new ParserException(Lingue.getIstance().format("m_par_invist"), t);
                     mit=(MultiIstr)i;
                     continue;
                 }
@@ -152,7 +153,7 @@ public class Modulo {
             internal=di.toArray();
             Static=mit;
         }
-        else throw new ParserException("Modulo irregolare", t);
+        else throw new ParserException(Lingue.getIstance().format("m_par_errmod"), t);
     }
     private void writeInternal(PrintWriter pw)throws CodeException{
         String u;

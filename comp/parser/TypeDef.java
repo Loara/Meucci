@@ -25,8 +25,8 @@ import comp.code.Register;
 import comp.code.Segmenti;
 import comp.code.TypeElem;
 import comp.code.Types;
-import comp.code.template.Substitutor;
 import comp.general.Info;
+import comp.general.Lingue;
 import comp.general.Stack;
 import comp.general.VScan;
 import comp.parser.template.Template;
@@ -56,7 +56,7 @@ public class TypeDef implements Serializable{
     public TypeDef(VScan<Token> t, String modulo, Stack<Callable> costr,
             Stack<Callable> Tcostr)throws ParserException{
         if(!(t.get() instanceof IdentToken) || !((IdentToken)t.get()).getString().equals("type"))
-            throw new ParserException("Tipo invalido", t);
+            throw new ParserException(Lingue.getIstance().format("m_par_invtyp"), t);
         t.nextEx();
         if(t.get() instanceof IdentToken && ((IdentToken)t.get()).getString().equals("explicit")){
             explicit=true;
@@ -65,7 +65,7 @@ public class TypeDef implements Serializable{
         else
             explicit=false;
         if(!(t.get() instanceof IdentToken))
-            throw new ParserException("Nome errato", t);
+            throw new ParserException(Lingue.getIstance().format("m_par_invnam"), t);
         this.modulo=modulo;
         nome=((IdentToken)t.get()).getString();
         Info.isForbitten(nome, t.get().getRiga());
@@ -73,7 +73,7 @@ public class TypeDef implements Serializable{
         tt=Template.parseTemp(t);
         if(t.get() instanceof IdentToken && ((IdentToken)t.get()).getString().equals("extends")){
             if(!(t.get(1) instanceof IdentToken))
-                throw new ParserException("extends errato", t);
+                throw new ParserException(Lingue.getIstance().format("m_par_exterr"), t);
             t.nextEx();
             ext=new TypeName(t);
         }
@@ -91,15 +91,15 @@ public class TypeDef implements Serializable{
                     else
                         costr.push(ccc);
                     if(!(t.get() instanceof EolToken))
-                        throw new ParserException("Manca ;", t);
+                        throw new ParserException(Lingue.getIstance().format("m_par_dotcom"), t);
                     t.nextEx();
                 }
                 else if(t.get() instanceof IdentToken && ((IdentToken)t.get()).getString().equals("end")){
                     Destructor ccc=new Destructor(t, nome, tt, modulo);
                     if(hasDes)
-                        throw new ParserException("Ci può essere un solo distruttore", t);
+                        throw new ParserException(Lingue.getIstance().format("m_par_onedis"), t);
                     else if(explicit)
-                        throw new ParserException("I tipi explicit non hanno distruttore", t);
+                        throw new ParserException(Lingue.getIstance().format("m_par_expdis"), t);
                     else{
                         hasDes=true;
                         if(tt.length==0)//Per chiamate di sovradistruttori
@@ -108,7 +108,7 @@ public class TypeDef implements Serializable{
                             Tcostr.push(ccc);
                     }
                     if(!(t.get() instanceof EolToken))
-                        throw new ParserException("Manca ;", t);
+                        throw new ParserException(Lingue.getIstance().format("m_par_dotcom"), t);
                     t.nextEx();
                 }
                 else{
@@ -125,12 +125,12 @@ public class TypeDef implements Serializable{
                     if(!dich.explicit && !dich.ghost && !dich.override && !dich.shadow){
                         if(ftt.get==null){
                             if(dich.params.length>0)
-                                throw new ParserException("Impossibile generare funzione di accesso", t);
+                                throw new ParserException(Lingue.getIstance().format("m_par_ngenac"), t);
                             ftt.get=new DefFunzMem(dich.getType(), nome, tt, dich.getIdent(), modulo, true);
                         }
                         if(ftt.set==null){
                             if(dich.params.length>0)
-                                throw new ParserException("Impossibile generare funzione di accesso", t);
+                                throw new ParserException(Lingue.getIstance().format("m_par_ngenac"), t);
                             if(!dich.read)
                                 ftt.get=new DefFunzMem(dich.getType(), nome, tt, dich.getIdent(), modulo, false);
                         }
@@ -139,7 +139,7 @@ public class TypeDef implements Serializable{
                     if(!t.reqSpace(2))//punto e virgola e successivo
                         throw new FineArrayException();
                     if(!(t.get() instanceof EolToken))
-                        throw new ParserException("Manca ;", t);
+                        throw new ParserException(Lingue.getIstance().format("m_par_dotcom"), t);
                     t.nextEx();
                 }
             }
@@ -147,7 +147,7 @@ public class TypeDef implements Serializable{
             ffm=fmm.toArray();
             t.next();
         }
-        else throw new ParserException("Tipo "+nome+" non valido: senza parentesi {", t);
+        else throw new ParserException(Lingue.getIstance().format("m_par_grftyp"), t);
     }
     /**
      * Per ClassList

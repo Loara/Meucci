@@ -54,7 +54,7 @@ public class StaticExpr extends Espressione{
             exp[i].validate(var);
             esp1[i+1]=exp[i].returnType(var, true);
         }
-        Funz.getIstance().request(Meth.costructorName(type), esp1, false, type.templates());
+        Funz.getIstance().esisteCostructor(type, esp1);
     }
     @Override
     public void toCode(Segmenti seg, Variabili var, Environment env, Accumulator acc)

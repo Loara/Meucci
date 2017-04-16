@@ -17,7 +17,6 @@
 package comp.code.template;
 
 import comp.parser.template.TemplateEle;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 

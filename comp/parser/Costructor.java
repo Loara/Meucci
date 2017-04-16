@@ -26,6 +26,7 @@ import comp.code.Segmenti;
 import comp.code.TypeElem;
 import comp.code.Types;
 import comp.code.vars.Variabili;
+import comp.general.Lingue;
 import comp.general.VScan;
 import comp.parser.expr.FunzExpr;
 import comp.parser.expr.IdentArray;
@@ -52,10 +53,10 @@ public class Costructor extends Callable{
     public Costructor(VScan<Token> t, String type, Template[] params, String modulo)throws ParserException{
         super(t, modulo);
         if(temp.length!=0)
-            throw new ParserException("Un costruttore non può avere parametri template", super.nome);
+            throw new ParserException(Lingue.getIstance().format("m_par_temcos"), super.nome);
         temp=params;
         if(!(nome instanceof IdentToken) || !((IdentToken)nome).getString().equals("init"))
-            throw new ParserException("Non è un costruttore",t);
+            throw new ParserException(Lingue.getIstance().format("m_par_invcos"),t);
         nome=new IdentToken(Meth.costructorName(type), nome.getRiga());
         classname=new TypeName(type, Template.conversion(params));
         FunzParam[] dd=new FunzParam[dichs.length+1];
@@ -71,7 +72,7 @@ public class Costructor extends Callable{
                 costruct=(FunzExpr)ei;
                 istr.m[0]=null;//già contemplata
                 if(costruct.template().length!=0)
-                    throw new ParserException("Impossibile specificare template per super", t);
+                    throw new ParserException(Lingue.getIstance().format("m_par_temsup"), t);
             }
             else
                 costruct=null;
@@ -96,12 +97,12 @@ public class Costructor extends Callable{
         TypeElem te=Types.getIstance().find(classname, true);
         if(te.extend==null){
             if(costruct!=null){
-                throw new CodeException("Chiamata erronea di costruttore inesistente");
+                throw new CodeException(Lingue.getIstance().format("m_cod_supcaly"));
             }
         }
         else{
             if(costruct==null){
-                throw new CodeException("Non è specificata alcuna chiamata al costruttore del sovrattipo");
+                throw new CodeException(Lingue.getIstance().format("m_cod_supcaln"));
             }
             TypeElem[] parames;
             Espressione[] expre=costruct.getValues();
@@ -124,11 +125,11 @@ public class Costructor extends Callable{
         TypeElem te=Types.getIstance().find(classname, true);
         if(te.extend==null){
             if(costruct!=null)
-                throw new CodeException("Chiamata erronea di costruttore inesistente");
+                throw new CodeException(Lingue.getIstance().format("m_cod_supcaly"));
         }
         else{
             if(costruct==null){
-                throw new CodeException("Non è specificata alcuna chiamata al costruttore del sovrattipo");
+                throw new CodeException(Lingue.getIstance().format("m_cod_supcaln"));
             }
             TypeElem[] parames;
             Espressione[] expre=costruct.getValues();

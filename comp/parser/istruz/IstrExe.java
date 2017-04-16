@@ -16,6 +16,7 @@
  */
 package comp.parser.istruz;
 
+import comp.general.Lingue;
 import comp.general.Stack;
 import comp.general.VScan;
 import comp.parser.Dichiarazione;
@@ -66,14 +67,14 @@ public class IstrExe {
                     t.nextEx();
                     return new BreakIstr();
                 }
-                else throw new ParserException("Break errato", t); 
+                else throw new ParserException(Lingue.getIstance().format("m_par_generr", "break"), t); 
             }
             if(idt.getString().equals("continue")){
                 if(t.get() instanceof EolToken){
                     t.nextEx();
                     return new ContinueIstr();
                 }
-                else throw new ParserException("Continue errato", t);
+                else throw new ParserException(Lingue.getIstance().format("m_par_generr", "continue"), t);
             }
             if(idt.getString().equals("return")){
                 if(t.get() instanceof EolToken){
@@ -86,7 +87,7 @@ public class IstrExe {
                         t.next();
                         return new ReturnIstruz(e);
                     }
-                    else throw new ParserException("Manca ; di return", t);
+                    else throw new ParserException(Lingue.getIstance().format("m_par_dotcom"), t);
                 }
             }
             //if
@@ -114,7 +115,7 @@ public class IstrExe {
             }
             if(idt.getString().equals("for")){
                     if(!(t.get() instanceof PareToken && ((PareToken)t.get()).s=='('))
-                        throw new ParserException("For errato", t);
+                        throw new ParserException(Lingue.getIstance().format("m_par_generr", "for"), t);
                     if(!t.next()){
                         throw new FineArrayException();
                     }
@@ -126,7 +127,7 @@ public class IstrExe {
                     else{
                         i=toIstr(t, true);
                         if(!(i instanceof ClassisIstr))
-                            throw new ParserException("Istruzione non adatta al for", t);
+                            throw new ParserException(Lingue.getIstance().format("m_par_fisnad", "for"), t);
                     }
                     Espressione e;
                     if(t.get() instanceof EolToken){
@@ -137,7 +138,7 @@ public class IstrExe {
                         e=toExpr(t);
                     }
                     if(!(t.get() instanceof EolToken)){
-                        throw new ParserException("Manca ; nel for", t);
+                        throw new ParserException(Lingue.getIstance().format("m_par_dotcom"), t);
                     }
                     t.nextEx();
                     if(t.get() instanceof PareToken && ((PareToken)t.get()).s==')')
@@ -145,11 +146,11 @@ public class IstrExe {
                     else{
                         f=toIstr(t, false);
                         if(!(f instanceof ClassisIstr))
-                            throw new ParserException("Valore non idoneo per for", t);
+                            throw new ParserException(Lingue.getIstance().format("m_par_fisnad", "for"), t);
                         t.previous();
                     }
                     if(!(t.get() instanceof PareToken && ((PareToken)t.get()).s==')')){
-                        throw new ParserException("Manca ) nel for", t);
+                        throw new ParserException(Lingue.getIstance().format("m_par_parncl"), t);
                     }
                     t.nextEx();
                     Istruzione doi=toIstr(t);
@@ -164,7 +165,7 @@ public class IstrExe {
             if(idt.getString().equals("try")){
                 Istruzione u=toIstr(t, true);
                 if(!(u instanceof MultiIstr))
-                    throw new ParserException("Non è un blocco try", t);
+                    throw new ParserException(Lingue.getIstance().format("m_par_fisnad", "try"), t);
                 MultiIstr mi=(MultiIstr)u;
                 Stack<String> en=new Stack<>(String.class);
                 Stack<MultiIstr> mu=new Stack<>(MultiIstr.class);
@@ -172,19 +173,19 @@ public class IstrExe {
                         ((IdentToken)t.get()).getString().equals("catch")){
                     t.nextEx();
                     if(!(t.get() instanceof PareToken && ((PareToken)t.get()).s=='('))
-                        throw new ParserException("Catch errato", t);
+                        throw new ParserException(Lingue.getIstance().format("m_par_generr", "catch"), t);
                     t.nextEx();
                     if(t.get() instanceof IdentToken)
                         en.push(((IdentToken)t.get()).getString());
                     else
-                        throw new ParserException("Valore errore non valido", t);
+                        throw new ParserException(Lingue.getIstance().format("m_par_ejxnvl"), t);
                     t.nextEx();
                     if(!(t.get() instanceof PareToken && ((PareToken)t.get()).s==')'))
-                        throw new ParserException("Catch errato", t);
+                        throw new ParserException(Lingue.getIstance().format("m_par_generr", "catch"), t);
                     t.nextEx();
                     u=IstrExe.toIstr(t, true);
                     if(!(u instanceof MultiIstr))
-                       throw new ParserException("Non è un blocco catch", t);
+                       throw new ParserException(Lingue.getIstance().format("m_par_fisnad", "catch"), t);
                     mu.push((MultiIstr)u);
                 }
                 MultiIstr def;
@@ -193,7 +194,7 @@ public class IstrExe {
                     t.nextEx();
                     u=IstrExe.toIstr(t, true);
                     if(!(u instanceof MultiIstr))
-                       throw new ParserException("Non è un blocco default", t);
+                       throw new ParserException(Lingue.getIstance().format("m_par_fisnad", "default"), t);
                     def=(MultiIstr)u;
                 }
                 else
@@ -206,14 +207,14 @@ public class IstrExe {
                 if(t.get() instanceof IdentToken)
                     ti=new ThrowIstr(((IdentToken)t.get()).getString());
                 else
-                    throw new ParserException("Valore errore non valido", idt.getRiga());
+                    throw new ParserException(Lingue.getIstance().format("m_par_ejxnvl"), idt.getRiga());
                 t.nextEx();
                 if(checkEol){
                     if(t.get() instanceof EolToken){
                         t.nextEx();
                         return ti;
                     }
-                    else throw new ParserException("Manca ;", t);
+                    else throw new ParserException(Lingue.getIstance().format("m_par_dotcom"), t);
                 }
                 else return ti;
             }
@@ -227,7 +228,8 @@ public class IstrExe {
                 if(t.get() instanceof UgualToken){
                     UgualToken ug=(UgualToken)t.get();
                     if(ug.getSymb()!=null)
-                        throw new ParserException("Variabile "+d.getIdent()+" non inizializzata", t);
+                        throw new ParserException(Lingue.getIstance().
+                                format("m_par_varnin", d.getIdent()), t);
                     if(!t.next()){
                         throw new FineArrayException();
                     }
@@ -238,7 +240,7 @@ public class IstrExe {
                             return new ClassisIstr(d, ug, null, e);
                         }
                         else{
-                            throw new ParserException("Dichiarazione errata, manca ;", t);
+                            throw new ParserException(Lingue.getIstance().format("m_par_dotcom"), t);
                         }
                     }
                     else return new ClassisIstr(d, ug, null, e);
@@ -248,7 +250,7 @@ public class IstrExe {
                     return new ClassisIstr(d, null, null, null);
                 }
                 else{
-                    throw new ParserException("Dichiarazione errata", t);
+                    throw new ParserException(Lingue.getIstance().format("m_par_invdich"), t);
                 }
             }
             else{
@@ -259,11 +261,9 @@ public class IstrExe {
         if(t.get() instanceof SymbToken && ((SymbToken)t.get()).getString().equals(":destroy")){
             t.nextEx();
             Espressione exp=ExprGen.toExpr(t);
-            if(!(exp instanceof IdentArray))
-                throw new ParserException("Parametro non adatto al distruttore", t);
             if(checkEol){
                 if(!(t.get() instanceof EolToken))
-                    throw new ParserException("Manca ;", t);
+                    throw new ParserException(Lingue.getIstance().format("m_par_dotcom"), t);
                 else
                     t.nextEx();
             }
@@ -293,13 +293,13 @@ public class IstrExe {
                     return new ClassisIstr(null, ut, (IdentArray)e, ee);
                 }
             }
-            throw new ParserException("Assegnazione non valida", t);
+            throw new ParserException(Lingue.getIstance().format("m_par_invass"), t);
         }else if(!checkEol || t.get() instanceof EolToken){
             t.next();
             return new ClassisIstr(null, null, null, e);
         }
         else{
-            throw new ParserException("Manca ; di espressione", t);
+            throw new ParserException(Lingue.getIstance().format("m_par_dotcom"), t);
         }
     }
 }

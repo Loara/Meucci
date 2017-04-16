@@ -18,6 +18,7 @@ package comp.code;
 
 import comp.code.vars.Variabili;
 import comp.general.Info;
+import comp.general.Lingue;
 import comp.parser.expr.IdentEle;
 import comp.parser.Membro;
 import comp.parser.TypeName;
@@ -84,7 +85,7 @@ public class VTable {
                 return j;
             }
             else if(f!=-1)
-                throw new CodeException("Parametri di accesso scorretti");
+                throw new CodeException(Lingue.getIstance().format("m_cod_errpacc"));
         }
         return -1;
     }
@@ -108,15 +109,12 @@ public class VTable {
         }
         for(int i=0; i<membs.length; i++){
             int rey=membs[i].compatible(val, var, false);
-            if(rey==0){
-                if(membs[i].read)
-                    throw new CodeException("Impossibile trovare funzione di "
-                            + "scrittura di "+membs[i].getIdent());
+            if(rey==0){//E' garantita la scrittura
                 j+=(allineamenti[i]+1)*Info.pointerdim;
                 return j;
             }
             else
-                throw new CodeException("Parametri di "+val.getIdent()+" non compatibili: "+rey);
+                throw new CodeException(Lingue.getIstance().format("m_cod_errpacc"));
         }
         return -1;
     }
@@ -124,7 +122,6 @@ public class VTable {
      * Come i precedenti, solo non controlla la compatibilità
      * @param ident
      * @param get
-     * @param modulo
      * @return
      * @throws CodeException 
      */

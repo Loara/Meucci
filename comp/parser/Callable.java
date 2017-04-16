@@ -27,6 +27,7 @@ import comp.code.TypeElem;
 import comp.code.Types;
 import comp.code.vars.Variabili;
 import comp.general.Info;
+import comp.general.Lingue;
 import comp.general.Stack;
 import comp.general.VScan;
 import comp.parser.istruz.IstrExe;
@@ -73,17 +74,11 @@ public abstract class Callable implements Serializable{
      * @return 
      */
     public static boolean canBeCalled(VScan<Token> t){
-        int sc=0;
         if(t.get() instanceof IdentToken){
             if(((IdentToken)t.get()).getString().equals("init"))
                 return t.get(1) instanceof PareToken;
-            if(((IdentToken)t.get()).getString().equals("shadow"))
-                sc=1;
-            else
-                sc=0;
         }
-        //+2 per nome e ritorno
-        return t.get(sc+2) instanceof PareToken;
+        return t.get(2) instanceof PareToken;
     }
     public Callable(VScan<Token> t, String modulo)throws ParserException{
         //Tutte le dichiarazioni sono effettuate dall'utente. Possibile utilizzare
@@ -100,7 +95,7 @@ public abstract class Callable implements Serializable{
         }
         else{
             if(!(t.get() instanceof IdentToken))
-                throw new ParserException("Ritorno funzione invalido", t);
+                throw new ParserException(Lingue.getIstance().format("m_par_invret"), t);
             else
                 Info.isForbitten(((IdentToken)t.get()).getString(), t.get().getRiga());
             retType=new TypeName(t);
@@ -109,7 +104,7 @@ public abstract class Callable implements Serializable{
         }
         temp=Template.parseTemp(t);
         if(!(t.get() instanceof PareToken)||((PareToken)t.get()).s!='(')
-            throw new ParserException("Funzione invalida", t);
+            throw new ParserException(Lingue.getIstance().format("m_par_invfun"), t);
         t.next();
         if(t.get() instanceof PareToken && ((PareToken)t.get()).s==')'){
             dichs=new FunzParam[0];
@@ -125,7 +120,7 @@ public abstract class Callable implements Serializable{
                 }
                 else if(t.get() instanceof PareToken && ((PareToken)t.get()).s==')')
                     break;
-                else throw new ParserException("Dichiarazioni errate", t);
+                else throw new ParserException(Lingue.getIstance().format("m_par_invdic"), t);
             }
             dichs=es.toArray();
         }
@@ -144,7 +139,7 @@ public abstract class Callable implements Serializable{
         Istruzione i=IstrExe.toIstr(t);
         if(i instanceof MultiIstr)
             istr=(MultiIstr)i;
-        else throw new ParserException("Istruzione non valida", t);
+        else throw new ParserException(Lingue.getIstance().format("m_par_invist"), t);
         mod=modulo;
     }
     public TypeName[] types(){

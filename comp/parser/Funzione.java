@@ -16,6 +16,7 @@
  */
 package comp.parser;
 
+import comp.general.Lingue;
 import comp.general.VScan;
 import comp.scanner.IdentToken;
 import comp.scanner.Token;
@@ -32,6 +33,6 @@ public class Funzione extends Callable{
     public Funzione(VScan<Token> t, String modulo)throws ParserException{
         super(t, modulo);
         if(!(nome instanceof IdentToken))
-            throw new ParserException("Nome funzione invalido", nome);
+            throw new ParserException(Lingue.getIstance().format("m_par_invnam"), nome);
     }
 }

@@ -21,6 +21,7 @@ import comp.code.CodeException;
 import comp.code.template.TNumbers;
 import comp.code.vars.Variabili;
 import comp.general.Info;
+import comp.general.Lingue;
 import comp.general.Stack;
 import comp.general.VScan;
 import comp.parser.template.FunzDich;
@@ -79,7 +80,7 @@ public class Membro implements Serializable{
             Info.isForbitten(dich.getIdent(), t.get().getRiga());
             if(t.get() instanceof PareToken && ((PareToken)t.get()).s=='['){
                 if(explicit)
-                    throw new ParserException("Parametri accesso a membro explicit", t);
+                    throw new ParserException(Lingue.getIstance().format("m_par_expacc", dich.lvalue), t);
                 t.nextEx();
                 Stack<TypeName> ss=new Stack<>(TypeName.class);
                 if(t.get() instanceof IdentToken){
@@ -87,7 +88,7 @@ public class Membro implements Serializable{
                     while(!(t.get() instanceof PareToken && ((PareToken)t.get())
                             .s==']')){
                         if(!(t.get() instanceof VirgToken)){
-                            throw new ParserException("Manca ,",t);
+                            throw new ParserException(Lingue.getIstance().format("m_par_comma"),t);
                         }
                         t.nextEx();
                         ss.push(new TypeName(t));
@@ -103,7 +104,7 @@ public class Membro implements Serializable{
                     t.nextEx();
                     packed=Template.detect(t);
                     if(!explicit)
-                        throw new ParserException("Membro non explicit", t);
+                        throw new ParserException(Lingue.getIstance().format("m_par_notexp"), t);
                     params=new TypeName[]{new TypeName("uint")};
                 }
                 else{
@@ -114,7 +115,7 @@ public class Membro implements Serializable{
             //il ; deve essere controllato altrove
         }
         else{
-            throw new ParserException("Membro erroneo", t);
+            throw new ParserException(Lingue.getIstance().format("m_par_invmem"), t);
         }
         //non è necessario il controllo sintattico
     }
@@ -164,28 +165,28 @@ public class Membro implements Serializable{
         if(validate){
             if(packed instanceof NumDich){
                 if(((NumDich)packed).expDim()>2)
-                    throw new CodeException("Numero troppo grande");
+                    throw new CodeException(Lingue.getIstance().format("m_cod_bignume"));
                 return;
             }
             if(packed instanceof FunzDich){
                 if(((FunzDich)packed).dimension()>2)
-                    throw new CodeException("Numero troppo grande");
+                    throw new CodeException(Lingue.getIstance().format("m_cod_bignume"));
                 return;
             }
             if(packed instanceof ParamDich){
                 if(TNumbers.getIstance().expDim(((ParamDich)packed).getName())>2){
-                    throw new CodeException("Numero troppo grande");
+                    throw new CodeException(Lingue.getIstance().format("m_cod_bignume"));
                 }
             }
             else
-                throw new CodeException("Non è una costante");
+                throw new CodeException(Lingue.getIstance().format("m_cod_costnis"));
         }
         else{
             if(!(packed instanceof NumDich))
-                throw new CodeException("Non è una costante");
+                throw new CodeException(Lingue.getIstance().format("m_cod_costnis"));
             else{
                 if(((NumDich)packed).expDim()>2)
-                    throw new CodeException("Numero troppo grande");
+                    throw new CodeException(Lingue.getIstance().format("m_cod_bignume"));
             }
         }
     }

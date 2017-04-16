@@ -22,6 +22,7 @@ import comp.code.Environment;
 import comp.code.Segmenti;
 import comp.code.TypeElem;
 import comp.code.vars.VarStack.VarEle;
+import comp.general.Lingue;
 import comp.parser.Dichiarazione;
 import comp.parser.FunzParam;
 import comp.parser.expr.IdentArray;
@@ -69,7 +70,7 @@ public class Variabili {
             if(v.isIn(name))
                 return;
         }
-        throw new CodeException("Impossibile trovare variabile "+name);
+        throw new CodeException(Lingue.getIstance().format("m_cod_uknvarb", name));
     }
     /**
      * Se true cerca prima in GhostVar
@@ -84,7 +85,7 @@ public class Variabili {
             if(v.isIn(ident))
                 return v.type(ident);
         }
-        throw new CodeException("Variabile "+ident+" non trovata");
+        throw new CodeException(Lingue.getIstance().format("m_cod_uknvarb", ident));
     }
     /**
      * Ritorna variabile nell'accumulatore
@@ -103,7 +104,7 @@ public class Variabili {
                 return;
             }
         }
-        throw new CodeException("Variabile "+ident+" non trovata");
+        throw new CodeException(Lingue.getIstance().format("m_cod_uknvarb", ident));
     }
     
     public void getVar(IdentArray i, Segmenti text,
@@ -135,7 +136,7 @@ public class Variabili {
                 setVar(text, acc, id.val());
                 return;
             }
-            else throw new CodeException("Assegnamento ad una non-variabile");
+            else throw new CodeException(Lingue.getIstance().format("m_cod_invassg"));
         }
         int rd=acc.saveAccumulator();//valore da inserire
         IdentEle[] kk=i.getElems();
@@ -168,7 +169,7 @@ public class Variabili {
                 setVar(text, acc, id.val());
                 return;
             }
-            else throw new CodeException("Assegnamento ad una non-variabile");
+            else throw new CodeException(Lingue.getIstance().format("m_cod_invassg"));
         }
         IdentEle[] kk=i.getElems();
         boolean[] bb=i.getDDots();
@@ -181,35 +182,6 @@ public class Variabili {
         ty.setXValueElement(text, this, env, kk[l-1], rd, acc, bb[l-1]);
         //acc.xrestoreAccumulator(rd);
     }
-    /*
-    Vedere se se ne può fare a meno
-    public void setVar(IdentArray i, Segmenti text, Environment env, 
-            Accumulator acc, long ji, int dimens)throws CodeException{
-        int l=i.getElems().length;
-        if(l==0){
-            if(i.getEsp() instanceof IdentExpr){
-                IdentExpr id=(IdentExpr)i.getEsp();
-                setVar(text, id.val(), ji, dimens);
-                return;
-            }
-            else throw new CodeException("Assegnamento ad una non-variabile");
-        }
-        int rd=acc.prenota();//valore da inserire
-        text.addIstruzione("mov",acc.getReg(rd).getReg(dimens),String.valueOf(ji));
-        IdentEle[] vt=i.getElems();
-        boolean[] bb=i.getDDots();
-        i.getEsp().toCode(text, this, env, acc);//funge da getvar
-        TypeElem ty=i.getEsp().returnType(this, false);
-        for(int j=0; j<l-1; j++){
-            ty=ty.getTypeElement(text, this, env, vt[j], acc, bb[j]);
-        }
-        ty.canWrite(vt[l-1].getIdent(), false);//sempre positivo
-        Register reg=acc.getReg(rd);
-        acc.libera(rd);//viene rinforzato in setValue, usato per evitare inutili push e pop
-        ty.setValueElement(text, this, env, vt[l-1], reg, acc, bb[l-1]);
-        //acc.libera(rd);
-    }
-    */
     /**
      * mette ax nella variabile
      * @param text
@@ -227,42 +199,12 @@ public class Variabili {
                 return;
             }
         }
-        throw new CodeException("Variabile "+ident+" non trovata");
+        throw new CodeException(Lingue.getIstance().format("m_cod_uknvarb", ident));
     }
-    /*
-    public void setVar(Segmenti text, String ident, long reg, int dim)throws CodeException{
-        for(Var v:varSt){
-            if(v.isIn(ident)){
-                v.setVar(text, ident, reg, dim);
-                return;
-            }
-        }
-        throw new CodeException("Variabile "+ident+" non trovata");
-    }
-    
-    public void clearVar(Segmenti text, String name, int dimens)throws CodeException{
-        setVar(text, name, 0, dimens);//usato solo per le dichiarazioni
-    }
-    */
     public VarStack getVarStack(){
         return vars;
     }
     public GhostVar getGhostVar(){
         return gvar;
     }
-    /*
-     * Ritorna il tipo di un array di IdentEle. Utile in varie occasioni. (Non dovrebbe essere più utilizzato
-     * @param id
-     * @param v
-     * @return 
-     * @throws comp.code.CodeException 
-     
-    public TypeElem returnTypeAdvanced(IdentEle[] id, boolean v)throws CodeException{
-        TypeElem ci=getType(id[0].getIdent());
-        for(int i=1;i<id.length;i++){
-            ci=Types.getIstance().find(ci.information(id[i].getIdent(), v).getType(), v);
-        }
-        return ci;
-    }
-*/
 }

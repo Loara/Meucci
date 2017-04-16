@@ -19,6 +19,7 @@ package comp.code;
 import comp.code.template.ClassList;
 import comp.code.template.Substitutor;
 import comp.general.Info;
+import comp.general.Lingue;
 import comp.parser.Membro;
 import comp.parser.TypeDef;
 import comp.parser.TypeName;
@@ -107,11 +108,12 @@ public class Types {
             if(t.equals(i.name))
                 return i;
         }
+        //Serve per i tipi template all'interno dei validate
         for(TypeElem i:Telems){
             if(t.equals(i.name))
                 return i;
         }
-        throw new CodeException("Tipo sconosciuto: "+t);
+        throw new CodeException(Lingue.getIstance().format("m_cod_typnfnd", t));
     }
     public TypeName translate(TypeName tn)throws CodeException{
         if(suds != null)
@@ -136,14 +138,41 @@ public class Types {
                 return i;
         }
         if(t.templates().length==0){
-            throw new CodeException("Impossibile trovare il tipo "+t.getName());
+        throw new CodeException(Lingue.getIstance().format("m_cod_typnfnd", t.getName()));
         }
         TypeElem tt=cl.generate(t.getName(), t.templates(), validate);
-        if(tt==null)
-            throw new CodeException("Impossibile trovate classe template di nome "
-            +t.getName());
         Telems.add(tt);
         return tt;
+    }
+    /*
+    Controlla solo l'esistenza del tipo, non lo definisce. Utile nei validate
+    per ridurre i tempi
+    */
+    public void esiste(String t)throws CodeException{
+        for(TypeElem i:elems){
+            if(t.equals(i.name))
+                return;
+        }
+        for(TypeElem i:Telems){
+            if(t.equals(i.name))
+                return;
+        }
+        throw new CodeException(Lingue.getIstance().format("m_cod_typnfnd", t));
+    }
+    public void esiste(TypeName t)throws CodeException{
+        if(suds!=null){
+            t=suds.recursiveGet(t);
+        }
+        if(t.templates().length==0){
+            esiste(t.getName());
+            return;
+        }
+        String mname=Meth.className(t);
+        for(TypeElem i:Telems){
+            if(i.name.equals(mname))
+                return;
+        }
+        cl.esiste(t.getName(), t.templates());
     }
     public ClassList getClassList(){
         return cl;

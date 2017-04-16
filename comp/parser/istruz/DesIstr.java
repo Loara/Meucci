@@ -44,7 +44,7 @@ public class DesIstr extends Istruzione{
         TypeElem te=exp.returnType(var, true);
         if(!te.reference)
             throw new CodeException("Tipo non refernce");
-        Funz.getIstance().request("free", new TypeElem[]{Types.getIstance().find("pt")}, false);
+        Funz.getIstance().esiste("free", new TypeElem[]{Types.getIstance().find("pt")});
     }
     @Override
     public void toCode(Segmenti seg, Variabili var, Environment env, Accumulator acc)throws CodeException{

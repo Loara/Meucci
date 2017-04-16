@@ -36,7 +36,7 @@ import comp.parser.TypeName;
  * @author loara
  */
 public class StackExpr extends Espressione{
-    private TypeName type;
+    private final TypeName type;
     private final Espressione[] exp;
     public StackExpr(TypeName t, Espressione[] data){
         type=t;
@@ -55,7 +55,7 @@ public class StackExpr extends Espressione{
             exp[i].validate(var);
             esp1[i+1]=exp[i].returnType(var, true);
         }
-        Funz.getIstance().request(Meth.costructorName(type), esp1, false, type.templates());
+        Funz.getIstance().esisteCostructor(type, esp1);
     }
     @Override
     public void toCode(Segmenti seg, Variabili var, Environment env, Accumulator acc)

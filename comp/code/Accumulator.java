@@ -18,6 +18,7 @@ package comp.code;
 import static comp.code.Register.*;
 import static comp.code.XReg.*;
 import comp.general.Info;
+import comp.general.Lingue;
 import comp.general.Stack;
 
 /**
@@ -94,18 +95,18 @@ public class Accumulator {
                 return j;
             }
         }
-        throw new CodeException("Registri finiti");
+        throw new CodeException(Lingue.getIstance().format("m_cod_endregs"));
     }
     public void libera(int i)throws CodeException{
         if(i<0)
-            throw new CodeException("Descrittore non valido");
+            throw new CodeException(Lingue.getIstance().format("m_cod_invdesc"));
         for(int j=0; j<regs.length; j++){
             if(occup[j]==i){
                 occup[j]=-1;
                 return;
             }
         }
-        throw new CodeException("Descrittore non trovato: "+i);
+        throw new CodeException(Lingue.getIstance().format("m_cod_invdesc"));
     }
     public int xprenota()throws CodeException{
         int j = Xgeneratore();
@@ -117,20 +118,20 @@ public class Accumulator {
                 return j;
             }
         }
-        throw new CodeException("Registri finiti");
+        throw new CodeException(Lingue.getIstance().format("m_cod_endregs"));
     }
     public void xlibera(int i)throws CodeException{
         if(i==0)
             return;
         if(i<0)
-            throw new CodeException("Descrittore non valido");
+            throw new CodeException(Lingue.getIstance().format("m_cod_invdesc"));
         for(int j=0; j<xregs.length; j++){
             if(xoc[j]==i){
                 xoc[j]=-1;
                 return;
             }
         }
-        throw new CodeException("Descrittore non trovato");
+        throw new CodeException(Lingue.getIstance().format("m_cod_invdesc"));
     }
     /**
      * Se i registri rr sono prenotato, li sposta in altri registri
@@ -163,7 +164,7 @@ public class Accumulator {
                 }
             }
             if(ou==-1)
-                throw new CodeException("Registri pieni");
+                throw new CodeException(Lingue.getIstance().format("m_cod_endregs"));
             occup[ou]=occup[in];
             occup[in]=-1;
             text.addIstruzione("mov", regs[ou].getReg(), r.getReg());
@@ -179,7 +180,7 @@ public class Accumulator {
                 return ret;
             }
         }
-        throw new CodeException("Registri finiti");
+        throw new CodeException(Lingue.getIstance().format("m_cod_endregs"));
     }
     public int saveAccumulator(Register r)throws CodeException{
         int ret=generatore();
@@ -187,12 +188,12 @@ public class Accumulator {
         for(int i=0; i<regs.length; i++){
             if(regs[i]==r){
                 if(occup[i]!=-1)
-                    throw new CodeException("Registro non vuoto");
+                    throw new CodeException(Lingue.getIstance().format("m_cod_invdesc"));
                 acc=i;
                 return ret;
             }
         }
-        throw new CodeException("Registri finiti");
+        throw new CodeException(Lingue.getIstance().format("m_cod_endregs"));
     }
     public void restoreAccumulator(int fd)throws CodeException{
         for(int i=0; i<occup.length; i++){
@@ -202,7 +203,7 @@ public class Accumulator {
                 return;
             }
         }
-        throw new CodeException("Registro non trovato");
+        throw new CodeException(Lingue.getIstance().format("m_cod_invdesc"));
     }
     /**
     * come il precedente, ma fd punta al registro prima utilizzato come accumulatore.
@@ -219,7 +220,7 @@ public class Accumulator {
                 return;
             }
         }
-        throw new CodeException("Registro non trovato");
+        throw new CodeException(Lingue.getIstance().format("m_cod_invdesc"));
     }
     /*
     esempio di ciclo save - restoreB
@@ -257,7 +258,7 @@ public class Accumulator {
                 return ret;
             }
         }
-        throw new CodeException("Registri finiti");
+        throw new CodeException(Lingue.getIstance().format("m_cod_endregs"));
     }
     public void xrestoreAccumulator(int fd)throws CodeException{
         for(int i=0; i<xoc.length; i++){
@@ -267,7 +268,7 @@ public class Accumulator {
                 return;
             }
         }
-        throw new CodeException("Registro non trovato");
+        throw new CodeException(Lingue.getIstance().format("m_cod_invdesc"));
     }
     public void xrestoreAccumulatorB(int fd)throws CodeException{
         for(int i=0; i<xoc.length; i++){
@@ -278,28 +279,28 @@ public class Accumulator {
                 return;
             }
         }
-        throw new CodeException("Registro non trovato");
+        throw new CodeException(Lingue.getIstance().format("m_cod_invdesc"));
     }
     public Register getReg(int rd)throws CodeException{
         if(rd<0)
-            throw new CodeException("Descrittore non valido: "+rd);
+            throw new CodeException(Lingue.getIstance().format("m_cod_invdesc"));
         for(int i=0; i<occup.length; i++){
             if(occup[i]==rd)
                 return regs[i];
         }
-        throw new CodeException("Descrittore non valido: "+rd);
+        throw new CodeException(Lingue.getIstance().format("m_cod_invdesc"));
     }
     public Register getAccReg(){
         return regs[acc];
     }
     public XReg getXReg(int rd)throws CodeException{
         if(rd<0)
-            throw new CodeException("Descrittore non valido");
+            throw new CodeException(Lingue.getIstance().format("m_cod_invdesc"));
         for(int i=0; i<xoc.length; i++){
             if(xoc[i]==rd)
                 return xregs[i];
         }
-        throw new CodeException("Descrittore non valido");
+        throw new CodeException(Lingue.getIstance().format("m_cod_invdesc"));
     }
     public XReg getXAccReg(){
         return xregs[xacc];
@@ -395,7 +396,7 @@ public class Accumulator {
                 if(xj==xacc)
                     xj++;
                 if(xj>=xregs.length)
-                    throw new CodeException("Errore interno: registri xmm finiti");
+                    throw new CodeException(Lingue.getIstance().format("m_cod_endregs"));
                 xoc[xj]=p.val;
                 text.addIstruzione("movsd",xregs[xj].getReg(),"qword[rsp]");
                 text.addIstruzione("add","rsp","16");
@@ -405,7 +406,7 @@ public class Accumulator {
                 while(regs[j]==Register.DX || j==acc)
                     j++;
                 if(j>=regs.length)
-                    throw new CodeException("Errore interno: registri gp finiti");
+                    throw new CodeException(Lingue.getIstance().format("m_cod_endregs"));
                 occup[j]=p.val;
                 text.addIstruzione("pop",regs[j].getReg(), null);
                 j++;

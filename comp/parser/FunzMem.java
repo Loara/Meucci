@@ -17,11 +17,11 @@
 package comp.parser;
 
 import comp.code.Meth;
+import comp.general.Lingue;
 import comp.general.VScan;
 import comp.parser.template.Template;
 import comp.scanner.IdentToken;
 import comp.scanner.Token;
-import java.util.Arrays;
 
 /**
  * Formato:
@@ -51,7 +51,7 @@ public class FunzMem extends Callable{
         noglobal=true;
         int riga=super.nome.getRiga();
         if(super.temp.length!=0)
-            throw new ParserException("Le funzioni di accesso non hanno template", riga);
+            throw new ParserException(Lingue.getIstance().format("m_par_temacc"), riga);
         super.temp=ctemplate;
         if(nome instanceof IdentToken){
             String n=((IdentToken)nome).getString();
@@ -63,11 +63,11 @@ public class FunzMem extends Callable{
                     getAcc=false;
                     break;
                 default:
-                    throw new ParserException("Accesso non specificato a: "+n, riga);
+                    throw new ParserException(Lingue.getIstance().format("m_par_unkacc", n), riga);
             }
             varName=name;
         }
-        else throw new ParserException("Nome non valido",riga);
+        else throw new ParserException(Lingue.getIstance().format("m_par_invnam"),riga);
         classname=ctype;
         FunzParam[] d2=new FunzParam[dichs.length+1];
         d2[0]=new FunzParam(new TypeName(ctype, Template.conversion(temp)), "this");
@@ -76,17 +76,20 @@ public class FunzMem extends Callable{
         super.nome=new IdentToken(Meth.accessFunzName(name, ctype, getAcc), riga);
         if(getAcc){
             if(!retType.equals(type))
-                throw new ParserException("Errore: "+nome+" non ritorna "+type.getName(), riga);
+                throw new ParserException(Lingue.getIstance().
+                        format("m_par_nonret", nome, type.getName()), riga);
         }
         else{
             if(!dichs[1].dich.type.equals(type))
-                throw new ParserException("Non trovato "+type.getName()+" in "+nome+
-                        " alla posizione 2",t);
+                throw new ParserException(Lingue.getIstance().
+                        format("m_par_notfnd", type.getName(), nome),t);
             if(!retType.equals(new TypeName("void")))
-                throw new ParserException("Errore: "+nome+"non ritorna void", riga);
+                throw new ParserException(Lingue.getIstance().format("m_par_nonret", nome, "void")
+                        , riga);
         }
     }
-    protected FunzMem(TypeName type, String ctype, Template[] ctemplates, String name, String modulo, boolean acc){
+    protected FunzMem(TypeName type, String ctype, Template[] ctemplates, String name, 
+            String modulo, boolean acc){
         super(modulo);
         nome=new IdentToken(Meth.accessFunzName(name, ctype, acc), -1);
         istr=null;
@@ -124,16 +127,4 @@ public class FunzMem extends Callable{
     public String className(){
         return classname;
     }
-    /**
-     * Valori dichiarati
-     * Da rivedere
-     * @return 
-    public FunzParam[] dichValues(){
-        if(!getAcc){
-            return Arrays.copyOfRange(decValues, 1, decValues.length);//elimina il set??
-        }
-        else
-            return decValues;
-    }
-    * */
 }

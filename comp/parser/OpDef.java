@@ -16,6 +16,7 @@
  */
 package comp.parser;
 
+import comp.general.Lingue;
 import comp.general.VScan;
 import comp.scanner.SymbToken;
 import comp.scanner.Token;
@@ -28,14 +29,13 @@ public class OpDef extends Callable{
     public OpDef(VScan<Token> t, String modulo)throws ParserException{
         super(t, modulo);
         if(super.temp.length!=0)
-            throw new ParserException("Un operatore non può avere parametri template", super.nome);
+            throw new ParserException(Lingue.getIstance().format("m_par_temopr"), super.nome);
         if(!(nome instanceof SymbToken))
-            throw new ParserException("Nome operazione invalida", nome);
+            throw new ParserException(Lingue.getIstance().format("m_par_invnap"), nome);
         if(((SymbToken)nome).getString().equals("=="))
-            throw new ParserException("Impossibile sovrascrivere l'operazione ==. "
-                    + "Sostituire == con :equals", nome);
+            throw new ParserException(Lingue.getIstance().format("m_par_uguopr"), nome);
         if(dichs==null || dichs.length==0 || dichs.length>2)
-            throw new ParserException("Parametri in numero erroneo", nome);//solo per la riga
+            throw new ParserException(Lingue.getIstance().format("m_par_nerpar"), nome);//solo per la riga
     }
     @Override
     public String getName(){

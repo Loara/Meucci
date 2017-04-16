@@ -17,6 +17,7 @@
 package comp.parser.expr;
 
 import comp.general.Info;
+import comp.general.Lingue;
 import comp.general.Stack;
 import comp.general.VScan;
 import comp.parser.Espressione;
@@ -92,13 +93,13 @@ public class ExprGen {
                         se.push(new IdentEle(id.getString(), ste.toArray()));
                         t.nextEx();
                     }
-                    else throw new ParserException("Manca ]", t);
+                    else throw new ParserException(Lingue.getIstance().format("m_par_sqrbrk"), t);
                 }
                 else{
                     se.push(new IdentEle(id.getString(), null));
                 }
             }
-            else throw new ParserException("Valore non valido come identificatore", t);
+            else throw new ParserException(Lingue.getIstance().format("m_par_invnam"), t);
         }
         while(t.get() instanceof DotToken);
         return new IdentArray(ev, se.toArray(), Info.conversion(be.toArray()));
@@ -128,7 +129,7 @@ public class ExprGen {
             if(te !=null && te instanceof FunzDich){
                 return new TemplExpr((FunzDich)te);
             }
-            else throw new ParserException("Template non valido", t);
+            else throw new ParserException(Lingue.getIstance().format("m_par_invtem"), t);
         }
         if(t.get() instanceof RealToken){
             RealExpr re=new RealExpr((RealToken)t.get());
@@ -173,10 +174,10 @@ public class ExprGen {
                                         return new StackExpr(td, stack.toArray());
                                 }
                             }
-                            else throw new ParserException("allocazione errata", t);
+                            else throw new ParserException(Lingue.getIstance().format("m_par_erralc"), t);
                         }
                     }
-                    else throw new ParserException("allocazione errata", t);
+                    else throw new ParserException(Lingue.getIstance().format("m_par_erralc"), t);
             }
             if((s.getString().equals("+")||s.getString().equals("-"))){
                 long j=s.getString().equals("+") ? 1 : -1;
@@ -218,13 +219,13 @@ public class ExprGen {
             Espressione in;
             in=toExpr(t);//le parentesi modificano l'associatività
             if(t.isEnded())
-                throw new ParserException("Manca parentesi finale", t);//è finito
+                throw new ParserException(Lingue.getIstance().format("m_par_parncl"), t);//è finito
                         //prima di chiudere la parentesi
             if(t.get() instanceof PareToken && ((PareToken)t.get()).s==')'){
                 t.nextEx();
                 return in;
             }
-            else throw new ParserException("Errore: parentesi non chiusa", t);
+            else throw new ParserException(Lingue.getIstance().format("m_par_parncl"), t);
         }
         /*
         funz o IdentExpr
@@ -236,7 +237,7 @@ public class ExprGen {
             if(!(t.get() instanceof PareToken) 
                 ||((PareToken)t.get()).s!='('){
                 if(pp.length>0)
-                    throw new ParserException("Parametri template in posizione errata", t);
+                    throw new ParserException(Lingue.getIstance().format("m_par_postem"), t);
                 return new IdentExpr(e);
             }
             t.nextEx();
@@ -252,14 +253,14 @@ public class ExprGen {
                 are.push(e2);
             }
             if(t.isEnded()){
-                throw new ParserException("Manca la parentesi finale", t.get(-1));
+                throw new ParserException(Lingue.getIstance().format("m_par_parncl"), t.get(-1));
             }
             if(t.get() instanceof PareToken && ((PareToken)t.get()).s==')'){
                 t.nextEx();
                 return new FunzExpr(e, pp, are.toArray());
             }
-            else throw new ParserException("Parentesi non chiusa nella funzione", t);
+            else throw new ParserException(Lingue.getIstance().format("m_par_parncl"), t);
         }
-        throw new ParserException("Struttura non riconosciuta", t);
+        throw new ParserException(Lingue.getIstance().format("m_par_uknstr"), t);
     }
 }

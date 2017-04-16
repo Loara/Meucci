@@ -23,7 +23,6 @@ import comp.code.Register;
 import comp.code.Segmenti;
 import comp.code.immop.Aritm;
 import comp.code.immop.Aritm2;
-import comp.code.template.Substitutor;
 import comp.code.vars.Variabili;
 import comp.parser.expr.Op1Expr;
 import comp.parser.expr.Op2Expr;

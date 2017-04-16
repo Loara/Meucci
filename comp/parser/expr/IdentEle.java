@@ -17,7 +17,6 @@
 package comp.parser.expr;
 
 import comp.parser.Espressione;
-import comp.scanner.IdentToken;
 import java.io.Serializable;
 
 /**

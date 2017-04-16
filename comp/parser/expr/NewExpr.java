@@ -54,8 +54,8 @@ public class NewExpr extends Espressione{
             exp[i].validate(var);
             esp1[i]=exp[i].returnType(var, true);
         }
-        Funz.getIstance().requestCostructor(type, esp1, true);
-        Funz.getIstance().request("allocate", new TypeElem[]{Types.getIstance().find("uint")}, true);
+        Funz.getIstance().esisteCostructor(type, esp1);
+        Funz.getIstance().esiste("allocate", new TypeElem[]{Types.getIstance().find("uint")});
     }
     @Override
     public void toCode(Segmenti seg, Variabili var, Environment env, Accumulator acc)

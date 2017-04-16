@@ -22,6 +22,7 @@ import comp.code.Segmenti;
 import comp.code.TypeElem;
 import comp.code.Types;
 import comp.code.XReg;
+import comp.general.Lingue;
 import comp.parser.Dichiarazione;
 import comp.parser.TypeName;
 import java.util.ArrayList;
@@ -70,7 +71,7 @@ public class VarStatic extends Var{
                 break;
             }
         }
-        if(f==null) throw new CodeException("Errore: "+ident+" non dichiarata.");
+        if(f==null) throw new CodeException(Lingue.getIstance().format("m_cod_uknvarb", ident));
         return f.type;
     }
     public StaticEle get(String ident, boolean exc)throws CodeException{
@@ -82,7 +83,7 @@ public class VarStatic extends Var{
             }
         }
         if(exc&&f==null)
-            throw new CodeException("Variabile sconosciuta :"+ident);
+            throw new CodeException(Lingue.getIstance().format("m_cod_uknvarb", ident));
         return f;
     }
     @Override
@@ -93,36 +94,24 @@ public class VarStatic extends Var{
     public void getVar(Segmenti text, String ident, Register reg)throws CodeException{
         StaticEle ve=get(ident, true);
         String u="["+ve.writtenName()+"]";
-        if(ve.type.xmmReg())
-            throw new CodeException("Valore reale");
-        else
-            getGVar(text, u, reg, ve.type.realDim());
+        getGVar(text, u, reg, ve.type.realDim());
     }
     @Override
     public void setVar(Segmenti text, String ident, Register reg)throws CodeException{
         StaticEle ve=get(ident, true);
         String u="["+ve.writtenName()+"]";
-        if(ve.type.xmmReg())
-            throw new CodeException("Valore reale");
-        else
-            setGVar(text, u, reg, ve.type.realDim());
+        setGVar(text, u, reg, ve.type.realDim());
     }
     @Override
     public void xgetVar(Segmenti text, String ident, XReg reg)throws CodeException{
         StaticEle ve=get(ident, true);
         String u="["+ve.writtenName()+"]";
-        if(ve.type.xmmReg())
-            getXVar(text, u, reg);
-        else
-            throw new CodeException("Valore non reale");
+        getXVar(text, u, reg);
     }
     @Override
     public void xsetVar(Segmenti text, String ident, XReg reg)throws CodeException{
         StaticEle ve=get(ident, true);
         String u="["+ve.writtenName()+"]";
-        if(ve.type.xmmReg())
-            setXVar(text, u, reg);
-        else
-            throw new CodeException("Valore non reale");
+        setXVar(text, u, reg);
     }
 }

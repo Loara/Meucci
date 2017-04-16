@@ -11,6 +11,7 @@ import comp.code.Environment;
 import comp.code.Segmenti;
 import comp.code.vars.Variabili;
 import comp.general.Info;
+import comp.general.Lingue;
 import comp.parser.Istruzione;
 import comp.parser.ParserException;
 
@@ -28,18 +29,18 @@ public class TryIstr extends Istruzione{
         exname=err;
         mexc=me;
         defaul=def;
-        eqErr(r);
+        eqErr(r, def!=null);
     }
     public TryIstr(MultiIstr ty, String[] err, MultiIstr[] me, int r)throws ParserException{
         this(ty, err, me, null, r);
     }
-    private void eqErr(int y)throws ParserException{
-        if(exname == null || exname.length == 0)
-            throw new ParserException("Blocco try senza alcun catch", y);
+    private void eqErr(int y, boolean def)throws ParserException{
+        if(!def && (exname == null || exname.length == 0))
+            throw new ParserException(Lingue.getIstance().format("m_par_tryctc"), y);
         for(int i=0; i<exname.length; i++){
             for(int j=i+1; j<exname.length; j++){
                 if(exname[i].equals(exname[j]))
-                    throw new ParserException("Due blocchi catch uguali: "+exname[i], y);
+                    throw new ParserException(Lingue.getIstance().format("m_par_eqlctc", exname[i]), y);
             }
         }
     }

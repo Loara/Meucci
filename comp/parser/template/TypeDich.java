@@ -16,10 +16,10 @@
  */
 package comp.parser.template;
 
+import comp.general.Lingue;
 import comp.general.VScan;
 import comp.parser.FineArrayException;
 import comp.parser.ParserException;
-import comp.parser.template.Template;
 import comp.scanner.IdentToken;
 import comp.scanner.Token;
 import java.io.Serializable;
@@ -41,7 +41,7 @@ public class TypeDich implements Serializable, TemplateEle{
             t.nextEx();
             params=Template.detectTemplate(t);
         }
-        else throw new ParserException("Utilizzo non valido del tipo", t);
+        else throw new ParserException(Lingue.getIstance().format("m_par_invtyp"), t);
     }
     public TypeDich(String name, TemplateEle... te){
         typename=name;

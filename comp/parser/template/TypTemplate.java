@@ -64,8 +64,6 @@ public class TypTemplate extends Template{
         return ext;
     }
     public void validate()throws CodeException{
-        if(reference && number)
-            throw new CodeException("Errore template: "+getIdent()+" non può essere "
-                    + "reference e number");
+        
     }
 }

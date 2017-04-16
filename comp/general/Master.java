@@ -71,17 +71,7 @@ public class Master {
     public static void main(String[] args)throws Exception{
         Master m=new Master();
         if(args.length<1){
-            System.out.println("Usage: meucc [options] sources...");
-            System.out.println();
-            System.out.println("OPTIONS");
-            System.out.println("-p");
-            System.out.println("generates only file headers, no compile anything");
-            System.out.println();
-            System.out.println("-c");
-            System.out.println("don't assemble files automatically");
-            System.out.println();
-            System.out.println("-a");
-            System.out.println("don't link files automatically");
+            System.out.println(Lingue.getIstance().format("m_option"));
             return;
         }
         Stack<String> fil=new Stack<>(String.class);
@@ -416,13 +406,13 @@ public class Master {
                     if(Files.isReadable(p))
                         return p;
                     else
-                        throw new IOException("Impossibile accedere a "+name+".in");
+                        throw new IOException(Lingue.getIstance().format("m_nofile", name, "in"));
                 }
             }
-            throw new IOException("Impossibile trovate "+name+".in");
+            throw new IOException(Lingue.getIstance().format("m_nofile", name, "in"));
         }
         else
-            throw new IOException("Impossibile accedere a "+name+".in");
+            throw new IOException(Lingue.getIstance().format("m_nofile", name, "in"));
     }
     public Path createAsmFile(String path)throws IOException{
         Path p=Paths.get(path+".asm");
@@ -441,16 +431,16 @@ public class Master {
                     if(Files.isReadable(p))
                         return p;
                     else
-                        throw new IOException("Impossibile accedere a "+name+".tin");
+                        throw new IOException(Lingue.getIstance().format("m_nofile", name, "tin"));
                 }
             }
             if(thrw)
-                throw new IOException("Impossibile trovate "+name+".tin");
+                throw new IOException(Lingue.getIstance().format("m_nofile", name, "tin"));
             else
                 return null;
         }
         else
-            throw new IOException("Impossibile accedere a "+name+".tin");
+            throw new IOException(Lingue.getIstance().format("m_nofile", name, "tin"));
     }
     public void exportModulo(Modulo mod)throws IOException, CodeException{//attenzione:non esportare funzioni shadow
         Path na=Paths.get(mod.nome+".in");

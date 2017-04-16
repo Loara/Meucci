@@ -19,6 +19,7 @@ package comp.code.vars;
 import comp.code.CodeException;
 import comp.code.TypeElem;
 import comp.code.Types;
+import comp.general.Lingue;
 import comp.parser.TypeName;
 import java.util.ArrayList;
 
@@ -57,7 +58,7 @@ public class GhostVar {
             }
         }
         if(f==null)
-            throw new CodeException("Variabile sconosciuta :"+ident);
+            throw new CodeException(Lingue.getIstance().format("m_cod_uknvarb", ident));
         return f;
     }
     public boolean isIn(String ident){
@@ -68,9 +69,7 @@ public class GhostVar {
                 break;
             }
         }
-        if(f==null)
-            return false;
-        return true;
+        return f != null;
     }
     public void addVar(TypeName t, String n)throws CodeException{
         al.add(new GVarEle(true, n, t));

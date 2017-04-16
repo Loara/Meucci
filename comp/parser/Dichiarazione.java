@@ -17,7 +17,7 @@
 package comp.parser;
 import comp.code.CodeException;
 import comp.code.template.Substitutor;
-import comp.general.Info;
+import comp.general.Lingue;
 import comp.general.VScan;
 import comp.parser.template.TemplateEle;
 import comp.scanner.IdentToken;
@@ -43,7 +43,7 @@ public class Dichiarazione implements Serializable{
             */
             s.next();
         }
-        else throw new ParserException("Dichiarazione errata", s);
+        else throw new ParserException(Lingue.getIstance().format("m_par_invdic"), s);
     }
     public Dichiarazione(String typet, String ident, TemplateEle... tn){
         type=new TypeName(typet, tn);

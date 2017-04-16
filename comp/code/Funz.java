@@ -18,6 +18,7 @@ package comp.code;
 
 import comp.code.template.FunzList;
 import comp.code.template.Substitutor;
+import comp.general.Lingue;
 import comp.parser.Callable;
 import comp.parser.OpDef;
 import comp.parser.TypeName;
@@ -156,19 +157,20 @@ public class Funz {
                 s.add(fer);
                 return fer;
             }
-            String err="Errore: trovate "+e.size()+" funzioni per "+name+Meth.paramsName(te)+":\n";
+            String err=Lingue.getIstance().format("m_cod_foufunn", e.size(), 
+                    Meth.funzKey(name, te))+":\n";
             err = e.stream().map((ex) -> ex.modname+"\n").reduce(err, String::concat);
             throw new CodeException(err);
         }
     }
     public FElement request(String modname)throws CodeException{
         if(modname==null)
-            throw new CodeException("Funzione non trovata");
+            throw new CodeException(Lingue.getIstance().format("m_cod_funnfon"));
         for(FElement e:s){
             if(modname.equals(e.modname))
                 return e;
         }
-        throw new CodeException("Funzione non trovata");
+        throw new CodeException(Lingue.getIstance().format("m_cod_funnfon"));
     }
     public FElement requestDestructor(TypeName tn, boolean noAdd)throws CodeException{
         TypeElem te=Types.getIstance().find(tn, noAdd);
@@ -187,6 +189,67 @@ public class Funz {
         tear[0]=te;
         System.arraycopy(params, 0, tear, 1, params.length);
         return request(Meth.costructorName(tn), tear, noAdd, tn.templates());
+    }
+    public void esiste(String name, TypeElem[] types, TemplateEle... ete)throws CodeException{
+        TemplateEle[] te;
+        if(suds!=null && suds.size()>0)
+            te=suds.recursiveGet(ete);
+        else
+            te=ete;
+        ArrayList<FElement> e=new ArrayList<>();
+        for(FElement i:s){
+            if(!i.name.equals(Meth.funzKey(name, te)))//equivalenza sia di nome che template
+                continue;
+            if(types.length!=i.trequest.length)
+                continue;
+            boolean jus=true;
+            for(int ij=0; ij<types.length; ij++){
+                if(!types[ij].ifEstende(i.trequest[ij], true)){
+                    jus=false;
+                    break;
+                }
+            }
+            if(!jus)
+                continue;
+            e.add(i);
+        }
+        if(e.size()!=1){
+            if(e.isEmpty() && te.length>0){
+                fl.esiste(name, te, types);
+                return;
+            }
+            String err=Lingue.getIstance().format("m_cod_foufunn", e.size(), 
+                    Meth.funzKey(name, te))+":\n";
+            err = e.stream().map((ex) -> ex.modname+"\n").reduce(err, String::concat);
+            throw new CodeException(err);
+        }
+    }
+    public void esiste(String modname)throws CodeException{
+        if(modname==null)
+            throw new CodeException(Lingue.getIstance().format("m_cod_funnfon"));
+        for(FElement e:s){
+            if(modname.equals(e.modname))
+                return;
+        }
+        throw new CodeException(Lingue.getIstance().format("m_cod_funnfon"));
+    }
+    public void esisteDestructor(TypeName tn)throws CodeException{
+        TypeElem te=Types.getIstance().find(tn, true);//E' necessario comunque per via dei template
+        esiste(Meth.destructorName(tn), new TypeElem[]{te}, tn.templates());
+    }
+    
+    public void esisteDestructor(String name, TemplateEle[] tel)throws CodeException{
+        TypeElem te=Types.getIstance().find(new TypeName(name, tel), true);
+        esiste(Meth.destructorName(name), new TypeElem[]{te}, tel);
+    }
+    public void esisteCostructor(TypeName tn, TypeElem[] params)throws CodeException{
+        if(params==null)
+            params=new TypeElem[0];
+        TypeElem te=Types.getIstance().find(tn, true);
+        TypeElem[] tear=new TypeElem[params.length+1];
+        tear[0]=te;
+        System.arraycopy(params, 0, tear, 1, params.length);
+        esiste(Meth.costructorName(tn), tear, tn.templates());
     }
     
     public FunzList getFunzList(){

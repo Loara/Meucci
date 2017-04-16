@@ -21,6 +21,7 @@ import comp.code.TypeElem;
 import comp.code.Types;
 import comp.code.template.TNumbers;
 import comp.general.Info;
+import comp.general.Lingue;
 import comp.general.VScan;
 import comp.parser.ParserException;
 import comp.parser.TypeName;
@@ -379,6 +380,24 @@ public abstract class FunzDich implements Serializable, TemplateEle{
     public abstract long upBound()throws CodeException;
     public abstract long lowBound()throws CodeException;
     public abstract int dimension()throws CodeException;
+    public TypeElem retType()throws CodeException{
+        int u=dimension();
+        String tname;
+        switch(u){
+            case 0:
+                tname="ubyte";
+                break;
+            case 1:
+                tname="ushort";
+                break;
+            case 2:
+                tname="uint";
+                break;
+            default:
+                tname="ulong";
+        }
+        return Types.getIstance().find(tname);//Non ha bisogno di validate
+    }
     public static FunzDich istance(String name, TemplateEle[] pars, VScan<Token> t)throws ParserException{
         FunzDich ret;
         switch(name){
@@ -395,15 +414,15 @@ public abstract class FunzDich implements Serializable, TemplateEle{
                 ret=new DIMENSION(pars);
                 break;
             default:
-                throw new ParserException("Funzione template non supportata dal compilatore", t);
+                throw new ParserException(Lingue.getIstance().format("m_par_ftensp", name), t);
         }
         if(ret.numParams()>0){
             if(pars.length!=ret.numParams())
-                throw new ParserException("Numero parametri errati in funzione template", t);
+                throw new ParserException(Lingue.getIstance().format("m_par_ftenpe"), t);
         }
         else{
             if(pars.length<(-ret.numParams()))
-                throw new ParserException("Numero parametri errati in funzione template", t);
+                throw new ParserException(Lingue.getIstance().format("m_par_ftenpe"), t);
         }
         return ret;
     }

@@ -26,8 +26,8 @@ import comp.code.Register;
 import comp.code.Segmenti;
 import comp.code.TypeElem;
 import comp.code.Types;
-import comp.code.template.Substitutor;
 import comp.code.vars.Variabili;
+import comp.general.Lingue;
 import comp.general.VScan;
 import comp.parser.template.Template;
 import comp.parser.template.TemplateEle;
@@ -52,12 +52,10 @@ public class Destructor extends Callable{
     public Destructor(VScan<Token> t, String type, Template[] params, String modulo)throws ParserException{
         super(t, modulo);
         if(temp.length!=0)
-            throw new ParserException("Un distruttore non può avere parametri template", super.nome);
+            throw new ParserException(Lingue.getIstance().format("m_par_temdis"), super.nome);
         if(dichs.length!=0)
-            throw new ParserException("Un distruttore non può ricevere parametri", super.nome);
+            throw new ParserException(Lingue.getIstance().format("m_par_pardis"), super.nome);
         temp=params;
-        if(!(nome instanceof IdentToken) || !((IdentToken)nome).getString().equals("end"))
-            throw new ParserException("Non è un distruttore",t);
         nome=new IdentToken(Meth.destructorName(type), nome.getRiga());
         classname=type;
         dichs=new FunzParam[1];

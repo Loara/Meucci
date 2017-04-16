@@ -18,6 +18,7 @@ package comp.code.template;
 
 import comp.code.CodeException;
 import comp.code.Types;
+import comp.general.Lingue;
 import comp.parser.TypeName;
 import comp.parser.template.FunzDich;
 import comp.parser.template.NumDich;
@@ -155,7 +156,7 @@ public class Substitutor extends HashMap<String, TemplateEle>{
                 val=new TypeName(((ParamDich)te).getName());
             else if(te instanceof TypeDich)
                 val=new TypeName((TypeDich)te);
-            else throw new CodeException("Valore errato in funzione template");
+            else throw new CodeException(Lingue.getIstance().format("m_cod_temverr"));
             ret=Types.getIstance().find(val, false).realDim();
         }
         else if(fd instanceof FunzDich.SUM){
@@ -164,7 +165,7 @@ public class Substitutor extends HashMap<String, TemplateEle>{
                 if(t instanceof NumDich){
                     ret+=((NumDich)t).getNum();
                 }
-                else throw new CodeException("Valore invalido");
+                else throw new CodeException(Lingue.getIstance().format("m_cod_temverr"));
             }
         }
         else if(fd instanceof FunzDich.PROD){
@@ -173,7 +174,7 @@ public class Substitutor extends HashMap<String, TemplateEle>{
                 if(t instanceof NumDich){
                     ret*=((NumDich)t).getNum();
                 }
-                else throw new CodeException("Valore invalido");
+                else throw new CodeException(Lingue.getIstance().format("m_cod_temverr"));
             }
         }
         else if(fd instanceof FunzDich.DIMENSION){
@@ -182,11 +183,11 @@ public class Substitutor extends HashMap<String, TemplateEle>{
                 val=new TypeName(((ParamDich)te).getName());
             else if(te instanceof TypeDich)
                 val=new TypeName((TypeDich)te);
-            else throw new CodeException("Valore errato in funzione template");
+            else throw new CodeException(Lingue.getIstance().format("m_cod_temverr"));
             ret=Types.getIstance().find(val, false).dimension(false);
         }
         else
-            throw new CodeException("Bug interno");
+            throw new CodeException(Lingue.getIstance().format("m_cod_funnukn"));
         return new NumDich(ret, dim);
     }
 }
