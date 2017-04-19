@@ -51,7 +51,7 @@ import java.util.HashSet;
  * Richiamato dal main</li>
  * <li> _VT_INIT_nometipo : Inizializza la vtable. Tale funzione esiste solo per tipi che
  * hanno vtable</li>
- * <li> _INIT_nometipo : dato un puntatore a un tipo istanziato: Se il tipo ha vtable gie la fa puntare;
+ * <li> _INIT_nometipo : dato un puntatore a un tipo istanziato: Se il tipo ha vtable glie la fa puntare;
  * se non ce l'ha ma non è esplicito pone il campo pari a 0. Richiamato prima del 
  * costruttore ed esiste solo per tipi non espliciti
  * </ul>

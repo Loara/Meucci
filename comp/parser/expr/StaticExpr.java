@@ -74,7 +74,7 @@ public class StaticExpr extends Espressione{
         seg.bss.add("STATIC_"+i+"_OBJ\tresb\t"+tp.dimension(false));
         seg.addIstruzione("test", "byte [STATIC_"+i+"_IND]", "1");
         seg.addIstruzione("jnz", "STATIC_"+i+"_OV", null);
-        acc.pushAll(seg);
+        var.getVarStack().pushAll(seg);
         seg.addIstruzione("lea",Register.AX.getReg(),"[STATIC_"+i+"_OBJ]");
         if(tp.explicit){
             if(Environment.template || type.templates().length!=0 || tp.external)

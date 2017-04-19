@@ -450,17 +450,22 @@ public class TypeElem {
             }
         }
         else{
-            acc.pushAll(text);//il pushall và prima, onde evitare corruzione stack
-            int tic=acc.prenota();//puntatore vtable
-            text.addIstruzione("mov",acc.getReg(tic).getReg(),
-                    "["+acc.getAccReg().getReg()+"]");
             int sc2=vt.getReadAcc(elem, var, env);
             if(sc2==-1)
                 throw new CodeException(Lingue.getIstance().format("m_cod_nfndmb", elem, name));
+            var.getVarStack().pushAll(text);//il pushall và prima, onde evitare corruzione stack
+            int tic=acc.prenota();//puntatore vtable
+            text.addIstruzione("mov",acc.getReg(tic).getReg(),
+                    "["+acc.getAccReg().getReg()+"]");
+            FunzExpr.obtElem(tic, sc2, elem.getVals(), ter, text, var, env, acc);
+            /*
+            text.addIstruzione("mov",acc.getReg(tic).getReg(),
+                    "["+acc.getAccReg().getReg()+"]");
             text.addIstruzione("push",acc.getAccReg().getReg(), null);//indirizzo oggetto
             //i valori di default tanto sono già stati aggiunti
             //acc.libera(tic)lanciato automaticamente all'interno di perfCall
             FunzExpr.perfCall(tic, sc2, ter, elem.getVals(), text, var, env, acc);
+            */
         }
         return ter;
     }
@@ -516,18 +521,20 @@ public class TypeElem {
             acc.libera(input);
         }
         else{
-            acc.pushAll(text, new int[]{input}, new int[0]);
-            text.text.flush();
-            int tic=acc.prenota();
-            text.addIstruzione("mov",acc.getReg(tic).getReg(),
-                    "["+acc.getAccReg().getReg()+"]");
             int sc2=vt.getWriteAcc(elem, var, env);
             if(sc2==-1)
                 throw new CodeException(Lingue.getIstance().format("m_cod_nfndmb", elem, name));
+            var.getVarStack().pushAll(text, new int[]{input}, new int[0]);
+            int tic=acc.prenota();
+            text.addIstruzione("mov",acc.getReg(tic).getReg(),
+                    "["+acc.getAccReg().getReg()+"]");
+            FunzExpr.setElem(tic, sc2, input, elem.getVals(), text, var, env, acc);
+            /*
             text.addIstruzione("push",acc.getAccReg().getReg(),null);//indirizzo oggetto
             text.addIstruzione("push",acc.getReg(input).getReg(), null);//valore da settare, sempre qword
             FunzExpr.perfCall(tic, sc2, Types.getIstance().find(new TypeName("void"), 
                     false), elem.getVals(), text, var, env, acc);
+            */
         }
                 
     }
@@ -569,17 +576,20 @@ public class TypeElem {
             }
         }
         else{
-            acc.pushAll(text, new int[0], new int[]{input});
-            int tic=acc.prenota();
-            text.addIstruzione("mov",acc.getReg(tic).getReg(),
-                    "["+acc.getAccReg().getReg()+"]");
             int sc2=vt.getWriteAcc(elem, var, env);
             if(sc2==-1)
                 throw new CodeException(Lingue.getIstance().format("m_cod_nfndmb", elem, name));
+            var.getVarStack().pushAll(text, new int[0], new int[]{input});
+            int tic=acc.prenota();
+            text.addIstruzione("mov",acc.getReg(tic).getReg(),
+                    "["+acc.getAccReg().getReg()+"]");
+            FunzExpr.setXElem(tic, sc2, input, elem.getVals(), text, var, env, acc);
+            /*
             text.addIstruzione("push",acc.getAccReg().getReg(),null);//indirizzo oggetto
             text.addIstruzione("push",acc.getAccReg().getReg(), null);//valore da settare
             text.addIstruzione("movsd", "[rsp]", acc.getXReg(input).getReg());
             FunzExpr.perfCall(tic, sc2, ter, elem.getVals(), text, var, env, acc);
+            */
         }
                 
     }

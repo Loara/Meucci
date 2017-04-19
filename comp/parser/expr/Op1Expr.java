@@ -87,7 +87,7 @@ public class Op1Expr extends Espressione{
         FElement modname=modname(var);
         if(!TryIstr.checkThrows(modname.errors, env))
             throw new CodeException("Errori di "+modname.name+" non gestiti correttamente");
-        acc.pushAll(text);
+        var.getVarStack().pushAll(text);
         FunzExpr.perfCall(modname, new Espressione[]{epr}, text, var, env, acc);
         //popAll automatico
     }

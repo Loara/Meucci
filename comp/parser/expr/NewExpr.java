@@ -22,7 +22,6 @@ import comp.code.Environment;
 import comp.code.Funz;
 import comp.code.Funz.FElement;
 import comp.code.Meth;
-import comp.code.Register;
 import comp.code.Segmenti;
 import comp.code.TypeElem;
 import comp.code.Types;
@@ -31,7 +30,14 @@ import comp.parser.Espressione;
 import comp.parser.TypeName;
 
 /**
- * allocazione oggetti statica
+ * allocazione oggetti dinamica
+ * 
+ * L'allocazione segue le seguenti regole:
+ * - chiama i parametri (se si incorre in un eccezione l'allocazione termina)
+ * - alloca memoria (dinamica, stack o statica)
+ * - collega la vtable alla memoria allocata
+ * - chiama il costruttore
+ * - mette nel registro accumulatore il puntatore all'oggetto
  * @author loara
  */
 public class NewExpr extends Espressione{
@@ -69,11 +75,56 @@ public class NewExpr extends Espressione{
                 new TypeElem[]{Types.getIstance().find("uint")}, false);
         if(Environment.template||allc.isExternFile())
             Funz.getIstance().ext.add(allc.modname);
-        acc.pushAll(seg);
-        Register a=acc.getAccReg();
-        seg.addIstruzione("mov", a.getReg(4), String.valueOf(tp.dimension(false)));
-        seg.addIstruzione("push", a.getReg(), null);
-        seg.addIstruzione("call",allc.modname,null);
+        FunzExpr.allc1(seg, var, env, acc, exp);
+        FunzExpr.perfCall(allc, new Espressione[]{new NumExpr(tp.dimension(false), true, 4)}
+                , seg, var, env, acc);
+        FunzExpr.allc2(seg, var, env, acc, exp, cos, tp);
+        /*
+        var.getVarStack().pushAll(seg);
+        
+        Proseguire così, per evitare possibili errori:
+        1) calcolare i parametri del costruttore (se si incorre in un eccezione
+        la memoria non viene allocata)
+        2) allocare memoria
+        3) chiamare il costruttore
+        
+        //parametri
+        
+        da modificare
+        int numpar=exp.length+1;
+        seg.addIstruzione("sub", "rsp", String.valueOf(8*numpar));
+        var.getVarStack().doPush(numpar);
+        for(int i=0; i<exp.length; i++){
+            exp[i].toCode(seg, var, env, acc);
+            TypeElem te=exp[i].returnType(var, false);
+            if(te.xmmReg()){
+                seg.addIstruzione("movq", "qword [rsp+"+(8*i+8)+"]", acc.getXAccReg().getReg());
+            }
+            else{
+                seg.addIstruzione("mov", "qword [rsp+"+(8*i+8)+"]", acc.getAccReg().getReg());
+            }
+        }
+        //memoria
+        var.getVarStack().pushAll(seg);//necessario
+        FunzExpr.perfCall(allc, 
+                new Espressione[]{new NumExpr(tp.dimension(false), true, 4)},
+                seg, var, env, acc);
+        //chiamata costruttore
+        if(Environment.template || tp.external || type.templates().length!=0){
+            if(!tp.explicit)
+                Funz.getIstance().ext.add("_INIT_"+Meth.className(type));
+            Funz.getIstance().ext.add(cos.modname);
+        }
+        seg.addIstruzione("mov", "qword [rsp]", acc.getAccReg().getReg());
+        if(!tp.explicit){
+            seg.addIstruzione("push", acc.getAccReg().getReg(), null);
+            seg.addIstruzione("call", "_INIT_"+Meth.className(type), null);
+        }
+        seg.addIstruzione("call", cos.modname, null);
+        var.getVarStack().remPush(numpar);
+        FunzExpr.perfCall(allc, 
+                new Espressione[]{new NumExpr(tp.dimension(false), true, 4)}, 
+                seg, var, env, acc);
         if(tp.explicit){
             if(Environment.template || tp.external || type.templates().length!=0)
                 Funz.getIstance().ext.add(cos.modname);
@@ -101,6 +152,7 @@ public class NewExpr extends Espressione{
         seg.addIstruzione("call",cos.modname,null);//costruttore vero, non genera eccezioni
         seg.addIstruzione("pop",a.getReg(), null);//vero valore di ritorno
         acc.popAll(seg);
+        */
     }
     @Override
     public void println(int i){

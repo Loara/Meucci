@@ -69,6 +69,14 @@ public class CodeMap{
             if(op1.equals(o2)){
                 if(op2.equals(o1))
                     return;//inutile aggiungere
+                if( (opc.startsWith("movsx") || opc.startsWith("movzx") ) && o1.contains("[")){
+                    //non è possibile combinarli
+                    flush();
+                    opc="mov";
+                    op1=o1;
+                    op2=o2;
+                    return;
+                }
                 if(!op1.contains("[")){
                     if(!op2.contains("[") || !o1.contains("[")){
                         if(o1.contains("[") && Info.isNum(op2.charAt(0))){
@@ -100,6 +108,17 @@ public class CodeMap{
                     op2=temp;
                     return;
                 }
+            }
+        }
+        if("sub".equals(opc) && "sub".equals(oc) && op1.equals(o1)){
+            try{
+                int v=Integer.parseInt(op2);
+                int w=Integer.parseInt(o2);
+                op2=String.valueOf(v+w);
+                return;
+            }
+            catch(NumberFormatException ex){
+                //Standard
             }
         }
         if("leave".equals(oc) && "mov".equals(opc)){

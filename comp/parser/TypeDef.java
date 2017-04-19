@@ -181,7 +181,7 @@ public class TypeDef implements Serializable{
         Environment.template=tt.length!=0;
         String rax=Register.AX.getReg();
         String rbx=Register.BX.getReg();
-        String rnome=Meth.className(nome, tparams);
+        String rnome=Meth.className(nome, tparams);//Il nome del relativo TypeElem
         if(explicit){
             if(ext!=null){
                 if(!Types.getIstance().find(ext, false).explicit)

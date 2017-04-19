@@ -60,6 +60,11 @@ public class NumExpr extends Espressione{
         unsigned=true;
         dim=8;
     }
+    public NumExpr(long num, boolean un, int di){
+        nu=num;
+        unsigned=un;
+        dim=di;
+    }
     @Override
     public void println(int inter){
         String i="";

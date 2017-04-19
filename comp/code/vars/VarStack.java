@@ -63,6 +63,8 @@ public class VarStack extends Var{
     private final Stack<VarEle> al;
     private int rrsp, maxdim, dimargs;//rsp = rbp - rrsp => rrsp = rbp - rsp
     private final Accumulator acc;
+    private int pushes;//I push effettuati. Al termine di ogni istruzione
+    //deve valere 0
     private boolean remainAlign(int cp, int dim, int pd){
         //ritorna true se dopo l'aggiunta rimane allineato
         //Bisogna stare attenti in quanto cp è l'rrsp e non l'rsp
@@ -110,6 +112,7 @@ public class VarStack extends Var{
         initArgs(args);
         rrsp = 0;//all'inizio rsp punta esattamente a ciò che punta rbp
         this.acc=acc;
+        pushes=0;
     }
     /**
      * Come il precedente, solo no parametri passati per stack
@@ -122,6 +125,7 @@ public class VarStack extends Var{
         initArgs(null);
         rrsp = 0;
         this.acc=acc;
+        pushes=0;
     }
     /**
      * Attenzione!!! in 64-bit è possibile effettuare il push solo per dimensioni di
@@ -131,22 +135,21 @@ public class VarStack extends Var{
      * @throws CodeException 
      */
     private void initArgs(FunzParam[] args)throws CodeException{
-        dimargs=0;
         if(args==null)
             return;
         int len = args.length;
+        dimargs=8*len;
         /*
         rrsp non ancora utilizzato
         Sia i l'i-esimo parametro (da sinistra) passato alla funzione.
         Allora la sua posizione assoluta è
-        rbp + 8*(len - i - 1) + 16 = rbp + 8*(len -i + 1)
+        rbp + 8*i + 16=rbp + 8*(i + 2)
         la posizione relativa diviene allora
-        8*(i - len - 1).
+        -8*(i + 2).
         */
-        for (int i=0; i<len; i++) {
-            dimargs+=8;
+        for (int i=len -1; i>=0; i--) {
             VarEle ve=new VarEle(true, false, args[i].getIdent()
-                    , args[i].dich.getRType(), Info.pointerdim * (i-len-1), Info.pointerdim);
+                    , args[i].dich.getRType(), Info.pointerdim * (-i-2), Info.pointerdim);
             al.push(ve);
         }
     }
@@ -221,6 +224,24 @@ public class VarStack extends Var{
     }
     public static int pushDim(int adim){
         return 8;
+    }
+    public void doPush(int tim){
+        pushes += tim;
+    }
+    public void remPush(int tim){
+        pushes -= tim;
+    }
+    public void remAllPush(){
+        pushes=0;
+    }
+    public void pushAll(Segmenti text)throws CodeException{
+        doPush(acc.pushAll(text));
+    }
+    public void pushAll(Segmenti text, int[] salva, int[] xsalva)throws CodeException{
+        doPush(acc.pushAll(text, salva, xsalva));
+    }
+    public void popAll(Segmenti text)throws CodeException{
+        doPush(acc.popAll(text));
     }
     public String varInfo(VarEle ve)throws CodeException{
         String r;
@@ -393,5 +414,8 @@ public class VarStack extends Var{
             e=vele[ind];
             ind--;
         }
+        //elimina i dati memorizzati tramite push (chiamate a funzioni, ...)
+        if(pushes>0)
+            seg.addIstruzione("add", "rsp", String.valueOf(8*pushes));
     }
 }

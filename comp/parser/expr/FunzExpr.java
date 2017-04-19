@@ -98,7 +98,7 @@ public class FunzExpr extends Espressione{
     @Override
     public void toCode(Segmenti text, Variabili var, Environment env, Accumulator acc
         )throws CodeException{
-        acc.pushAll(text);//bisogna farlo prima altrimenti inquina lo stack
+        var.getVarStack().pushAll(text);//bisogna farlo prima altrimenti inquina lo stack
         //per la chiamata a funzione
         //non sono importanti i registri prenotati dopo, verranno rilasciati
         FElement fe=modname(var);
@@ -107,21 +107,22 @@ public class FunzExpr extends Espressione{
         perfCall(fe, values, text, var, env, acc);
     }
     public static void perfCall(FElement fe, Espressione[] values, Segmenti text,
-            Variabili vars, Environment env, Accumulator acc)throws CodeException
-    {
-        for(Espressione e:values){
-            e.toCode(text, vars, env, acc);
-            TypeElem t=e.returnType(vars, false);
+            Variabili vars, Environment env, Accumulator acc)throws CodeException{
+        text.addIstruzione("sub", "rsp", String.valueOf(8*values.length));
+        vars.getVarStack().doPush(values.length);
+        for(int i=0; i<values.length; i++){
+            values[i].toCode(text, vars, env, acc);
+            TypeElem t=values[i].returnType(vars, false);
             if(t.xmmReg()){
-                text.addIstruzione("movq", acc.getAccReg().getReg(), acc.getXAccReg().getReg());
-                text.addIstruzione("push", acc.getAccReg().getReg(), null);
+                text.addIstruzione("movq", "qword [rsp+"+(8*i)+"]", acc.getXAccReg().getReg());
             }
             else{
-                text.addIstruzione("push", acc.getAccReg().getReg(), null);
+                text.addIstruzione("mov", "qword [rsp+"+(8*i)+"]", acc.getAccReg().getReg());
             }
         }
         text.addIstruzione("call", fe.modname, null);
-        acc.popAll(text);//non modifica rax, xmm0 e rdx
+        vars.getVarStack().remPush(values.length);
+        vars.getVarStack().popAll(text);//non modifica rax, xmm0 e rdx
         //C'è un problema: dopo aver effettuato il pushall e viene generata un eccezione
         //durante l'esecuzione dei parametri (prima della chiamata alla funzione
         //vera e propria), chi pulisce lo stack? Non ci sarebbero problemi di esecuzione
@@ -170,68 +171,123 @@ public class FunzExpr extends Espressione{
                 ), Register.AX.getReg(rettype.realDim()));
     }
     /*
-     * Nota: non effettua il pushall
-     * @param modname
-     * @param rettype
-     * @param vals
-     * @param text
-     * @param vars
-     * @param env
-     * @param acc
-     * @throws CodeException 
-    public static void perffCall(String modname, TypeElem rettype, Espressione[] vals, Segmenti text,
-            Variabili vars, Environment env, Accumulator acc)throws CodeException{
-        for(Espressione e:vals){
-            e.toCode(text, vars, env, acc);
-            TypeElem t=e.returnType(vars, false);
+    robj punta alla vtable
+    l'oggetto è nell'accumulatore
+    offst è l'offset della funzione da chiamare all'interno della vtable
+    
+    Ricordare che il primo parametro è sempre l'oggetto
+    
+     non fà il pushall
+    */
+    public static void obtElem(int robj, int offst, Espressione[] exp, TypeElem type
+            , Segmenti text, Variabili var, Environment env, Accumulator acc)
+            throws CodeException{
+        text.addIstruzione("sub", "rsp", String.valueOf(8*exp.length+8));
+        var.getVarStack().doPush(exp.length+1);
+        text.addIstruzione("mov", "[rsp]", acc.getAccReg().getReg());
+        for(int i=0; i<exp.length; i++){
+            exp[i].toCode(text, var, env, acc);
+            TypeElem t=exp[i].returnType(var, false);
             if(t.xmmReg()){
-                text.addIstruzione("movq", acc.getAccReg().getReg(), acc.getXAccReg().getReg());
-                text.addIstruzione("push", acc.getAccReg().getReg(), null);
+                text.addIstruzione("movq", "[rsp+"+(8*i+8)+"]", acc.getXAccReg().getReg());
             }
             else{
-                text.addIstruzione("push", acc.getAccReg().getReg(), null);
+                text.addIstruzione("mov", "[rsp+"+(8*i+8)+"]", acc.getAccReg().getReg());
             }
         }
-        text.addIstruzione("call", modname, null);
-        if(rettype.name.equals("void"))
-            return;
-        if(rettype.xmmReg())
+        text.addIstruzione("call", "["+acc.getReg(robj).getReg()+"+"+offst+"]", null);
+        var.getVarStack().remPush(exp.length+1);
+        acc.libera(robj);
+        acc.popAll(text);//Niente eccezioni (per ora)
+        if(type.xmmReg())
             text.addIstruzione("movsd", acc.getXAccReg().getReg(), XReg.XMM0.getReg());
         else
-            text.addIstruzione("mov", acc.getAccReg().getReg(rettype.name
-                ), Register.AX.getReg(rettype.name));
+            text.addIstruzione("mov", acc.getAccReg().getReg(type.realDim()
+                ), Register.AX.getReg(type.realDim()));        
     }
+    /*
+    robj punta alla vtable
+    l'oggetto è nell'accumulatore
+    offst è l'offset della funzione da chiamare all'interno della vtable
+    input (GPR) contiene il valore da settare
+    
+    Ricordare che il primo parametro è sempre l'oggetto, il secondo è il valore da settare
+    
+     non fà il pushall
     */
-    /**
-     * Nota: non effettua il pushall, ma il popall e il libera sì
-     * Come il precedente, solo non chiama da label ma da puntatore memorizzato 
-     * in registro salvato.
-     * @param fd    il registro che punta alla vtable
-     * @param offset    l'offset della funzione da chiamare
-     * @param rettype
-     * @param vals
-     * @param text
-     * @param vars
-     * @param env
-     * @param acc
-     * @throws CodeException 
-     */
-    public static void perfCall(int fd, int offset, TypeElem rettype, Espressione[] vals, Segmenti text,
-            Variabili vars, Environment env, Accumulator acc)throws CodeException{
-        for(Espressione e:vals){
-            e.toCode(text, vars, env, acc);
-            TypeElem t=e.returnType(vars, false);
+    public static void setElem(int robj, int offst, int input, Espressione[] exp
+            , Segmenti text, Variabili var, Environment env, Accumulator acc)
+            throws CodeException{
+        text.addIstruzione("sub", "rsp", String.valueOf(8*exp.length+16));
+        var.getVarStack().doPush(exp.length+2);
+        text.addIstruzione("mov", "[rsp]", acc.getAccReg().getReg());
+        text.addIstruzione("mov", "[rsp+8]", acc.getReg(input).getReg());
+        for(int i=0; i<exp.length; i++){
+            exp[i].toCode(text, var, env, acc);
+            TypeElem t=exp[i].returnType(var, false);
             if(t.xmmReg()){
-                text.addIstruzione("push", acc.getAccReg().getReg(), null);
-                text.addIstruzione("movsd", "[rsp]", acc.getXAccReg().getReg());
-                //non ci sono istruzioni
+                text.addIstruzione("movq", "[rsp+"+(8*i+16)+"]", acc.getXAccReg().getReg());
             }
             else{
-                text.addIstruzione("push", acc.getAccReg().getReg()
-                        , null);
+                text.addIstruzione("mov", "[rsp+"+(8*i+16)+"]", acc.getAccReg().getReg());
+            }
+        }
+        text.addIstruzione("call", "["+acc.getReg(robj).getReg()+"+"+offst+"]", null);
+        var.getVarStack().remPush(exp.length+2);
+        acc.libera(robj);
+        acc.libera(input);
+        acc.popAll(text);//Niente eccezioni (per ora)     
+    }
+    /*
+    robj punta alla vtable
+    l'oggetto è nell'accumulatore
+    offst è l'offset della funzione da chiamare all'interno della vtable
+    input (XMM) contiene il valore da settare
+    
+    Ricordare che il primo parametro è sempre l'oggetto, il secondo è il valore da settare
+    
+     non fà il pushall
+    */
+    public static void setXElem(int robj, int offst, int input, Espressione[] exp
+            , Segmenti text, Variabili var, Environment env, Accumulator acc)
+            throws CodeException{
+        text.addIstruzione("sub", "rsp", String.valueOf(8*exp.length+16));
+        var.getVarStack().doPush(exp.length+2);
+        text.addIstruzione("mov", "[rsp]", acc.getAccReg().getReg());
+        text.addIstruzione("movq", "[rsp+8]", acc.getXReg(input).getReg());
+        for(int i=0; i<exp.length; i++){
+            exp[i].toCode(text, var, env, acc);
+            TypeElem t=exp[i].returnType(var, false);
+            if(t.xmmReg()){
+                text.addIstruzione("movq", "[rsp+"+(8*i+16)+"]", acc.getXAccReg().getReg());
+            }
+            else{
+                text.addIstruzione("mov", "[rsp+"+(8*i+16)+"]", acc.getAccReg().getReg());
+            }
+        }
+        text.addIstruzione("call", "["+acc.getReg(robj).getReg()+"+"+offst+"]", null);
+        var.getVarStack().remPush(exp.length+2);
+        acc.libera(robj);
+        acc.libera(input);
+        acc.popAll(text);//Niente eccezioni (per ora)     
+    }
+    /*
+    public static void perfCall(int fd, int offset, TypeElem rettype, Espressione[] vals, Segmenti text,
+            Variabili vars, Environment env, Accumulator acc)throws CodeException{
+        text.addIstruzione("sub", "rsp", String.valueOf(8*vals.length));
+        vars.getVarStack().doPush(vals.length);
+        for(int i=0; i<vals.length; i++){
+            vals[i].toCode(text, vars, env, acc);
+            TypeElem t=vals[i].returnType(vars, false);
+            if(t.xmmReg()){
+                text.addIstruzione("movq", "[rsp+"+(8*i)+"]", acc.getXAccReg().getReg());
+            }
+            else{
+                text.addIstruzione("mov", "[rsp+"+(8*i)+"]", acc.getAccReg().getReg());
             }
         }
         text.addIstruzione("call", "["+acc.getReg(fd).getReg()+"+"+offset+"]", null);
+        vars.getVarStack().remPush(vals.length);
         acc.libera(fd);
         acc.popAll(text);//Niente eccezioni (per ora)
         if(rettype.name.equals("void"))
@@ -241,5 +297,50 @@ public class FunzExpr extends Espressione{
         else
             text.addIstruzione("mov", acc.getAccReg().getReg(rettype.realDim()
                 ), Register.AX.getReg(rettype.realDim()));
+    }
+    */
+    /*
+    Queste funzioni devono essere utilizzate per l'allocazione di oggetti
+    */
+    public static void allc1(Segmenti text, Variabili vars, Environment env, Accumulator acc,
+            Espressione[] params)throws CodeException{
+        //Preliminari
+        vars.getVarStack().pushAll(text);
+        //memoria per parametri + valore di ritorno
+        int nump=params.length+1;
+        text.addIstruzione("sub", "rsp", String.valueOf(8*nump+8));
+        vars.getVarStack().doPush(nump+1);
+        //parametri
+        for(int i=0; i<params.length; i++){
+            params[i].toCode(text, vars, env, acc);
+            TypeElem t=params[i].returnType(vars, false);
+            if(t.xmmReg()){
+                text.addIstruzione("movq", "[rsp+"+(8*i+8)+"]", acc.getXAccReg().getReg());
+            }
+            else{
+                text.addIstruzione("mov", "[rsp+"+(8*i+8)+"]", acc.getAccReg().getReg());
+            }
+        }
+    }
+    /*
+    Nell'accumulatore vi è il puntatore alla memoria allocata
+    */
+    public static void allc2(Segmenti text, Variabili vars, Environment env, Accumulator acc,
+            Espressione[] params, FElement cos, TypeElem tp)throws CodeException{
+        if(cos.isExternFile())
+            Funz.getIstance().ext.add(cos.modname);
+        text.addIstruzione("mov", "[rsp]", acc.getAccReg().getReg());
+        text.addIstruzione("mov", "[rsp+"+(8*params.length+8)+"]", acc.getAccReg().getReg());
+        if(!tp.explicit){
+            //c'è l'_INIT_
+            if(Environment.template || tp.external || tp.isTemplate())
+                Funz.getIstance().ext.add("_INIT_"+tp.name);
+            text.addIstruzione("push", acc.getAccReg().getReg(), null);
+            text.addIstruzione("call", "_INIT_"+tp.name, null);
+        }
+        text.addIstruzione("call", cos.modname, null);
+        text.addIstruzione("pop", acc.getAccReg().getReg(), null);
+        vars.getVarStack().remPush(params.length+2);
+        vars.getVarStack().popAll(text);
     }
 }

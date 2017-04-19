@@ -104,7 +104,7 @@ public class Op2Expr extends Espressione{
             Accumulator acc)throws CodeException{
         if(Aritm.analyze(text, var, env, acc, this))
             return;
-        acc.pushAll(text);
+        var.getVarStack().pushAll(text);
         FElement modname=modname(var);
         if(!TryIstr.checkThrows(modname.errors, env))
             throw new CodeException("Errori di "+modname.name+" non gestiti correttamente");

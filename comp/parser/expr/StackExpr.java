@@ -66,8 +66,13 @@ public class StackExpr extends Espressione{
         for(int i=0; i<exp.length; i++)
             esp1[i+1]=exp[i].returnType(var, false);
         FElement cos=Funz.getIstance().request(Meth.costructorName(type), esp1, false, type.templates());
+        FunzExpr.allc1(seg, var, env, acc, exp);
+        VarEle ve=var.allocStack(tp.dimension(false), true);
+        seg.addIstruzione("lea", acc.getAccReg().getReg(), var.getVarStack().varPos(ve));
+        FunzExpr.allc2(seg, var, env, acc, exp, cos, tp);
+        /*
         //analogo a :new
-        acc.pushAll(seg);
+        var.getVarStack().pushAll(seg);
         //Bisogna stare attenti ora che possono essere generate eccezioni:
         //Il blocco non deve essere settato subito per permettere l'esecuzione
         //del distruttore, ma deve essere garantita la corretta terminazione
@@ -103,6 +108,7 @@ public class StackExpr extends Espressione{
         seg.addIstruzione("pop",acc.getAccReg().getReg(), null);//vero valore di ritorno
         vel.destroyable = !tp.explicit;
         acc.popAll(seg);
+        */
     }
     @Override
     public void println(int i){

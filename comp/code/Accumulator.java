@@ -329,18 +329,20 @@ public class Accumulator {
             }
         }
     }
-    public void pushAll(Segmenti text)throws CodeException{
-        pushAll(text, new int[0], new int[0]);
+    public int pushAll(Segmenti text)throws CodeException{
+        return pushAll(text, new int[0], new int[0]);
     }
     /**
      * 
      * @param text
      * @param salva i registri da salvare, ma verrano comunque eliminati al popAll
      * @param xsalva
+     * @return quante volte è stato effettuato il push di 8 byte
      * @throws CodeException 
      */
-    public void pushAll(Segmenti text, int[] salva, int[] xsalva)throws CodeException{
+    public int pushAll(Segmenti text, int[] salva, int[] xsalva)throws CodeException{
         qv.push(null);//termine, all'inizio data la struttura a stack
+        int ret=0;
         for(int i=0; i<xoc.length; i++){
             if(xoc[i]>-1){
                 boolean find=false;
@@ -352,8 +354,9 @@ public class Accumulator {
                 }
                 if(find)
                     continue;
-                text.addIstruzione("sub","rsp","16");
+                text.addIstruzione("sub","rsp","8");
                 text.addIstruzione("movsd","qword[rsp]",xregs[i].getReg());
+                ret++;
                 qv.push(new AcElem(xoc[i], true));
                 xoc[i]=-1;
             }
@@ -370,16 +373,19 @@ public class Accumulator {
                 if(find)
                     continue;
                 text.addIstruzione("push",regs[i].getReg(),null);
+                ret++;
                 qv.push(new AcElem(occup[i], false));
                 occup[i]=-1;
             }
         }
+        return ret;
     }
     /*
     I registri rax, xmm0 e rdx DEVONO essere lasciati inalterati, in quanto contengolo
     rispettivamente valore di ritorno (gp o xmm) e condizione di errore
+    ritorna il numero di pop do 8 byte
     */
-    public void popAll(Segmenti text)throws CodeException{
+    public int popAll(Segmenti text)throws CodeException{
         for(int i=0; i<occup.length; i++){
             occup[i]=-1;
         }
@@ -387,7 +393,8 @@ public class Accumulator {
             xoc[i] = -1;
         }
         if(qv.size()==0)
-            return;
+            return 0;
+        int ret=0;
         AcElem p=qv.pop();
         int j = 1;//esclude rax
         int xj = 1;//esclude xmm0
@@ -400,6 +407,7 @@ public class Accumulator {
                 xoc[xj]=p.val;
                 text.addIstruzione("movsd",xregs[xj].getReg(),"qword[rsp]");
                 text.addIstruzione("add","rsp","16");
+                ret++;
                 xj++;
             }
             else{
@@ -409,9 +417,11 @@ public class Accumulator {
                     throw new CodeException(Lingue.getIstance().format("m_cod_endregs"));
                 occup[j]=p.val;
                 text.addIstruzione("pop",regs[j].getReg(), null);
+                ret++;
                 j++;
             }
             p=qv.pop();
         }
+        return ret;
     }
 }
