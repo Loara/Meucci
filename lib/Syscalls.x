@@ -5,10 +5,10 @@ modulo Syscalls depends Pointers{
 	}
 	uint open(pt name, int flag, int mode){
 		%a{
-	mov	eax, 2
-	mov	rdi,[rbp+32]
+	mov	eax, 2	;Il protocollo di chiamata è cambiato
+	mov	rdi,[rbp+16]
 	mov	esi,[rbp+24]
-	mov	edx,[rbp+16]
+	mov	edx,[rbp+32]
 	syscall
 		}
 	}
@@ -22,18 +22,18 @@ modulo Syscalls depends Pointers{
 	long Pwrite(int fd, pt buf, ulong size){
 		%a{
 	mov	eax,1
-	mov	edi,[rbp+32]
+	mov	edi,[rbp+16]
 	mov	rsi,[rbp+24]
-	mov	rdx,[rbp+16]
+	mov	rdx,[rbp+32]
 	syscall
 		}
 	}
 	long Pread(int fd, pt buf, ulong size){
 		%a{
 	mov	eax,0
-	mov	edi,[rbp+32]
+	mov	edi,[rbp+16]
 	mov	rsi,[rbp+24]
-	mov	rdx,[rbp+16]
+	mov	rdx,[rbp+32]
 	syscall
 		}
 	}
@@ -96,12 +96,12 @@ modulo Syscalls depends Pointers{
 	pt mmap(pt addr, ulong size, int prot, int flags, int fd, ulong off){
 		%a{
 	mov	eax, 9
-	mov	rdi, [rbp+56]
-	mov	rsi, [rbp+48]
-	mov	edx, [rbp+40]
-	mov	r10d, [rbp+32]
-	mov	r8d, [rbp+24]
-	mov	r9, [rbp+16]
+	mov	rdi, [rbp+16]
+	mov	rsi, [rbp+24]
+	mov	edx, [rbp+32]
+	mov	r10d, [rbp+40]
+	mov	r8d, [rbp+48]
+	mov	r9, [rbp+56]
 	syscall
 		}
 	}
@@ -113,8 +113,8 @@ modulo Syscalls depends Pointers{
 	int munmap(pt addr, ulong size){
 		%a{
 	mov	eax, 11
-	mov	rdi, [rbp+24]
-	mov	rsi, [rbp+16]
+	mov	rdi, [rbp+16]
+	mov	rsi, [rbp+24]
 	syscall
 		}
 	}
