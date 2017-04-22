@@ -19,7 +19,6 @@ package comp.scanner;
 import comp.general.CompException;
 import comp.general.Info;
 import comp.general.Lingue;
-import comp.general.Master;
 import comp.general.Stack;
 import comp.general.VScan;
 import java.util.ArrayList;
@@ -143,11 +142,10 @@ public class Analyser {
         }
     }
     protected boolean analyzeASM(VScan<Character> scan, ArrayList<Token> tok, int r){
-        if(scan.get()!='%'||scan.get(1)!='a'||scan.get(2)!='{')
-            return false;
+        //%a{
+        scan.next();
+        scan.next();
         StringBuilder build=new StringBuilder();
-        scan.next();
-        scan.next();
         while(scan.next()){
             if(scan.get()=='}'){
                 tok.add(new ASMToken(build.toString(),r));

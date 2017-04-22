@@ -28,6 +28,6 @@ public class ASMToken extends Token{
     }
     @Override
     public String toString(){
-        return "ASM: "+code;
+        return "ASM: ";
     }
 }
