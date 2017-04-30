@@ -455,9 +455,17 @@ public class Master {
             for(TypeDef td:mod.type){
                 exportType(new TypeElem(td, false), out);
             }
-            out.writeInt(mod.ca.length);
-            for(Callable c:mod.ca)
-                exportCall(new FElement(c, false), out);
+            //Vanno scritte solo le funzioni non shadow
+            int num=0;
+            for(Callable c:mod.ca){
+                if(!c.isShadow())
+                    num++;
+            }
+            out.writeInt(num);
+            for(Callable c:mod.ca){
+                if(!c.isShadow())
+                    exportCall(new FElement(c, false), out);
+            }
         }
         writeTemplates(mod);
     }

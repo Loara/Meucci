@@ -52,6 +52,8 @@ public class FunzMem extends Callable{
         int riga=super.nome.getRiga();
         if(super.temp.length!=0)
             throw new ParserException(Lingue.getIstance().format("m_par_temacc"), riga);
+        if(shadow)
+            throw new ParserException(Lingue.getIstance().format("m_par_shderr"), riga);
         super.temp=ctemplate;
         if(nome instanceof IdentToken){
             String n=((IdentToken)nome).getString();

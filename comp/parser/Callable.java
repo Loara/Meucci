@@ -54,11 +54,12 @@ public abstract class Callable implements Serializable{
     private String mod;
     protected boolean noglobal;
     protected String[] errors;//Errori che può generare. CONTA l'ordine
+    protected boolean shadow;
     protected Callable(String m){
         //non fa niente
         mod=m;
     }
-    public Callable(Token n, FunzParam[] d, MultiIstr i, String mod, String[] errors){
+    public Callable(Token n, boolean shadow, FunzParam[] d, MultiIstr i, String mod, String[] errors){
         nome=n;
         dichs=d;
         istr=i;
@@ -67,6 +68,7 @@ public abstract class Callable implements Serializable{
         temp=new Template[0];
         this.mod=mod;
         this.errors=errors;
+        this.shadow=shadow;
     }
     /**
      * Da modificare
@@ -94,10 +96,17 @@ public abstract class Callable implements Serializable{
             //costruttori o distruttori
         }
         else{
+            if(t.get() instanceof IdentToken && ((IdentToken)t.get()).getString().equals("shadow")){
+                shadow=true;
+                t.nextEx();
+            }
+            else
+                shadow=false;
             if(!(t.get() instanceof IdentToken))
                 throw new ParserException(Lingue.getIstance().format("m_par_invret"), t);
-            else
+            else{
                 Info.isForbitten(((IdentToken)t.get()).getString(), t.get().getRiga());
+            }
             retType=new TypeName(t);
             nome=t.get();
             t.nextEx();
@@ -158,6 +167,9 @@ public abstract class Callable implements Serializable{
             n[i]=temp[i].getIdent();
         }
         return n;
+    }
+    public boolean isShadow(){
+        return shadow;
     }
     public String[] errors(){
         return errors;

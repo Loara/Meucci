@@ -54,6 +54,8 @@ public class Costructor extends Callable{
         super(t, modulo);
         if(temp.length!=0)
             throw new ParserException(Lingue.getIstance().format("m_par_temcos"), super.nome);
+        if(shadow)
+            throw new ParserException(Lingue.getIstance().format("m_par_shderr"), super.nome);
         temp=params;
         if(!(nome instanceof IdentToken) || !((IdentToken)nome).getString().equals("init"))
             throw new ParserException(Lingue.getIstance().format("m_par_invcos"),t);
