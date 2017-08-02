@@ -21,9 +21,11 @@ import comp.code.Environment;
 import comp.code.Register;
 import comp.code.Segmenti;
 import comp.code.TypeElem;
+import comp.code.Types;
 import comp.code.vars.Variabili;
 import comp.general.Info;
 import comp.parser.Espressione;
+import comp.parser.expr.CastExpr;
 import comp.parser.expr.IdentArray;
 import comp.parser.expr.NumExpr;
 import comp.parser.expr.Op2Expr;
@@ -35,10 +37,10 @@ import comp.parser.expr.Op2Expr;
 public class Aritm {
     public static final String[] Car2={"+", "-", "&", "|", ":xor"}, CarA2={"*", "/", ":mod"}, Sar2={"<<", ">>"},
             Bar2={"==", ">", "<", ">=", "<=", "!="}, bol2={"&&", "||", "->"},
-            pt={"==", "!="}, XO2={"+", "-", "*", "/"};
+            pt={"==", "!="}, XO2={"+", "-", "*", "/"}, ptOp={"+", "-"};
     public static final String[] Car2V={"add", "sub", "and", "or", "xor"},CarA2V={"imul", "idiv", "idiv"}, 
             Sar2V={"sal", "sar", "shr"}, Bar2V={"e", "g", "l", "ge", "le", "ne"},
-            XO2V={"addsd", "subsd", "mulsd", "divsd"};
+            XO2V={"addsd", "subsd", "mulsd", "divsd"}, ptOpV={"add", "sub"};
     //bol2V={"z", "nz"}, non esiste
     public static int isIn(String t, String[] ar){
         for(int i=0; i<ar.length; i++)
@@ -72,13 +74,29 @@ public class Aritm {
                 return true;
             }
         }
+        i=isIn(ops, ptOp);
+        if(i!=-1){
+            if(r1.name.equals("pt") && r2.isUnsignedNum()){
+                if(IA1){
+                    long num=((IdentArray)op.getVars()[1]).numValue();
+                    op.getVars()[0].toCode(text, vars, env, acc);
+                    text.addIstruzione(ptOpV[i], acc.getAccReg().getReg(), String.valueOf(num));
+                    return true;
+                }
+                int d=Aritm.initDataCl(text, vars, env, acc, op);
+                CastExpr.castWrt(text, acc.getReg(d), r2.realDim(), 8, false);
+                text.addIstruzione(ptOpV[i], acc.getAccReg().getReg(), acc.getReg(d).getReg());
+                acc.libera(d);
+                return true;
+            }
+        }
         if(mult(text, vars, env, acc, op))
             return true;
         i=isIn(ops, Bar2);
-            if(i!=-1 && r1.number && r2.number){
-                int md=r1.realDim();
-                if(md<r2.realDim())
-                    md=r2.realDim();
+        if(i!=-1 && r1.number && r2.number){
+            int md=r1.realDim();
+            if(md<r2.realDim())
+                md=r2.realDim();
             if(IA1){
                 long num=((IdentArray)op.getVars()[1]).numValue();
                 op.getVars()[0].toCode(text, vars, env, acc);
@@ -175,6 +193,9 @@ public class Aritm {
         int i=isIn(val, CarA2);
         if(i!=-1 && t1.number && t2.number)
             return true;
+        i=isIn(val, ptOp);
+        if(i!=-1 && t1.name.equals("pt") && t2.isUnsignedNum())
+            return true;
         i=isIn(val, Car2);
         if(i!=-1 && t1.number && t2.number)
             return true;
@@ -202,9 +223,9 @@ public class Aritm {
                 rt2=op.getVars()[1].returnType(vars, false);
         int i=isIn(ops, CarA2);
         if(i!=-1){
-            if(Info.varNum(rt1.name) && Info.varNum(rt2.name)){
+            if(rt1.number && rt2.number){
                 String code=CarA2V[i];
-                boolean uns=Info.unsignNum(rt1.name)&&Info.unsignNum(rt2.name);
+                boolean uns=rt1.isUnsignedNum() && rt2.isUnsignedNum();
                 int md=rt1.realDim();
                 if(md<rt2.realDim())
                     md=rt2.realDim();
@@ -304,6 +325,12 @@ public class Aritm {
                 return "boolean";
             if("ubyte".equals(t2.name) && isIn(op.getName(), Sar2)!=-1)
                 return retTypeNum(t1.name, t2.name);
+            return null;
+        }
+        if(t1.name.equals("pt") && t2.isUnsignedNum()){
+            if(isIn(op.getName(), ptOp) != -1){
+                return "pt";
+            }
             return null;
         }
         if("boolean".equals(t1.name)&&"boolean".equals(t2.name)){

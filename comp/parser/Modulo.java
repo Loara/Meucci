@@ -21,6 +21,8 @@ import comp.code.CodeException;
 import comp.code.Environment;
 import comp.code.Funz;
 import comp.code.Meth;
+import comp.code.ModLoader;
+import comp.code.ModLoader.MLdone;
 import comp.code.Segmenti;
 import comp.code.Types;
 import comp.code.template.Notifica;
@@ -60,6 +62,7 @@ import java.util.HashSet;
 public class Modulo {
     public final String nome;
     public final String[] deps;
+    public final Boolean[] publ;
     public final TypeDef[] type, Ttype;
     public final Callable[] ca, Tca;
     public final Dichiarazione[] internal;//variabili interne, non si esportano, sono shadow
@@ -76,15 +79,24 @@ public class Modulo {
             //dipendenze
             if(t.get() instanceof IdentToken && ((IdentToken)t.get()).getString().equals("depends")){
                 Stack<String> de=new Stack<>(String.class);
+                Stack<Boolean> pb=new Stack<>(Boolean.class);
                 t.nextEx();
                 while(t.get() instanceof IdentToken){
+                    if(((IdentToken)t.get()).getString().equals("public")){
+                        pb.push(true);
+                        t.nextEx();
+                    }
+                    else
+                        pb.push(false);
                     de.push(((IdentToken)t.get()).getString());
                     t.nextEx();
                 }
                 deps=de.toArray();
+                publ=pb.toArray();
             }
             else{
                 deps=new String[0];
+                publ=new Boolean[0];
             }
             
             if(!(t.get() instanceof PareToken && ((PareToken)t.get()).s=='{'))
@@ -181,9 +193,10 @@ public class Modulo {
         Types.getIstance().clearAll();
         TNumbers.getIstance().clearAll();
         Environment.currentModulo=nome;
-        HashSet<String> loadedModules=new HashSet<>();//Per evitare di caricare
+        HashSet<MLdone> loadedModules=new HashSet<>();//Per evitare di caricare
         for(String dep:deps){
-            mas.importModulo(dep, nome, loadedModules);
+            ModLoader.getIstance().importModulo(loadedModules, dep, nome);
+            //Bisogna migliorare questo passaggio
         }
         boolean b;
         for(TypeDef t:type){

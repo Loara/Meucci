@@ -21,6 +21,8 @@ import comp.code.Environment;
 import comp.code.Funz;
 import comp.code.Funz.FElement;
 import comp.code.Meth;
+import comp.code.ModLoader;
+import comp.code.ModLoader.MLdone;
 import comp.code.Segmenti;
 import comp.code.TypeElem;
 import comp.code.Types;
@@ -29,22 +31,15 @@ import comp.code.template.Substitutor;
 import comp.code.template.TNumbers;
 import comp.parser.Callable;
 import comp.parser.Dichiarazione;
-import comp.parser.Membro;
 import comp.parser.Modulo;
 import comp.parser.ParserException;
 import comp.parser.TypeDef;
-import comp.parser.TypeName;
-import comp.parser.template.NumDich;
 import comp.parser.template.TemplateEle;
 import comp.scanner.Analyser;
 import comp.scanner.Analyser.ScanException;
 import comp.scanner.Token;
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -53,18 +48,14 @@ import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import static comp.general.FileManager.createAsmFile;
 
 /**
  * Gestisce tutti i passi della compilazione
  * @author loara
  */
 public class Master {
-    
     public static String currentFile;
-    
-    public ArrayList<String> createdFile;
-    private String cpath;//percorso corrente
-    public final ArrayList<String> resps;
     private String[] oname;
     public boolean compile, assemble, link;
     
@@ -84,7 +75,7 @@ public class Master {
             return;
         MPrinter mp;
         MPrinter ep;
-        for(String f:m.createdFile){
+        for(String f:FileManager.createdFile){
             Process p=Runtime.getRuntime().exec(new String[]{"nasm", "-felf64", "-o"+f+".o", f+".asm"});
             mp= new MPrinter(p.getInputStream(), false);
             ep= new MPrinter(p.getErrorStream(), true);
@@ -92,18 +83,18 @@ public class Master {
             ep.start();
             int ret=p.waitFor();
             if(ret!=0){
-               deleteAll(0, m.createdFile);
+               deleteAll(0, FileManager.createdFile);
                return;
             }
         }
         if(!m.link){
-            deleteAll(2, m.createdFile);
+            deleteAll(2, FileManager.createdFile);
             return;
         }
-        String[] s=new String[1+m.createdFile.size()];
+        String[] s=new String[1+FileManager.createdFile.size()];
         s[0]="ld";
-        for(int i=0; i<m.createdFile.size(); i++){
-            s[1+i]=m.createdFile.get(i)+".o";
+        for(int i=0; i<FileManager.createdFile.size(); i++){
+            s[1+i]=FileManager.createdFile.get(i)+".o";
         }
         Process pr=Runtime.getRuntime().exec(s);
         mp= new MPrinter(pr.getInputStream(), false);
@@ -111,7 +102,7 @@ public class Master {
         mp.start();
         ep.start();
         int ret=pr.waitFor();
-        deleteAll(0, m.createdFile);
+        deleteAll(0, FileManager.createdFile);
     }
     private void detect(String[] params, Stack<String> fil){
         for (String param : params) {
@@ -144,13 +135,12 @@ public class Master {
         }
     }
     public Master(){
-        resps=new ArrayList<>();
-        resps.add("/usr/include/meucci");
+        FileManager.resps.add("/usr/include/meucci");
     }
     public void compila(String[] files)throws Exception{
-        createdFile=new ArrayList<>();
+        FileManager.createdFile=new ArrayList<>();
         oname=new String[files.length];
-        cpath=System.getProperty("user.dir");
+        FileManager.cpath=System.getProperty("user.dir");
         Modulo[] mods=new Modulo[files.length];
         for(int i=0; i<oname.length; i++){
             oname[i]=files[i].substring(files[i].lastIndexOf("/")+1, files[i].length()-2);
@@ -185,11 +175,11 @@ public class Master {
     }
     public Modulo parser(VScan<Token> t)throws ParserException, IOException, CodeException{
         Modulo m=new Modulo(t);
-        exportModulo(m);
+        ModLoader.getIstance().exportModulo(m);
         return m;
     }
     public void codifica(Modulo m)throws IOException, CodeException, ClassNotFoundException{
-        Path p=this.createAsmFile(m.nome);
+        Path p=FileManager.createAsmFile(m.nome);
         try(PrintWriter pw=new PrintWriter(Files.newBufferedWriter(p, StandardOpenOption.WRITE, 
                 StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING))){
             pw.println("\tDEFAULT\tREL");
@@ -200,7 +190,7 @@ public class Master {
     public void codificaTemplate(HashSet<Notifica> tty, HashSet<Notifica> tfun)throws CodeException,
             IOException, ClassNotFoundException{
         boolean type;
-        String modulo;
+        MLdone modulo;
         Notifica selected;
         Stack<String> st=new Stack<>(String.class);
         while(true){
@@ -214,12 +204,11 @@ public class Master {
             }
             else
                 type=true;
-            modulo=selected.modulo;
-            rey reb=readTemplates(modulo);
+            modulo=ModLoader.getIstance().getIfIn(selected.modulo);
             while(true){
                 if(type){
                     TypeDef h=null;
-                    for(TypeDef td:reb.td){
+                    for(TypeDef td:modulo.Ttyp){
                         if(td.getName().equals(selected.nome)){
                             h=td;
                             break;
@@ -235,7 +224,7 @@ public class Master {
                 }
                 else{
                     Callable h=null;
-                    for(Callable td:reb.ca){
+                    for(Callable td:modulo.Tcal){
                         if(td.getName().equals(selected.nome)){
                             h=td;
                             break;
@@ -246,9 +235,9 @@ public class Master {
                     codificaTFunz(h, selected.parametri);
                     selected.segnato=true;
                 }
-                selected=getNoSigned(tty, modulo);
+                selected=getNoSigned(tty, modulo.name);
                 if(selected==null){
-                    selected=getNoSigned(tfun, modulo);
+                    selected=getNoSigned(tfun, modulo.name);
                     if(selected==null)
                         break;
                     else
@@ -322,7 +311,7 @@ public class Master {
     }
     public void codificaTFunz(Callable funz, TemplateEle[] temps)
     throws CodeException, IOException, ClassNotFoundException{
-        Path pa=createAsmFile(Meth.modName(funz, temps));
+        Path pa=FileManager.createAsmFile(Meth.modName(funz, temps));
         try(PrintWriter out=new PrintWriter(Files.newBufferedWriter(pa, StandardOpenOption.WRITE,
                         StandardOpenOption.CREATE))){
             settaAmbiente(funz.getModulo());
@@ -372,8 +361,18 @@ public class Master {
         Types.getIstance().clearAll();
         Funz.getIstance().clearAll();
         TNumbers.getIstance().clearAll();
-        HashSet<String> ml=new HashSet<>();
-        importModulo(modulo, modulo, ml);
+        HashSet<MLdone> ml=new HashSet<>();
+        ModLoader.getIstance().importModulo(ml, modulo, modulo);
+        for(MLdone m:ml){
+            for(TypeElem te:m.typ)
+                Types.getIstance().load(te);
+            for(FElement fe:m.fun)
+                Funz.getIstance().load(fe);
+            for(TypeDef te:m.Ttyp)
+                Types.getIstance().load(te, m.external);
+            for(Callable fe:m.Tcal)
+                Funz.getIstance().load(fe, m.external);
+        }
     }
     private Notifica getNoSigned(HashSet<Notifica> nos){
         for(Notifica no:nos){
@@ -388,253 +387,5 @@ public class Master {
                 return no;
         }
         return null;
-    }
-    /**
-     * Cerca il file del manifesto dai responsitory
-     * @param name
-     * @return
-     * @throws IOException 
-     */
-    public Path findMod(String name)throws IOException{
-        Path p=Paths.get(cpath+"/"+name+".in");
-        if(Files.exists(p) && Files.isReadable(p))
-            return p;
-        else if(!Files.exists(p)){
-            for(String resp:resps){
-                p=Paths.get(resp+"/"+name+".in");
-                if(Files.exists(p)){
-                    if(Files.isReadable(p))
-                        return p;
-                    else
-                        throw new IOException(Lingue.getIstance().format("m_nofile", name, "in"));
-                }
-            }
-            throw new IOException(Lingue.getIstance().format("m_nofile", name, "in"));
-        }
-        else
-            throw new IOException(Lingue.getIstance().format("m_nofile", name, "in"));
-    }
-    public Path createAsmFile(String path)throws IOException{
-        Path p=Paths.get(path+".asm");
-        Files.deleteIfExists(p);
-        createdFile.add(path);
-        return p;
-    }
-    public Path findTFile(String name, boolean thrw)throws IOException{
-        Path p=Paths.get(cpath+"/"+name+".tin");
-        if(Files.exists(p) && Files.isReadable(p))
-            return p;
-        else if(!Files.exists(p)){
-            for(String resp:resps){
-                p=Paths.get(resp+"/"+name+".tin");
-                if(Files.exists(p)){
-                    if(Files.isReadable(p))
-                        return p;
-                    else
-                        throw new IOException(Lingue.getIstance().format("m_nofile", name, "tin"));
-                }
-            }
-            if(thrw)
-                throw new IOException(Lingue.getIstance().format("m_nofile", name, "tin"));
-            else
-                return null;
-        }
-        else
-            throw new IOException(Lingue.getIstance().format("m_nofile", name, "tin"));
-    }
-    public void exportModulo(Modulo mod)throws IOException, CodeException{//attenzione:non esportare funzioni shadow
-        Path na=Paths.get(mod.nome+".in");
-        try(ObjectOutputStream out=new ObjectOutputStream(new BufferedOutputStream
-        (Files.newOutputStream(na, StandardOpenOption.WRITE, StandardOpenOption.CREATE,
-                StandardOpenOption.TRUNCATE_EXISTING)))){
-            //out.writeUTF(mod.nome);non interessa il nome
-            out.writeInt(mod.deps.length);
-            for(String i:mod.deps)
-                out.writeUTF(i);
-            out.writeInt(mod.type.length);
-            for(TypeDef td:mod.type){
-                exportType(new TypeElem(td, false), out);
-            }
-            //Vanno scritte solo le funzioni non shadow
-            int num=0;
-            for(Callable c:mod.ca){
-                if(!c.isShadow())
-                    num++;
-            }
-            out.writeInt(num);
-            for(Callable c:mod.ca){
-                if(!c.isShadow())
-                    exportCall(new FElement(c, false), out);
-            }
-        }
-        writeTemplates(mod);
-    }
-    /**
-     * Aggiunge i Tipi e i Callable ai Funz e Types (anche template), e lo fa ricorsivamente.
-     * Prima di utilizzarlo assicurarsi di lanciare clearAll ai suddetti
-     * 
-     * L'HashSet è necessario per evitare di caricare più volte lo stesso modulo
-     * @param name modulo da caricare
-     * @param oname modulo che effettua il caricamento
-     * @param ml
-     * @throws IOException 
-     * @throws java.lang.ClassNotFoundException 
-     */
-    public void importModulo(String name, String oname, HashSet<String> ml)throws IOException, ClassNotFoundException{
-        if(ml.contains(name))
-            return;//se già caricato
-        boolean ext=!(name.equals(oname));
-        Path p=findMod(name);
-        String[] de;
-        try(ObjectInputStream in=new ObjectInputStream(new BufferedInputStream
-        (Files.newInputStream(p, StandardOpenOption.READ)))){
-            int i=in.readInt();
-            de=new String[i];
-            for(int j=0; j<i; j++)
-                de[j]=in.readUTF();
-            i=in.readInt();
-            for(int j=0; j<i; j++)
-                Types.getIstance().load(importType(in, ext));
-            i=in.readInt();
-            for(int j=0; j<i; j++){
-                FElement fe=importCall(in, ext);
-                Funz.getIstance().load(fe);
-            }
-        }
-        rey re=readTemplates(name);//Ora lo cerca
-        Types.getIstance().getClassList().addAll(re.td);
-        Funz.getIstance().getFunzList().addAll(re.ca);
-        ml.add(name);
-        for(String dep:de)
-            importModulo(dep, oname, ml);
-    }
-    private void exportType(TypeElem te, ObjectOutputStream out)throws IOException{
-        out.writeUTF(te.name);
-        out.writeBoolean(te.explicit);
-        out.writeInt(te.subtypes.length);
-        for(Membro mem:te.subtypes){
-            int perms=0;
-            //non ci sono override
-            if(mem.explicit)
-                perms=1;
-            else if(mem.ghost)
-                perms=2;
-            perms*=3;
-            if(mem.shadow)
-                perms+=1;
-            if(mem.read)
-                perms+=2;
-            out.writeByte(perms & 0xFF);
-            out.writeObject(mem.getType());
-            out.writeUTF(mem.getIdent());
-            out.writeInt(mem.params.length);
-            for(TypeName t:mem.params)
-                out.writeObject(t);
-            if(mem.packed==null)
-                out.writeBoolean(false);
-            else{
-                out.writeBoolean(true);
-                //Sicuramente NumDich
-                out.writeLong(((NumDich)mem.packed).getNum());
-            }
-        }
-        if(te.extend!=null){
-            out.writeBoolean(true);
-            out.writeObject(te.extend);
-        }
-        else
-            out.writeBoolean(false);
-    }
-    private TypeElem importType(ObjectInputStream in, boolean ext)throws IOException,
-            ClassNotFoundException{
-        String name=in.readUTF();
-        boolean explic=in.readBoolean();
-        int i=in.readInt();
-        Membro[] mem=new Membro[i];
-        for(int j=0; j<i; j++){
-            int perms=in.readByte()&0xFF;
-            TypeName ty=(TypeName)in.readObject();
-            String na=in.readUTF();
-            int len=in.readInt();
-            TypeName[] par=new TypeName[len];
-            for(int k=0; k<len; k++)
-                par[k]=(TypeName)in.readObject();
-            TemplateEle pack=null;
-            if(in.readBoolean())
-                pack=new NumDich(in.readLong(), 2);
-            boolean shadow=(perms % 3)==1;
-            boolean read=(perms % 3)==2;
-            perms=perms/3;
-            boolean explicit=(perms % 3)==1;
-            boolean ghost=(perms % 3)==2;
-            mem[j]=new Membro(ty, na, par, shadow, read, explicit, ghost, pack);
-        }
-        TypeName ex=null;
-        if(in.readBoolean())
-            ex=(TypeName)in.readObject();
-        return new TypeElem(name, ex, mem, ext, explic);
-    }
-    private void exportCall(FElement fe, ObjectOutputStream out)throws IOException{
-        out.writeUTF(fe.name);
-        out.writeUTF(fe.modname);
-        out.writeObject(fe.ret);
-        out.writeInt(fe.trequest.length);
-        for(TypeName t:fe.trequest)
-            out.writeObject(t);
-        out.writeBoolean(fe.oper);
-        int y = fe.errors.length;
-        out.writeInt(y);
-        for(int i = 0; i<y; i++){
-            out.writeUTF(fe.errors[i]);//Conta l'ordine
-        }
-    }
-    private FElement importCall(ObjectInputStream in, boolean ext)throws IOException,
-            ClassNotFoundException{
-        String name=in.readUTF();
-        String modname=in.readUTF();
-        TypeName ret;
-        ret=(TypeName)in.readObject();
-        int i=in.readInt();
-        TypeName[] ty=new TypeName[i];
-        for(int j=0; j<i; j++)
-            ty[j]=(TypeName)in.readObject();
-        boolean op=in.readBoolean();
-        String[] err = new String[in.readInt()];
-        for(int u =0; u<err.length; u++)
-            err[u]=in.readUTF();
-        return new FElement(name, modname, ty, ret, op, ext, false, err);
-    }
-    private void writeTemplates(Modulo mod)throws IOException{
-        if(mod.Tca.length==0 && mod.Ttype.length==0)
-            return;
-        Path p=Paths.get(cpath+"/"+mod.nome+".tin");
-        try(ObjectOutputStream out=new ObjectOutputStream(new 
-            BufferedOutputStream(Files.newOutputStream(p, StandardOpenOption.WRITE, 
-                StandardOpenOption.CREATE)))){
-            out.writeObject(mod.Ttype);
-            out.writeObject(mod.Tca);
-        }
-    }
-    private rey readTemplates(String mod)throws IOException{
-        Path p=findTFile(mod, false);
-        rey ret=new rey();
-        if(p==null){
-            ret.td=new TypeDef[0];
-            ret.ca=new Callable[0];
-            return ret;
-        }
-        try(ObjectInputStream in=new ObjectInputStream(new 
-            BufferedInputStream(Files.newInputStream(p, StandardOpenOption.READ)))){
-            ret.td=(TypeDef[])in.readObject();
-            ret.ca=(Callable[])in.readObject();
-        }
-        catch(ClassNotFoundException ex){
-            throw new IOException(ex);
-        }
-        return ret;
-    }
-    public static class rey{
-        TypeDef[] td;
-        Callable[] ca;
     }
 }

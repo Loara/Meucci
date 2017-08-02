@@ -19,6 +19,7 @@ package comp.parser.expr;
 import comp.code.Accumulator;
 import comp.code.CodeException;
 import comp.code.Environment;
+import comp.code.Register;
 import comp.code.Segmenti;
 import comp.code.TypeElem;
 import comp.code.Types;
@@ -56,28 +57,28 @@ public class CastExpr extends Espressione{
         if(t1.isNum() && t2.isNum()){
             int dt1=t1.realDim();//tipo di ritorno
             int dt2=t2.realDim();//ritorno espressione
-            if(dt1>dt2){
-                if(Info.unsignNum(t1.name)){
-                    if(dt1==8 && dt2==4){
-                        //NON È NECESSARIO IN QUANTO OGNI ISTRUZIONE A 32 BIT
-                        //AZZERA I 32 BIT PIÙ SIGNIFICATIVI (Intel vol 1 §3.4.2)
-                    }
-                    else
-                        text.addIstruzione("movzx", acc.getAccReg().getReg(dt1), 
-                                acc.getAccReg().getReg(dt2));
-                }
-                else{
-                    if(dt1==8 && dt2==4){
-                        text.addIstruzione("movsxd", acc.getAccReg().getReg(), 
-                                acc.getAccReg().getReg(4));
-                    }
-                    else
-                        text.addIstruzione("movsx", acc.getAccReg().getReg(dt1), 
-                                acc.getAccReg().getReg(dt2));
-                }
-            }
+            castWrt(text, acc.getAccReg(), dt2, dt1, !t1.isUnsignedNum());
         }
-        //Tolti tutti i controlli
+    }
+    public static void castWrt(Segmenti seg, Register reg, int odim, int ndim, boolean sign)
+    throws CodeException{
+        if(odim >= ndim)
+            return;
+        if(sign){
+            if(ndim==8 && ndim==4){
+                seg.addIstruzione("movsxd", reg.getReg(), reg.getReg(4));
+            }
+            else
+                seg.addIstruzione("movsx", reg.getReg(ndim), reg.getReg(odim));
+        }
+        else{
+            if(ndim==8 && odim==4){
+                //NON È NECESSARIO IN QUANTO OGNI ISTRUZIONE A 32 BIT
+                //AZZERA I 32 BIT PIÙ SIGNIFICATIVI (Intel vol 1 §3.4.2)
+            }
+            else
+                seg.addIstruzione("movzx", reg.getReg(ndim), reg.getReg(odim));
+        }
     }
     @Override
     public void println(int i){
