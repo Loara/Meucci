@@ -67,27 +67,42 @@ public class Types {
     public Substitutor getSubstitutor(){
         return suds;
     }
-    /**
+    /*
      * Carica un tipo. Decide automaticamente dove inserirlo
      * @param e
      * @param ext
      * @return
      * @throws CodeException 
-     */
-    public boolean load(TypeDef e, boolean ext)throws CodeException{
+     *
+    public boolean logad(TypeDef e, boolean ext)throws CodeException{
         if(e.templates().length!=0){
             if(!ext)
                 return cl.add(e);
         }
         return elems.add(new TypeElem(e, ext));
     }
+    */
     public boolean load(TypeElem e){
         return elems.add(e);
+    }
+    public boolean loadAll(TypeElem[] e){
+        boolean a=true;
+        for(TypeElem tt:e){
+            a=a && elems.add(tt);
+        }
+        return a;
+    }
+    public boolean loadAllTemplates(TypeDef[] td){
+        boolean a=true;
+        for(TypeDef tt:td){
+            a=a && cl.add(tt);
+        }
+        return a;
     }
     public boolean loadTemplate(TypTemplate td)throws CodeException{
         td.validate();
         boolean b=Telems.add(new TypeElem(td.getIdent(), td.ext(), new Membro[0],
-                false, td.isRef(), td.isNum()));//non è mai esterno
+                Environment.currentModulo, td.isRef(), td.isNum()));//non è mai esterno
         return b;
     }
     public boolean removeTemplate(TypTemplate td){

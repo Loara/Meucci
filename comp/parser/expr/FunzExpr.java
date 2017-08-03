@@ -20,7 +20,7 @@ import comp.code.Accumulator;
 import comp.code.CodeException;
 import comp.code.Environment;
 import comp.code.Funz;
-import comp.code.Funz.FElement;
+import comp.code.FElement;
 import comp.code.Register;
 import comp.code.Segmenti;
 import comp.code.TypeElem;
@@ -333,7 +333,7 @@ public class FunzExpr extends Espressione{
         text.addIstruzione("mov", "[rsp+"+(8*params.length+8)+"]", acc.getAccReg().getReg());
         if(!tp.explicit){
             //c'è l'_INIT_
-            if(Environment.template || tp.external || tp.isTemplate())
+            if(Environment.template || tp.isExternal() || tp.isTemplate())
                 Funz.getIstance().ext.add("_INIT_"+tp.name);
             text.addIstruzione("push", acc.getAccReg().getReg(), null);
             text.addIstruzione("call", "_INIT_"+tp.name, null);

@@ -19,7 +19,7 @@ package comp.code;
 import comp.code.template.WeakSubstitutor;
 import comp.general.Info;
 import comp.parser.Callable;
-import comp.parser.FunzParam;
+import comp.parser.Costructor;
 import comp.parser.Funzione;
 import comp.parser.Membro;
 import comp.parser.TypeName;
@@ -78,11 +78,13 @@ public class Meth {
             suf+="@";
         else
             suf+="";
-        String nn=suf+funzKey(d.getName(), params);
+        String nn=suf+funzKey(d.memName(), params);
         WeakSubstitutor sub=new WeakSubstitutor();
         sub.addAll(d.templateNames(), params);
-        for(FunzParam i:d.getElems())
-            nn+="."+className(sub.recursiveGet(i.dich.getRType()));
+        int s=d instanceof Costructor ? 1 : 0;
+        //Se è un costruttore il primo parametro non conta 
+        for(int i=s; i<d.getElems().length; i++)
+            nn+="."+className(sub.recursiveGet(d.getElems()[i].dich.getRType()));
         return nn;
     }
     public static String paramsName(TemplateEle[] vv){
@@ -130,15 +132,6 @@ public class Meth {
      */
     public static String accessFunzName(String membro, String classname, boolean get){
         return FMemName(membro, get)+"_"+classname;
-    }
-    public static String costructorName(TypeName classname){
-        return "init_"+classname.getName();//NON vanno considerati anche i parametri
-        //per vari motivi:
-        //1)Sono già considerati come parametri template della funzione
-        //2)Il costruttore è associato a tutta la famiglia di tipi e non ad un tipo in particolare
-    }
-    public static String costructorName(String classname){
-        return "init_"+classname;
     }
     public static String destructorName(TypeName classname){
         return "end_"+classname.getName();//NON vanno considerati anche i parametri

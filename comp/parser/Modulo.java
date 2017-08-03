@@ -19,6 +19,7 @@ package comp.parser;
 import comp.code.Accumulator;
 import comp.code.CodeException;
 import comp.code.Environment;
+import comp.code.FElement;
 import comp.code.Funz;
 import comp.code.Meth;
 import comp.code.ModLoader;
@@ -186,29 +187,32 @@ public class Modulo {
             pw.println("V"+di.getIdent()+":\t"+u+"\t0");
         }
     }
-    public void Codifica(PrintWriter out, Master mas)
+    private void settaAmbiente()
             throws CodeException, IOException, ClassNotFoundException{
-        //prima carica informazioni
         Funz.getIstance().clearAll();
         Types.getIstance().clearAll();
         TNumbers.getIstance().clearAll();
         Environment.currentModulo=nome;
-        HashSet<MLdone> loadedModules=new HashSet<>();//Per evitare di caricare
-        for(String dep:deps){
-            ModLoader.getIstance().importModulo(loadedModules, dep, nome);
-            //Bisogna migliorare questo passaggio
-        }
-        boolean b;
-        for(TypeDef t:type){
-            b=Types.getIstance().load(t, false);
-            if(!b)
-                throw new CodeException("Errore interno: impossibile caricare tipo "+t.nome);
-        }
-        for(Callable cal:ca){
-            Funz.getIstance().load(cal, false);
-        }
-        Types.getIstance().getClassList().addAll(Ttype);
-        Funz.getIstance().getFunzList().addAll(Tca);
+        HashSet<MLdone> loadedModules=new HashSet<>();
+        ModLoader.getIstance().importAllModules(loadedModules, nome, nome);
+        loadedModules.stream().map((m) -> {
+            Types.getIstance().loadAll(m.typ);
+            return m;
+        }).map((m) -> {
+            Types.getIstance().loadAllTemplates(m.Ttyp);
+            return m;
+        }).map((m) -> {
+            Funz.getIstance().loadAll(m.fun);
+            return m;
+        }).forEach((m) -> {
+            Funz.getIstance().loadAllTemplates(m.Tcal);
+        });
+        //Anche gli shadow vanno nell'intestazione
+    }
+    public void Codifica(PrintWriter out, Master mas)
+            throws CodeException, IOException, ClassNotFoundException{
+        //prima carica informazioni
+        settaAmbiente();
         //---
         Segmenti text=new Segmenti();
         Environment env=new Environment();//è unico per ogni file

@@ -16,6 +16,10 @@
  */
 package comp.general;
 
+import comp.code.CodeException;
+import comp.code.TypeElem;
+import comp.code.vars.Variabili;
+import comp.parser.Espressione;
 import comp.parser.ParserException;
 import comp.scanner.PareToken;
 import comp.scanner.Token;
@@ -47,7 +51,7 @@ public class Info {
     
     //Ordine crescente per ricerca binaria
     //Nomi vietati per nomi funzioni normali, variabili, nome tipi
-    public static final String[] forbittenNames=new String[]{"break", "catch", "continue", 
+    public static final String[] forbittenNames=new String[]{"break", "catch", "continue", "costructor",
         "default", "depends", "destroy", "else", "end", "errors", "explicit", "extends", "for", "ghost", 
         "if", "init", "modulo", "new", "num", "number", "override", "packed", "public", "read", "reference", 
         "return", "shadow", "static", "super", "this", "throw", "try", "typ", "type", "while"};
@@ -217,5 +221,15 @@ public class Info {
             return binarySearch(ar, val, a, c);
         else
             return binarySearch(ar, val, c+1, b);
+    }
+    
+    
+    public static TypeElem[] paramTypes(Espressione[] exp, Variabili var, boolean v)
+            throws CodeException{
+        TypeElem[] ret=new TypeElem[exp.length];
+        for(int i=0; i<ret.length; i++){
+            ret[i]=exp[i].returnType(var, v);
+        }
+        return ret;
     }
 }

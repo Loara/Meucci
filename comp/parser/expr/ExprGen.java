@@ -140,44 +140,21 @@ public class ExprGen {
         if(t.get() instanceof SymbToken){
             SymbToken s=(SymbToken)t.get();
             t.nextEx();
-            if(s.getString().equals(":new") || s.getString().equals(":stack")
-                    || s.getString().equals(":static")){
-                TypeName td=new TypeName(t);
-                    if(t.get() instanceof PareToken && ((PareToken)t.get()).s=='('){
-                        t.nextEx();
-                        if(t.get() instanceof PareToken && ((PareToken)t.get()).s==')'){
-                            t.next();
-                            switch (s.getString()) {
-                                case ":new":
-                                    return new NewExpr(td, new Espressione[0]);
-                                case ":static":
-                                    return new StaticExpr(td, new Espressione[0]);
-                                default:
-                                    return new StackExpr(td, new Espressione[0]);
-                            }
-                        }
-                        else{
-                            Stack<Espressione> stack=new Stack<>(Espressione.class);
-                            stack.push(toExpr(t));
-                            while(t.get() instanceof VirgToken){
-                                t.nextEx();
-                                stack.push(toExpr(t));
-                            }
-                            if(t.get() instanceof PareToken && ((PareToken)t.get()).s==')'){
-                                t.next();
-                                switch (s.getString()) {
-                                    case ":new":
-                                        return new NewExpr(td, stack.toArray());
-                                    case ":static":
-                                        return new StaticExpr(td, stack.toArray());
-                                    default:
-                                        return new StackExpr(td, stack.toArray());
-                                }
-                            }
-                            else throw new ParserException(Lingue.getIstance().format("m_par_erralc"), t);
-                        }
-                    }
-                    else throw new ParserException(Lingue.getIstance().format("m_par_erralc"), t);
+            if(":new".equals(s.getString()) || ":stack".equals(s.getString()) 
+                    || ":static".equals(s.getString())){
+                Espressione ey=toUnaryExpr(t);
+                if(!(ey instanceof FunzExpr))
+                    throw new ParserException(Lingue.getIstance().format("m_par_invcos"), t);
+                switch(s.getString()){
+                    case ":new":
+                        return new NewExpr((FunzExpr)ey);
+                    case ":stack":
+                        return new StackExpr((FunzExpr)ey);
+                    case ":static":
+                        return new StaticExpr((FunzExpr)ey);
+                    default:
+                        throw new ParserException(Lingue.getIstance().format("m_par_invcos"), t);
+                }
             }
             if((s.getString().equals("+")||s.getString().equals("-"))){
                 long j=s.getString().equals("+") ? 1 : -1;

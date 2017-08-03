@@ -20,7 +20,7 @@ import comp.code.Accumulator;
 import comp.code.CodeException;
 import comp.code.Environment;
 import comp.code.Funz;
-import comp.code.Funz.FElement;
+import comp.code.FElement;
 import comp.code.Segmenti;
 import comp.code.TypeElem;
 import comp.code.Types;

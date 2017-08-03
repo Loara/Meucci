@@ -19,7 +19,7 @@ package comp.parser;
 import comp.code.CodeException;
 import comp.code.Environment;
 import comp.code.Funz;
-import comp.code.Funz.FElement;
+import comp.code.FElement;
 import comp.code.Meth;
 import comp.code.Register;
 import comp.code.Segmenti;
@@ -53,8 +53,8 @@ public class TypeDef implements Serializable{
     //quindi non vengono aggiunti
     */
     protected Template[] tt;
-    public TypeDef(VScan<Token> t, String modulo, Stack<Callable> costr,
-            Stack<Callable> Tcostr)throws ParserException{
+    public TypeDef(VScan<Token> t, String modulo, Stack<Callable> des,
+            Stack<Callable> Tdes)throws ParserException{
         if(!(t.get() instanceof IdentToken) || !((IdentToken)t.get()).getString().equals("type"))
             throw new ParserException(Lingue.getIstance().format("m_par_invtyp"), t);
         t.nextEx();
@@ -84,17 +84,7 @@ public class TypeDef implements Serializable{
             t.nextEx();
             boolean hasDes=false;
             while(!(t.get() instanceof PareToken && ((PareToken)t.get()).s=='}')){
-                if(t.get() instanceof IdentToken && ((IdentToken)t.get()).getString().equals("init")){
-                    Costructor ccc=new Costructor(t, nome, tt, modulo);
-                    if(ifTem)
-                        Tcostr.push(ccc);
-                    else
-                        costr.push(ccc);
-                    if(!(t.get() instanceof EolToken))
-                        throw new ParserException(Lingue.getIstance().format("m_par_dotcom"), t);
-                    t.nextEx();
-                }
-                else if(t.get() instanceof IdentToken && ((IdentToken)t.get()).getString().equals("end")){
+                if(t.get() instanceof IdentToken && ((IdentToken)t.get()).getString().equals("end")){
                     Destructor ccc=new Destructor(t, nome, tt, modulo);
                     if(hasDes)
                         throw new ParserException(Lingue.getIstance().format("m_par_onedis"), t);
@@ -103,9 +93,9 @@ public class TypeDef implements Serializable{
                     else{
                         hasDes=true;
                         if(tt.length==0)//Per chiamate di sovradistruttori
-                            costr.push(ccc);
+                            des.push(ccc);
                         else
-                            Tcostr.push(ccc);
+                            Tdes.push(ccc);
                     }
                     if(!(t.get() instanceof EolToken))
                         throw new ParserException(Lingue.getIstance().format("m_par_dotcom"), t);
@@ -354,7 +344,7 @@ public class TypeDef implements Serializable{
         //Environment.template=tt.length!=0;    Già inserito in toCode
         if(ext!=null){
             TypeName rext=Types.getIstance().translate(ext);
-            if(ext.templates().length !=0 || Types.getIstance().find(ext, false).external
+            if(ext.templates().length !=0 || Types.getIstance().find(ext, false).isExternal()
                     || vparams.length!=0)
                 Funz.getIstance().ext.add("_VT_INIT_E_"+Meth.className(rext));
             seg.addIstruzione("call", "_VT_INIT_E_"+Meth.className(rext), null);
@@ -479,7 +469,7 @@ public class TypeDef implements Serializable{
     public String getName(){
         return nome;
     }
-    public Membro[] getDich(){
+    public Membro[] getMembri(){
         return types;
     }
     public FMorg[] getMems(){

@@ -20,7 +20,7 @@ import comp.code.Accumulator;
 import comp.code.CodeException;
 import comp.code.Environment;
 import comp.code.Funz;
-import comp.code.Funz.FElement;
+import comp.code.FElement;
 import comp.code.Segmenti;
 import comp.code.vars.Variabili;
 import comp.code.immop.Aritm;
@@ -62,7 +62,7 @@ public class Op2Expr extends Espressione{
         System.out.println(i+"Elemento2:");
         epr2.println(inter+2);
     }
-    private Funz.FElement request(Variabili var, boolean v)throws CodeException{
+    private FElement request(Variabili var, boolean v)throws CodeException{
             TypeElem[] tr=new TypeElem[2];
             tr[0]=epr.returnType(var, v);
             tr[1]=epr2.returnType(var, v);

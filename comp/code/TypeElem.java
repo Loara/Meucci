@@ -51,16 +51,16 @@ import java.util.Objects;
  * @author loara
  */
 public class TypeElem {
-    public final String name;
+    public final String name, modulo;
     public final Membro[] subtypes;
     private final int[] allineamenti;//gli offset dei sottotipi allineati in memoria
     public final TypeName extend;
     public final VTable vt;
-    public final boolean primitive, reference, number, external, 
+    public final boolean primitive, reference, number, 
             explicit;//se è definita in un altro modulo, explicit se non ha vtable e membri espliciti
     public final boolean template;//è true se e solo se è un parametro template
     private int dim;
-    public TypeElem(TypeDef e, boolean ex)throws CodeException{
+    public TypeElem(TypeDef e)throws CodeException{
         primitive=false;
         reference=true;
         number=false;
@@ -68,7 +68,7 @@ public class TypeElem {
         explicit=e.classExplicit();
         name=e.getName();
         Stack<Membro> bbi=new Stack<>(Membro.class);
-        for(Membro tt:e.getDich()){
+        for(Membro tt:e.getMembri()){
             if(!tt.override)
                 bbi.push(tt);//escludere gli override
         }
@@ -76,12 +76,12 @@ public class TypeElem {
         allineamenti=new int[subtypes.length];
         extend=e.extend();
         vt=new VTable(subtypes, name, extend);
-        external=ex;
+        modulo=e.modulo();
         dim=-1;
         if(explicit && extend==null && subtypes.length==0)
             throw new CodeException(Lingue.getIstance().format("m_cod_typexpe", name));
     }
-    public TypeElem(String n, TypeName e, Membro[] s, boolean ex, boolean explicit){
+    public TypeElem(String n, TypeName e, Membro[] s, String mod, boolean explicit){
         name=n;
         extend=e;
         subtypes=s;
@@ -91,7 +91,7 @@ public class TypeElem {
         reference=true;
         this.explicit=explicit;
         number=false;
-        external=ex;
+        modulo=mod;
         vt=new VTable(s, n, e);
         dim=-1;
     }
@@ -100,13 +100,13 @@ public class TypeElem {
      * @param n
      * @param e
      * @param s
-     * @param ex
+     * @param mod
      * @param ref
      * @param num 
      * @throws comp.code.CodeException 
      */
-    public TypeElem(String n, TypeName e, Membro[] s, boolean ex, boolean ref, boolean num)
-    throws CodeException{
+    public TypeElem(String n, TypeName e, Membro[] s, String mod, boolean ref, boolean num)
+        throws CodeException{
         template=true;
         if(num && ref)
             throw new CodeException(Lingue.getIstance().format("m_cod_errpara"));
@@ -136,7 +136,7 @@ public class TypeElem {
             primitive=false;
             number=false;
         }
-        external=ex;
+        modulo=mod;
         vt=new VTable(s, n, e);
         dim=-1;
     }
@@ -150,9 +150,15 @@ public class TypeElem {
         reference=name.equals(":null");//sono anche reference
         number=Info.varNum(name);
         dim=-1;
-        external=false;
+        modulo="-all";//tipi primitivi
+        //Non è necessario per le funzioni grazie ad Aritm
         explicit=true;
         vt=null;
+    }
+    public boolean isExternal(){
+        if("-all".equals(modulo))
+            return false;
+        return !modulo.equals(Environment.currentModulo);
     }
     /**
      * Da aggiustare
@@ -359,7 +365,7 @@ public class TypeElem {
     public void canRead(String el, boolean v)throws CodeException{
         for(Membro m:subtypes){
             if(m.dich.getIdent().equals(el)){
-                if(external && m.shadow)
+                if(isExternal() && m.shadow)
                     throw new CodeException(Lingue.getIstance().format("m_cod_cannmb", el, name));
                 return;
             }
@@ -372,7 +378,7 @@ public class TypeElem {
     public void canWrite(String el, boolean v)throws CodeException{
         for(Membro m:subtypes){
             if(m.dich.getIdent().equals(el)){
-                if(external && (m.shadow || m.read))
+                if(isExternal() && (m.shadow || m.read))
                     throw new CodeException(Lingue.getIstance().format("m_cod_canwmb", el, name));
                 return;
             }
@@ -385,7 +391,7 @@ public class TypeElem {
     public boolean directAccess(String ident, boolean dd)throws CodeException{
         for(Membro m:subtypes){
             if(m.dich.getIdent().equals(ident)){
-                return !m.ghost && ((m.explicit || m.shadow) || (!dd && !external));
+                return !m.ghost && ((m.explicit || m.shadow) || (!dd && !isExternal()));
             }
         }
         if(extend!=null)

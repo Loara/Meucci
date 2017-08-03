@@ -20,7 +20,7 @@ import comp.code.Accumulator;
 import comp.code.CodeException;
 import comp.code.Environment;
 import comp.code.Funz;
-import comp.code.Funz.FElement;
+import comp.code.FElement;
 import comp.code.Meth;
 import comp.code.Register;
 import comp.code.Segmenti;
@@ -56,7 +56,6 @@ public class Destructor extends Callable{
         if(dichs.length!=0)
             throw new ParserException(Lingue.getIstance().format("m_par_pardis"), super.nome);
         temp=params;
-        nome=new IdentToken(Meth.destructorName(type), nome.getRiga());
         classname=type;
         dichs=new FunzParam[1];
         dichs[0]=new FunzParam(new TypeName(type, Template.conversion(params)), "this");
@@ -68,6 +67,10 @@ public class Destructor extends Callable{
     @Override
     public String getName(){
         return ((IdentToken)nome).getString();
+    }
+    @Override
+    public String memName(){
+        return Meth.destructorName(classname);
     }
     @Override
     public void validate(Environment env, Dichiarazione[] varSt)throws CodeException{

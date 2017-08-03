@@ -17,7 +17,7 @@
 package comp.parser.expr;
 
 import comp.code.*;
-import comp.code.Funz.FElement;
+import comp.code.FElement;
 import comp.code.vars.Variabili;
 import comp.code.immop.Aritm2;
 import comp.general.Info;
@@ -46,13 +46,13 @@ public class Op1Expr extends Espressione{
         System.out.println(i+"Elemento:");
         epr.println(inter+2);
     }
-    private Funz.FElement request(Variabili var, boolean v)throws CodeException{
+    private FElement request(Variabili var, boolean v)throws CodeException{
             TypeElem[] tr=new TypeElem[1];
             tr[0]=epr.returnType(var, v);
             return Funz.getIstance().request(symb.getString(), tr, v);
     }
     private FElement modname(Variabili var)throws CodeException{
-            Funz.FElement fe=request(var, false);
+            FElement fe=request(var, false);
             if(fe.isExternFile())
                 Funz.getIstance().ext.add(fe.modname);
             return fe;

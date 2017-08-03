@@ -16,74 +16,44 @@
  */
 package comp.parser;
 
-import comp.code.Accumulator;
 import comp.code.CodeException;
 import comp.code.Environment;
-import comp.code.Funz;
-import comp.code.Funz.FElement;
-import comp.code.Meth;
-import comp.code.Segmenti;
-import comp.code.TypeElem;
 import comp.code.Types;
 import comp.code.vars.Variabili;
-import comp.general.Lingue;
 import comp.general.VScan;
-import comp.parser.expr.FunzExpr;
-import comp.parser.expr.IdentArray;
-import comp.parser.istruz.ClassisIstr;
 import comp.parser.template.Template;
 import comp.scanner.IdentToken;
 import comp.scanner.Token;
 
 /**
- * Costruttore, và memorizzato come FunzEle
+ * Costruttore, dalla versione 3 và memorizzata all'esterno del tipo, 
+ * si usa la parola chiave "costructor" PRIMA di shadow e senza il tipo di ritorno,
+ * seguito dal nome del costruttore e dai 
+ * parametri template. Il primo parametro 
+ * del costruttore (e non più il nome) determinano l'oggetto creato.
+ * 
+ * È sempre possibile settare come nome del costruttore il nome dell'oggetto da creare
+ * e sfruttare l'overloading, però quando si utilizzano parametri template si consiglia
+ * di cambiare nome.
+ * 
+ * Come FElement al nome si deve aggiungere il prefisso "_init_"
  * @author loara
  */
 public class Costructor extends Callable{
-    private TypeName classname;
-    private FunzExpr costruct;
+    private final String fclass;
     /**
      * 
      * @param t
-     * @param type Nome della classe in cui è dichiarato il costruttore
-     * @param params Dichiarazione template della classem madre
+     * @param cl
      * @param modulo
      * @throws ParserException 
      */
-    public Costructor(VScan<Token> t, String type, Template[] params, String modulo)throws ParserException{
-        super(t, modulo);
-        if(temp.length!=0)
-            throw new ParserException(Lingue.getIstance().format("m_par_temcos"), super.nome);
-        if(shadow)
-            throw new ParserException(Lingue.getIstance().format("m_par_shderr"), super.nome);
-        temp=params;
-        if(!(nome instanceof IdentToken) || !((IdentToken)nome).getString().equals("init"))
-            throw new ParserException(Lingue.getIstance().format("m_par_invcos"),t);
-        nome=new IdentToken(Meth.costructorName(type), nome.getRiga());
-        classname=new TypeName(type, Template.conversion(params));
-        FunzParam[] dd=new FunzParam[dichs.length+1];
-        dd[0]=new FunzParam(new TypeName(type, Template.conversion(params)), "this");
-        System.arraycopy(dichs, 0, dd, 1, dichs.length);
-        dichs=dd;
-        if(istr.m.length==0){
-            costruct=null;
-        }
-        else if(istr.m[0] instanceof ClassisIstr && ((ClassisIstr)istr.m[0]).isExpression()){
-            Espressione ei=((ClassisIstr)istr.m[0]).getExpr();
-            if(ei instanceof FunzExpr && ((FunzExpr)ei).getName().equals("super")){
-                costruct=(FunzExpr)ei;
-                istr.m[0]=null;//già contemplata
-                if(costruct.template().length!=0)
-                    throw new ParserException(Lingue.getIstance().format("m_par_temsup"), t);
-            }
-            else
-                costruct=null;
-        }
-        else
-            costruct=null;
+    public Costructor(VScan<Token> t, String modulo)throws ParserException{
+        super(t, modulo, true);
+        fclass=super.dichs[0].getType();
     }
     public String className(){
-        return classname.getName();
+        return fclass;
     }
     @Override
     public String getName(){
@@ -96,59 +66,12 @@ public class Costructor extends Callable{
         Environment.ret=Types.getIstance().find(retType, true);
         Environment.template=true;
         Environment.errors=errors;
-        TypeElem te=Types.getIstance().find(classname, true);
-        if(te.extend==null){
-            if(costruct!=null){
-                throw new CodeException(Lingue.getIstance().format("m_cod_supcaly"));
-            }
-        }
-        else{
-            if(costruct==null){
-                throw new CodeException(Lingue.getIstance().format("m_cod_supcaln"));
-            }
-            TypeElem[] parames;
-            Espressione[] expre=costruct.getValues();
-            parames=new TypeElem[expre.length+1];
-            parames[0]=te;
-            for(int i=0; i<expre.length; i++){
-                parames[i+1]=expre[i].returnType(vs, true);
-            }
-            Funz.getIstance().request(Meth.costructorName(te.extend), parames, 
-                    true, classname.templates());
-        }
         istr.validate(vs, env);
         Template.removeTemplateConditions(temp);
     }
     @Override
-    public void preCode(Segmenti text, Variabili var, Environment env,
-            Accumulator acc)throws CodeException{
-        //TemplateEle[] telemy=Template.conversion(temp); Questa linea è erronea, in quanto
-        //il campo temp non può ovviamente essere sostituito
-        TypeElem te=Types.getIstance().find(classname, true);
-        if(te.extend==null){
-            if(costruct!=null)
-                throw new CodeException(Lingue.getIstance().format("m_cod_supcaly"));
-        }
-        else{
-            if(costruct==null){
-                throw new CodeException(Lingue.getIstance().format("m_cod_supcaln"));
-            }
-            TypeElem[] parames;
-            Espressione[] expre=costruct.getValues();
-            parames=new TypeElem[expre.length+1];
-            Espressione[] calling=new Espressione[expre.length+1];
-            parames[0]=te;
-            calling[0]=new IdentArray("this");
-            for(int i=0; i<expre.length; i++){
-                parames[i+1]=expre[i].returnType(var, false);
-                calling[i+1]=expre[i];
-            }
-            FElement fel=Funz.getIstance().request(Meth.costructorName(te.extend.getName()), 
-                    parames, false, te.extend.templates());
-            if(fel.isExternFile())
-                Funz.getIstance().ext.add(fel.modname);
-            FunzExpr.perfCall(fel, calling, text, var, env, acc);
-        }
+    public String memName(){
+        return "init_"+getName();
     }
 }
 

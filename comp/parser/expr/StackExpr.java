@@ -20,56 +20,53 @@ import comp.code.Accumulator;
 import comp.code.CodeException;
 import comp.code.Environment;
 import comp.code.Funz;
-import comp.code.Funz.FElement;
+import comp.code.FElement;
 import comp.code.Meth;
-import comp.code.Register;
 import comp.code.Segmenti;
 import comp.code.TypeElem;
 import comp.code.Types;
 import comp.code.vars.VarStack.VarEle;
 import comp.code.vars.Variabili;
+import comp.general.Info;
 import comp.parser.Espressione;
 import comp.parser.TypeName;
+import comp.parser.template.TemplateEle;
 
 /**
  * allocazione oggetti statica
  * @author loara
  */
 public class StackExpr extends Espressione{
-    private final TypeName type;
-    private final Espressione[] exp;
-    public StackExpr(TypeName t, Espressione[] data){
-        type=t;
-        exp=data;//temporaneo
+    private final String name;
+    private final Espressione[] vals;
+    private final TemplateEle[] temp;
+    public StackExpr(FunzExpr f){
+        name=f.getName();
+        vals=f.getValues();
+        temp=f.template();
     }
     @Override
     public TypeElem returnType(Variabili var, boolean v)throws CodeException{
-        return Types.getIstance().find(type, v);
+        FElement fee=Funz.getIstance().requestCostructor(name, 
+                temp, Info.paramTypes(vals, var, v), v);
+        return Types.getIstance().find(fee.trequest[0], v);
     }
     @Override
     public void validate(Variabili var)throws CodeException{
-        TypeElem tp=Types.getIstance().find(type, true);
-        TypeElem[] esp1=new TypeElem[exp.length+1];
-        esp1[0]=tp;
-        for(int i=0; i<exp.length; i++){
-            exp[i].validate(var);
-            esp1[i+1]=exp[i].returnType(var, true);
-        }
-        Funz.getIstance().esisteCostructor(type, esp1);
+        Funz.getIstance().esisteCostructor(name, temp, Info.paramTypes(vals, var, true));
     }
     @Override
     public void toCode(Segmenti seg, Variabili var, Environment env, Accumulator acc)
         throws CodeException{
-        TypeElem tp=Types.getIstance().find(type, false);
-        TypeElem[] esp1=new TypeElem[exp.length+1];
-        esp1[0]=tp;
-        for(int i=0; i<exp.length; i++)
-            esp1[i+1]=exp[i].returnType(var, false);
-        FElement cos=Funz.getIstance().request(Meth.costructorName(type), esp1, false, type.templates());
-        FunzExpr.allc1(seg, var, env, acc, exp);
+        FElement cos=Funz.getIstance().requestCostructor(name, temp, 
+                Info.paramTypes(vals, var, false), false);
+        TypeElem tp=Types.getIstance().find(cos.trequest[0], false);
+        if(cos.isExternFile())
+            Funz.getIstance().ext.add(cos.modname);
+        FunzExpr.allc1(seg, var, env, acc, vals);
         VarEle ve=var.allocStack(tp.dimension(false), true);
         seg.addIstruzione("lea", acc.getAccReg().getReg(), var.getVarStack().varPos(ve));
-        FunzExpr.allc2(seg, var, env, acc, exp, cos, tp);
+        FunzExpr.allc2(seg, var, env, acc, vals, cos, tp);
         /*
         //analogo a :new
         var.getVarStack().pushAll(seg);

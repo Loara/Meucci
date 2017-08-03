@@ -17,7 +17,6 @@
 package comp.code.template;
 
 import comp.code.CodeException;
-import comp.code.Environment;
 import comp.code.Meth;
 import comp.code.TypeElem;
 import comp.general.Lingue;
@@ -58,9 +57,9 @@ public class ClassList extends TList<TypeDef>{
         else{
             exs = sub.recursiveGet(t.extend());
         }
-        Membro[] mem=new Membro[t.getDich().length];
+        Membro[] mem=new Membro[t.getMembri().length];
         for(int i=0; i<mem.length; i++){
-            Membro ii=t.getDich()[i];
+            Membro ii=t.getMembri()[i];
             mem[i]=new Membro(ii, sub.recursiveGet(ii.getType()),
                     sub.recursiveGet(new TemplateEle[]{ii.packed})[0]);
         }
@@ -71,7 +70,7 @@ public class ClassList extends TList<TypeDef>{
         }
         String className=Meth.className(name, param);
         return new TypeElem(className, exs, mem, 
-                !t.modulo().equals(Environment.currentModulo), t.classExplicit());
+                t.modulo(), t.classExplicit());
     }
     public void esiste(String name, TemplateEle[] param)throws CodeException{
         TypeDef t=find(name);

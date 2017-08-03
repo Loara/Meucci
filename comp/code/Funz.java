@@ -20,66 +20,16 @@ import comp.code.template.FunzList;
 import comp.code.template.Substitutor;
 import comp.general.Lingue;
 import comp.parser.Callable;
-import comp.parser.OpDef;
 import comp.parser.TypeName;
 import comp.parser.template.TemplateEle;
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Objects;
 
 /**
  *
  * @author loara
  */
 public class Funz {
-    public static class FElement{
-        public final String name, modname;
-        public final TypeName ret;
-        public final TypeName[] trequest;
-        public final boolean oper, external, templ;
-        public final String[] errors;
-        public FElement(String nome, String mnome, TypeName[] tr, TypeName rit,
-                boolean operatore, boolean ex, boolean template, String[] err){
-            name=nome;
-            modname=mnome;
-            trequest=tr;
-            ret=rit;
-            oper=operatore;
-            external=ex;
-            templ=template;
-            errors = err;
-        }
-        public FElement(Callable ca, boolean ex, TemplateEle... params)throws CodeException{
-            //Non deve effettuare la sostituzione, in quanto è stata fatta da FunzList
-            //oppure non ha parametri template
-            name=Meth.funzKey(ca.getName(), params);
-            modname=Meth.modName(ca, params);
-            ret=ca.getReturn();
-            oper=ca instanceof OpDef;
-            trequest=ca.types();
-            external=ex;
-            templ=params.length!=0;
-            errors = ca.errors();
-        }
-        public TypeElem Return(boolean validate)throws CodeException{
-            return Types.getIstance().find(ret, validate);
-        }
-        public boolean isExternFile(){
-            return external || templ || Environment.template;
-        }
-        @Override
-        public int hashCode() {
-            int hash = 7;
-            hash = 83 * hash + Objects.hashCode(this.modname);
-            return hash;
-        }
-        @Override
-        public boolean equals(Object o){
-            if(!(o instanceof FElement))
-                return false;
-            return modname.equals(((FElement)o).modname);
-        }
-    }
     private final HashSet<FElement> s;
     private final FunzList fl;
     private Substitutor suds;
@@ -108,6 +58,7 @@ public class Funz {
     public void setSubstitutor(Substitutor sub){
         suds=sub;
     }
+    /*
     public void load(Callable f, boolean ext)throws CodeException{
         if(f.templates().length!=0){
             fl.add(f);
@@ -116,8 +67,22 @@ public class Funz {
         FElement fe=new FElement(f, ext, new TemplateEle[0]);
         s.add(fe);
     }
-    public void load(FElement f){
-        s.add(f);
+    */
+    public boolean load(FElement f){
+        return s.add(f);
+    }
+    public boolean loadTemplate(Callable c){
+        return fl.add(c);
+    }
+    public boolean loadAll(FElement[] e){
+        boolean a=true;
+        for(FElement tt:e){
+            a=a && s.add(tt);
+        }
+        return a;
+    }
+    public boolean loadAllTemplates(Callable[] td){
+        return fl.addAll(td);
     }
     /*
     noAdd serve a FunzList per non aggiungere la funzione (e quindi i relativi tipi a
@@ -181,14 +146,55 @@ public class Funz {
         TypeElem te=Types.getIstance().find(new TypeName(name, tel), noAdd);
         return request(Meth.destructorName(name), new TypeElem[]{te}, noAdd, tel);
     }
-    public FElement requestCostructor(TypeName tn, TypeElem[] params, boolean noAdd)throws CodeException{
-        if(params==null)
-            params=new TypeElem[0];
-        TypeElem te=Types.getIstance().find(tn, noAdd);
-        TypeElem[] tear=new TypeElem[params.length+1];
-        tear[0]=te;
-        System.arraycopy(params, 0, tear, 1, params.length);
-        return request(Meth.costructorName(tn), tear, noAdd, tn.templates());
+    /**
+     * params NON contiene il tipo del costruttore, deve essere dedotto
+     * fname NON inizia con init_
+     * 
+     * @param fname
+     * @param tem
+     * @param params
+     * @param noAdd
+     * @return
+     * @throws CodeException 
+     */
+    public FElement requestCostructor(String fname, TemplateEle[] tem, TypeElem[] params, 
+            boolean noAdd)throws CodeException{
+        TemplateEle[] te;
+        if(suds!=null && suds.size()>0)
+            te=suds.recursiveGet(tem);
+        else
+            te=tem;
+        ArrayList<FElement> e=new ArrayList<>();
+        for(FElement i:s){
+            if(!i.name.equals(Meth.funzKey("init_"+fname, te)))//equivalenza sia di nome che template
+                continue;
+            if(params.length!= (i.trequest.length-1))
+                continue;
+            boolean jus=true;
+            for(int ij=0; ij<params.length; ij++){
+                if(!params[ij].ifEstende(i.trequest[ij+1], noAdd)){
+                    jus=false;
+                    break;
+                }
+            }
+            if(!jus)
+                continue;
+            e.add(i);
+        }
+        if(e.size()==1){
+            return e.get(0);
+        }
+        else {
+            if(e.isEmpty() && te.length>0){
+                FElement fer=fl.generateCostructor(fname, tem, params, noAdd);
+                s.add(fer);
+                return fer;
+            }
+            String err=Lingue.getIstance().format("m_cod_foufunn", e.size(), 
+                    Meth.funzKey("init_"+fname, te))+":\n";
+            err = e.stream().map((ex) -> ex.modname+"\n").reduce(err, String::concat);
+            throw new CodeException(err);
+        }
     }
     public void esiste(String name, TypeElem[] types, TemplateEle... ete)throws CodeException{
         TemplateEle[] te;
@@ -242,14 +248,39 @@ public class Funz {
         TypeElem te=Types.getIstance().find(new TypeName(name, tel), true);
         esiste(Meth.destructorName(name), new TypeElem[]{te}, tel);
     }
-    public void esisteCostructor(TypeName tn, TypeElem[] params)throws CodeException{
-        if(params==null)
-            params=new TypeElem[0];
-        TypeElem te=Types.getIstance().find(tn, true);
-        TypeElem[] tear=new TypeElem[params.length+1];
-        tear[0]=te;
-        System.arraycopy(params, 0, tear, 1, params.length);
-        esiste(Meth.costructorName(tn), tear, tn.templates());
+    public void esisteCostructor(String fname, TemplateEle[] tem, TypeElem[] params)throws CodeException{
+        TemplateEle[] te;
+        if(suds!=null && suds.size()>0)
+            te=suds.recursiveGet(tem);
+        else
+            te=tem;
+        ArrayList<FElement> e=new ArrayList<>();
+        for(FElement i:s){
+            if(!i.name.equals(Meth.funzKey("init_"+fname, te)))//equivalenza sia di nome che template
+                continue;
+            if(params.length != (i.trequest.length-1) )
+                continue;
+            boolean jus=true;
+            for(int ij=0; ij<params.length; ij++){
+                if(!params[ij].ifEstende(i.trequest[ij+1], true)){
+                    jus=false;
+                    break;
+                }
+            }
+            if(!jus)
+                continue;
+            e.add(i);
+        }
+        if(e.size()!=1){
+            if(e.isEmpty() && te.length>0){
+                fl.esisteCostructor(fname, tem, params);
+                return;
+            }
+            String err=Lingue.getIstance().format("m_cod_foufunn", e.size(), 
+                    Meth.funzKey("init_"+fname, te))+":\n";
+            err = e.stream().map((ex) -> ex.modname+"\n").reduce(err, String::concat);
+            throw new CodeException(err);
+        }
     }
     
     public FunzList getFunzList(){

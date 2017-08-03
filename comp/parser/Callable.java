@@ -70,11 +70,11 @@ public abstract class Callable implements Serializable{
         this.errors=errors;
         this.shadow=shadow;
     }
-    /**
+    /*
      * Da modificare
      * @param t
      * @return 
-     */
+     
     public static boolean canBeCalled(VScan<Token> t){
         if(t.get() instanceof IdentToken){
             if(((IdentToken)t.get()).getString().equals("init"))
@@ -82,35 +82,50 @@ public abstract class Callable implements Serializable{
         }
         return t.get(2) instanceof PareToken;
     }
+    */
     public Callable(VScan<Token> t, String modulo)throws ParserException{
         //Tutte le dichiarazioni sono effettuate dall'utente. Possibile utilizzare
         //i forbittenNames di Info
-        if(t.get() instanceof IdentToken && (((IdentToken)t.get()).getString().equals("init")
-                || ((IdentToken)t.get()).getString().equals("end"))){
-            //costruttore
-            noglobal=false;
-            retType=new TypeName("void");
-            nome=new IdentToken(((IdentToken)t.get()).getString(), t.getInd());
+        if(t.get() instanceof IdentToken && ((IdentToken)t.get()).getString().equals("shadow")){
+            shadow=true;
             t.nextEx();
-            errors = new String[0];//Attualmente non si possono generare errori da
-            //costruttori o distruttori
         }
+        else
+            shadow=false;
+        if(!(t.get() instanceof IdentToken))
+            throw new ParserException(Lingue.getIstance().format("m_par_invret"), t);
         else{
-            if(t.get() instanceof IdentToken && ((IdentToken)t.get()).getString().equals("shadow")){
-                shadow=true;
-                t.nextEx();
-            }
-            else
-                shadow=false;
-            if(!(t.get() instanceof IdentToken))
-                throw new ParserException(Lingue.getIstance().format("m_par_invret"), t);
-            else{
-                Info.isForbitten(((IdentToken)t.get()).getString(), t.get().getRiga());
-            }
-            retType=new TypeName(t);
-            nome=t.get();
+            Info.isForbitten(((IdentToken)t.get()).getString(), t.get().getRiga());
+        }
+        retType=new TypeName(t);
+        nome=t.get();
+        t.nextEx();
+        
+        initRest(t, modulo);
+    }
+    protected Callable(VScan<Token> t, String modulo, boolean costr)throws ParserException{
+        t.nextEx();//costructor
+        if(t.get() instanceof IdentToken && ((IdentToken)t.get()).getString().equals("shadow")){
+            shadow=true;
             t.nextEx();
         }
+        else
+            shadow=false;
+        if(!(t.get() instanceof IdentToken))
+            throw new ParserException(Lingue.getIstance().format("m_par_invret"), t);
+        else{
+            Info.isForbitten(((IdentToken)t.get()).getString(), t.get().getRiga());
+        }
+        retType=new TypeName("void");
+        nome=t.get();
+        if(!(nome instanceof IdentToken))
+            throw new ParserException(Lingue.getIstance().format("m_par_invcos"), t);
+        t.nextEx();
+        
+        initRest(t, modulo);
+    }
+    protected final void initRest(VScan<Token> t, String modulo)throws ParserException{
+        //t deve puntare ai parametri template
         temp=Template.parseTemp(t);
         if(!(t.get() instanceof PareToken)||((PareToken)t.get()).s!='(')
             throw new ParserException(Lingue.getIstance().format("m_par_invfun"), t);
@@ -178,6 +193,13 @@ public abstract class Callable implements Serializable{
         return dichs;
     }
     public abstract String getName();//per via di Token
+    /**
+     * Nome da utilizzare per FElement, si consiglia di effettuarne l'override
+     * @return 
+     */
+    public String memName(){
+        return getName();
+    }
     public TypeName getReturn(){
         return retType;
     }

@@ -19,7 +19,7 @@ package comp.general;
 import comp.code.CodeException;
 import comp.code.Environment;
 import comp.code.Funz;
-import comp.code.Funz.FElement;
+import comp.code.FElement;
 import comp.code.Meth;
 import comp.code.ModLoader;
 import comp.code.ModLoader.MLdone;
@@ -361,18 +361,21 @@ public class Master {
         Types.getIstance().clearAll();
         Funz.getIstance().clearAll();
         TNumbers.getIstance().clearAll();
+        Environment.currentModulo=modulo;
         HashSet<MLdone> ml=new HashSet<>();
-        ModLoader.getIstance().importModulo(ml, modulo, modulo);
-        for(MLdone m:ml){
-            for(TypeElem te:m.typ)
-                Types.getIstance().load(te);
-            for(FElement fe:m.fun)
-                Funz.getIstance().load(fe);
-            for(TypeDef te:m.Ttyp)
-                Types.getIstance().load(te, m.external);
-            for(Callable fe:m.Tcal)
-                Funz.getIstance().load(fe, m.external);
-        }
+        ModLoader.getIstance().importAllModules(ml, modulo, modulo);
+        ml.stream().map((m) -> {
+            Types.getIstance().loadAll(m.typ);
+            return m;
+        }).map((m) -> {
+            Types.getIstance().loadAllTemplates(m.Ttyp);
+            return m;
+        }).map((m) -> {
+            Funz.getIstance().loadAll(m.fun);
+            return m;
+        }).forEach((m) -> {
+            Funz.getIstance().loadAllTemplates(m.Tcal);
+        });
     }
     private Notifica getNoSigned(HashSet<Notifica> nos){
         for(Notifica no:nos){

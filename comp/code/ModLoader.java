@@ -5,14 +5,15 @@
  */
 package comp.code;
 
-import comp.code.Funz.FElement;
 import static comp.general.FileManager.cpath;
 import static comp.general.FileManager.findTFile;
 import static comp.general.FileManager.resps;
 import comp.general.Lingue;
 import comp.parser.Callable;
+import comp.parser.Costructor;
 import comp.parser.Membro;
 import comp.parser.Modulo;
+import comp.parser.OpDef;
 import comp.parser.TypeDef;
 import comp.parser.TypeName;
 import comp.parser.template.NumDich;
@@ -114,7 +115,7 @@ public class ModLoader {
                 out.writeBoolean(b);
             out.writeInt(mod.type.length);
             for(TypeDef td:mod.type){
-                exportType(new TypeElem(td, false), out);
+                exportType(td, out);
             }
             //Vanno scritte solo le funzioni non shadow
             int num=0;
@@ -125,7 +126,7 @@ public class ModLoader {
             out.writeInt(num);
             for(Callable c:mod.ca){
                 if(!c.isShadow())
-                    exportCall(new Funz.FElement(c, false), out);
+                    exportCall(c, out);
             }
         }
         writeTemplates(mod);
@@ -135,13 +136,14 @@ public class ModLoader {
      * Prima di utilizzarlo assicurarsi di lanciare clearAll ai suddetti
      * 
      * L'HashSet è necessario per evitare di caricare più volte lo stesso modulo
-     * @param mods
      * @param name modulo da caricare
      * @param oname modulo che effettua il caricamento
+     * @return 
      * @throws IOException 
      * @throws java.lang.ClassNotFoundException 
      */
-    public void importModulo(Collection<MLdone> mods, String name, String oname)throws IOException, ClassNotFoundException{
+    public MLdone importModulo(String name, String oname)
+            throws IOException, ClassNotFoundException{
         MLdone ii=getIfIn(name);
         boolean ext=!(name.equals(oname));
         if(ii==null){
@@ -159,31 +161,36 @@ public class ModLoader {
                 i=in.readInt();
                 ii.typ=new TypeElem[i];
                 for(int j=0; j<i; j++)
-                    ii.typ[j]=importType(in, ext);
+                    ii.typ[j]=importType(in, name);
                 i=in.readInt();
                 ii.fun=new FElement[i];
                 for(int j=0; j<i; j++){
-                    ii.fun[j]=importCall(in, ext);
+                    ii.fun[j]=importCall(in, name);
                 }
             }
             readTemplates(name, ii);
             modLoaded.add(ii);
         }
         ii.external=ext;
-        if(!mods.contains(ii)){
-            mods.add(ii);
+        return ii;
+    }
+    public void importAllModules(Collection<MLdone> ml, String name, String oname)
+            throws IOException, ClassNotFoundException{
+        MLdone ii=importModulo(name, oname);
+        if(!ml.contains(ii)){
+            ml.add(ii);
             for(int k=0; k<ii.dep.length; k++){
                 if(ii.pb[k]){
-                    importModulo(mods, ii.dep[k], oname);
+                    importAllModules(ml, ii.dep[k], oname);
                 }
             }
         }
     }
-    private void exportType(TypeElem te, ObjectOutputStream out)throws IOException{
-        out.writeUTF(te.name);
-        out.writeBoolean(te.explicit);
-        out.writeInt(te.subtypes.length);
-        for(Membro mem:te.subtypes){
+    private void exportType(TypeDef te, ObjectOutputStream out)throws IOException{
+        out.writeUTF(te.getName());
+        out.writeBoolean(te.classExplicit());
+        out.writeInt(te.getMembri().length);
+        for(Membro mem:te.getMembri()){
             int perms=0;
             //non ci sono override
             if(mem.explicit)
@@ -209,14 +216,14 @@ public class ModLoader {
                 out.writeLong(((NumDich)mem.packed).getNum());
             }
         }
-        if(te.extend!=null){
+        if(te.extend()!=null){
             out.writeBoolean(true);
-            out.writeObject(te.extend);
+            out.writeObject(te.extend());
         }
         else
             out.writeBoolean(false);
     }
-    private TypeElem importType(ObjectInputStream in, boolean ext)throws IOException,
+    private TypeElem importType(ObjectInputStream in, String modulo)throws IOException,
             ClassNotFoundException{
         String name=in.readUTF();
         boolean explic=in.readBoolean();
@@ -243,26 +250,28 @@ public class ModLoader {
         TypeName ex=null;
         if(in.readBoolean())
             ex=(TypeName)in.readObject();
-        return new TypeElem(name, ex, mem, ext, explic);
+        return new TypeElem(name, ex, mem, modulo, explic);
     }
-    private void exportCall(Funz.FElement fe, ObjectOutputStream out)throws IOException{
-        out.writeUTF(fe.name);
-        out.writeUTF(fe.modname);
-        out.writeObject(fe.ret);
-        out.writeInt(fe.trequest.length);
-        for(TypeName t:fe.trequest)
+    private void exportCall(Callable fe, ObjectOutputStream out)throws IOException, CodeException{
+        out.writeUTF(fe.getName());
+        out.writeUTF(Meth.modName(fe));//Genera errori, da controllare
+        out.writeBoolean(fe.isShadow());
+        out.writeObject(fe.getReturn());
+        out.writeInt(fe.types().length);
+        for(TypeName t:fe.types())
             out.writeObject(t);
-        out.writeBoolean(fe.oper);
-        int y = fe.errors.length;
+        out.writeBoolean(fe instanceof OpDef);
+        int y = fe.errors().length;
         out.writeInt(y);
         for(int i = 0; i<y; i++){
-            out.writeUTF(fe.errors[i]);//Conta l'ordine
+            out.writeUTF(fe.errors()[i]);//Conta l'ordine
         }
     }
-    private Funz.FElement importCall(ObjectInputStream in, boolean ext)throws IOException,
+    private FElement importCall(ObjectInputStream in, String modulo)throws IOException,
             ClassNotFoundException{
         String name=in.readUTF();
         String modname=in.readUTF();
+        boolean shd=in.readBoolean();
         TypeName ret;
         ret=(TypeName)in.readObject();
         int i=in.readInt();
@@ -273,7 +282,7 @@ public class ModLoader {
         String[] err = new String[in.readInt()];
         for(int u =0; u<err.length; u++)
             err[u]=in.readUTF();
-        return new Funz.FElement(name, modname, ty, ret, op, ext, false, err);
+        return new FElement(name, modname, ty, ret, op, shd, modulo, false, err);
     }
     private void writeTemplates(Modulo mod)throws IOException{
         if(mod.Tca.length==0 && mod.Ttype.length==0)
