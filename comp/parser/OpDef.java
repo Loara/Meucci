@@ -16,6 +16,7 @@
  */
 package comp.parser;
 
+import comp.code.Meth;
 import comp.general.Lingue;
 import comp.general.VScan;
 import comp.scanner.SymbToken;
@@ -40,5 +41,19 @@ public class OpDef extends Callable{
     @Override
     public String getName(){
         return ((SymbToken)nome).getString();
+    }
+    @Override
+    public String memName(){
+        String n=getName();
+        if(n.startsWith(":"))
+            return "o"+n.substring(1);
+        else
+            return "o"+Meth.encode(n);
+    }
+    public static String opName(String n){
+        if(n.startsWith(":"))
+            return "o"+n.substring(1);
+        else
+            return "o"+Meth.encode(n);
     }
 }

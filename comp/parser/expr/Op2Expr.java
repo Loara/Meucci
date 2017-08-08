@@ -30,6 +30,7 @@ import comp.scanner.SymbToken;
 import comp.code.TypeElem;
 import comp.code.Types;
 import comp.general.Info;
+import comp.parser.OpDef;
 import comp.parser.TypeName;
 import comp.parser.istruz.TryIstr;
 
@@ -66,7 +67,7 @@ public class Op2Expr extends Espressione{
             TypeElem[] tr=new TypeElem[2];
             tr[0]=epr.returnType(var, v);
             tr[1]=epr2.returnType(var, v);
-            return Funz.getIstance().request(symb.getString(), tr, v);
+            return Funz.getIstance().request(OpDef.opName(symb.getString()), tr, v);
     }
     private FElement modname(Variabili var)throws CodeException{
             FElement fe=request(var, false);

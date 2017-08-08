@@ -20,6 +20,7 @@ import comp.code.template.FunzList;
 import comp.code.template.Substitutor;
 import comp.general.Lingue;
 import comp.parser.Callable;
+import comp.parser.Costructor;
 import comp.parser.TypeName;
 import comp.parser.template.TemplateEle;
 import java.util.ArrayList;
@@ -166,7 +167,7 @@ public class Funz {
             te=tem;
         ArrayList<FElement> e=new ArrayList<>();
         for(FElement i:s){
-            if(!i.name.equals(Meth.funzKey("init_"+fname, te)))//equivalenza sia di nome che template
+            if(!i.name.equals(Meth.funzKey(Costructor.costrName(fname), te)))//equivalenza sia di nome che template
                 continue;
             if(params.length!= (i.trequest.length-1))
                 continue;
@@ -191,7 +192,7 @@ public class Funz {
                 return fer;
             }
             String err=Lingue.getIstance().format("m_cod_foufunn", e.size(), 
-                    Meth.funzKey("init_"+fname, te))+":\n";
+                    Meth.funzKey(Costructor.costrName(fname), te))+":\n";
             err = e.stream().map((ex) -> ex.modname+"\n").reduce(err, String::concat);
             throw new CodeException(err);
         }
@@ -256,7 +257,7 @@ public class Funz {
             te=tem;
         ArrayList<FElement> e=new ArrayList<>();
         for(FElement i:s){
-            if(!i.name.equals(Meth.funzKey("init_"+fname, te)))//equivalenza sia di nome che template
+            if(!i.name.equals(Meth.funzKey(Costructor.costrName(fname), te)))//equivalenza sia di nome che template
                 continue;
             if(params.length != (i.trequest.length-1) )
                 continue;
@@ -277,7 +278,7 @@ public class Funz {
                 return;
             }
             String err=Lingue.getIstance().format("m_cod_foufunn", e.size(), 
-                    Meth.funzKey("init_"+fname, te))+":\n";
+                    Meth.funzKey(Costructor.costrName(fname), te))+":\n";
             err = e.stream().map((ex) -> ex.modname+"\n").reduce(err, String::concat);
             throw new CodeException(err);
         }

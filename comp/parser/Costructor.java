@@ -16,8 +16,10 @@
  */
 package comp.parser;
 
+import comp.code.Accumulator;
 import comp.code.CodeException;
 import comp.code.Environment;
+import comp.code.Segmenti;
 import comp.code.Types;
 import comp.code.vars.Variabili;
 import comp.general.VScan;
@@ -44,7 +46,6 @@ public class Costructor extends Callable{
     /**
      * 
      * @param t
-     * @param cl
      * @param modulo
      * @throws ParserException 
      */
@@ -63,6 +64,7 @@ public class Costructor extends Callable{
     public void validate(Environment env, Dichiarazione[] varSt)throws CodeException{
         Template.addTemplateConditions(temp);
         Variabili vs=new Variabili(dichs, varSt, true, null);
+        vs.setCostrVarName(dichs[0].getIdent());
         Environment.ret=Types.getIstance().find(retType, true);
         Environment.template=true;
         Environment.errors=errors;
@@ -70,8 +72,16 @@ public class Costructor extends Callable{
         Template.removeTemplateConditions(temp);
     }
     @Override
+    protected void preCode(Segmenti text, Variabili var, Environment env, 
+            Accumulator acc)throws CodeException{
+        var.setCostrVarName(dichs[0].getIdent());
+    }
+    @Override
     public String memName(){
         return "init_"+getName();
+    }
+    public static String costrName(String fname){
+        return "init_"+fname;
     }
 }
 

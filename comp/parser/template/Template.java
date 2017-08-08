@@ -30,7 +30,6 @@ import comp.scanner.HashToken;
 import comp.scanner.IdentToken;
 import comp.scanner.IntToken;
 import comp.scanner.PareToken;
-import comp.scanner.SymbToken;
 import comp.scanner.Token;
 import comp.scanner.VirgToken;
 import java.io.Serializable;
@@ -128,9 +127,7 @@ public abstract class Template implements Serializable{
         return false;
     }
     private static NumTemplate parseNum(VScan<Token> t, String name)throws ParserException{
-        long inf=0, sup=0;
         int dim;
-        boolean bi=false, bs=false;
         if(t.get() instanceof IntToken){
             dim=(int)((IntToken)t.get()).s;
             if(dim<0 || dim>Info.maxDimExp)
@@ -138,35 +135,8 @@ public abstract class Template implements Serializable{
             t.nextEx();
         }
         else throw new ParserException(Lingue.getIstance().format("m_par_timman", name), t);
-        if(t.get() instanceof SymbToken && ((SymbToken)t.get()).getString().equals(">")){
-            t.nextEx();
-            if(t.get() instanceof IntToken){
-                bi=true;
-                inf=((IntToken)t.get()).s;
-            }
-            else throw new ParserException(Lingue.getIstance().format("m_par_nucter"), t);
-            t.nextEx();
-        }
-        if(t.get() instanceof SymbToken && ((SymbToken)t.get()).getString().equals("<")){
-            t.nextEx();
-            if(t.get() instanceof IntToken){
-                bs=true;
-                if(dim<Info.maxDimExp){
-                    long max= 1l << 8*(1l << dim) - 1;
-                    long vay=((IntToken)t.get()).s;
-                    sup= max<vay ? max : vay;
-                }
-                else
-                    sup=((IntToken)t.get()).s;
-            }
-            else throw new ParserException(Lingue.getIstance().format("m_par_nucter"), t);
-            t.nextEx();
-        }
-        else if(dim<Info.maxDimExp){
-            bs=true;
-            sup = 1l << 8*(1l << dim) - 1;
-        }
-        return new NumTemplate(name, dim, inf, sup, bi, bs);
+        
+        return new NumTemplate(name, dim);
     }
     private static TypTemplate parseTyp(VScan<Token> t, String name)throws ParserException{
         boolean ref=false, num=false;

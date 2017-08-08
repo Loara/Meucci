@@ -225,7 +225,7 @@ public class Master {
                 else{
                     Callable h=null;
                     for(Callable td:modulo.Tcal){
-                        if(td.getName().equals(selected.nome)){
+                        if(td.memName().equals(selected.nome)){
                             h=td;
                             break;
                         }

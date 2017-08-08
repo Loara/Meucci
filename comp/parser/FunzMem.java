@@ -16,7 +16,6 @@
  */
 package comp.parser;
 
-import comp.code.Meth;
 import comp.general.Lingue;
 import comp.general.VScan;
 import comp.parser.template.Template;
@@ -35,8 +34,8 @@ public class FunzMem extends Callable{
     //private final FunzParam[] decValues;
     /**
      * type è il tipo del parametro a cui si accede
-     * ctype è il tipo della classe che contiene il parametro
-     * name è il nome del parametro
+     * ctype è il tipo della classe che contiene il parametro -> classname
+     * name è il nome del parametro -> varName
      * @param t
      * @param type
      * @param ctype
@@ -75,7 +74,6 @@ public class FunzMem extends Callable{
         d2[0]=new FunzParam(new TypeName(ctype, Template.conversion(temp)), "this");
         System.arraycopy(dichs, 0, d2, 1, dichs.length);
         dichs=d2;
-        super.nome=new IdentToken(Meth.accessFunzName(name, ctype, getAcc), riga);
         if(getAcc){
             if(!retType.equals(type))
                 throw new ParserException(Lingue.getIstance().
@@ -93,7 +91,6 @@ public class FunzMem extends Callable{
     protected FunzMem(TypeName type, String ctype, Template[] ctemplates, String name, 
             String modulo, boolean acc){
         super(modulo);
-        nome=new IdentToken(Meth.accessFunzName(name, ctype, acc), -1);
         istr=null;
         temp=ctemplates;
         noglobal=true;
@@ -114,6 +111,10 @@ public class FunzMem extends Callable{
     @Override
     public String getName(){
         return ((IdentToken)nome).getString();
+    }
+    @Override
+    public String memName(){
+        return (getAcc ? "G" : "S")+varName+"_"+classname;
     }
     public String varName(){
         return varName;

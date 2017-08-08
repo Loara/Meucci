@@ -258,16 +258,32 @@ public class IstrExe {
             }
             t.previous();//reinserisce l'identtoken nello scan
         }
-        if(t.get() instanceof SymbToken && ((SymbToken)t.get()).getString().equals(":destroy")){
-            t.nextEx();
-            Espressione exp=ExprGen.toExpr(t);
-            if(checkEol){
-                if(!(t.get() instanceof EolToken))
-                    throw new ParserException(Lingue.getIstance().format("m_par_dotcom"), t);
-                else
-                    t.nextEx();
+        if(t.get() instanceof SymbToken){
+            SymbToken st=(SymbToken)t.get();
+            if(st.getString().equals(":destroy")){
+                t.nextEx();
+                Espressione exp=ExprGen.toExpr(t);
+                if(checkEol){
+                    if(!(t.get() instanceof EolToken))
+                        throw new ParserException(Lingue.getIstance().format("m_par_dotcom"), t);
+                    else
+                        t.nextEx();
+                }
+                return new DesIstr((IdentArray)exp);
             }
-            return new DesIstr((IdentArray)exp);
+            if(st.getString().equals(":super")){
+                t.nextEx();
+                Espressione exp=ExprGen.toExpr(t);
+                if(!(exp instanceof FunzExpr))
+                    throw new ParserException("bula", t);
+                if(checkEol){
+                    if(!(t.get() instanceof EolToken))
+                        throw new ParserException(Lingue.getIstance().format("m_par_dotcom"), t);
+                    else
+                        t.nextEx();
+                }
+                return new SuperIstr((FunzExpr)exp);
+            }
         }
         //multi
         if(t.reqSpace(2) && t.get() instanceof PareToken && ((PareToken)t.get()).s=='{'){

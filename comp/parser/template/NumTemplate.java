@@ -24,71 +24,25 @@ import comp.code.template.TNumbers;
  * @author loara
  */
 public class NumTemplate extends Template{
-    private long mas, min;//La possibilità che fossero TemplateEle è stata rimossa
-    //in quanto generano molti problemi con le FunzEle che verranno generate in futuro.
+    /*
+    private long mas, min;
     private final boolean bmas, bmin;
-    private int dimExp;
+    
+    Data la complessità della loro gestione, è stata disabilitata la possibilità
+    di limitarne i valori. Si consiglia per quanto possibile di utilizzare throw
+    */
+    private final int dimExp;
     public NumTemplate(String i){
         super(i);
         dimExp=2;
-        bmas=false;
-        bmin=true;
     }
-    NumTemplate(String i, int dim, long inf, long sup, boolean binf, boolean bsup){
+    NumTemplate(String i, int dim){
         super(i);
         dimExp=dim;
-        bmas=binf;
-        bmin=bsup;
-        mas=sup;
-        min=inf;
     }
     @Override
     public boolean isCompatible(TemplateEle te)throws CodeException{
-        if(!(te instanceof NumDich || te instanceof ParamDich || te instanceof FunzDich))
-            return false;
-        if(!bmas && !bmin)
-            return true;
-        boolean pp=true;
-        if(bmas){
-            if(te instanceof NumDich)
-                pp= ((NumDich)te).getNum()<mas;
-            else if(te instanceof ParamDich){
-                pp= TNumbers.getIstance().minoreDi(((ParamDich)te).getName()
-                        ,mas);
-            }
-            else if(te instanceof FunzDich){
-                FunzDich fde=(FunzDich)te;
-                fde.validate();
-                if(fde.hasUp()){
-                    pp=fde.upBound()<=mas;
-                }
-                else
-                    pp=false;
-            }
-            else
-                pp=false;//da modificare
-        }
-        if(!pp)
-            return false;
-        if(bmin){
-            if(te instanceof NumDich)
-                pp= ((NumDich)te).getNum()>min;
-            else if(te instanceof ParamDich)
-                pp= TNumbers.getIstance().maggioreDi(((ParamDich)te).getName()
-                        , min);
-            else if(te instanceof FunzDich){
-                FunzDich fde=(FunzDich)te;
-                fde.validate();
-                if(fde.hasLow()){
-                    pp=fde.lowBound()>=min;
-                }
-                else
-                    pp=false;
-            }
-            else
-                pp=false;
-        }
-        return pp;
+        return te instanceof NumDich || te instanceof ParamDich || te instanceof FunzDich;
     }
     public int dimExp(){
         return dimExp;
@@ -103,17 +57,5 @@ public class NumTemplate extends Template{
     @Override
     public int hashCode() {
         return getIdent().hashCode();
-    }
-    public boolean hasMin(){
-        return bmin;
-    }
-    public boolean hasMax(){
-        return bmas;
-    }
-    public long getMin(){
-        return min;
-    }
-    public long getMax(){
-        return mas;
     }
 }

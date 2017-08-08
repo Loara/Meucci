@@ -28,6 +28,7 @@ import comp.code.XReg;
 import comp.code.vars.Variabili;
 import comp.general.Info;
 import comp.parser.Espressione;
+import comp.parser.Funzione;
 import comp.parser.ParserException;
 import comp.parser.istruz.TryIstr;
 import comp.parser.template.TemplateEle;
@@ -76,7 +77,7 @@ public class FunzExpr extends Espressione{
             for(int i=0; i<tr.length; i++){
                 tr[i]=values[i].returnType(var, v);
             }
-            return Funz.getIstance().request(nome, tr, v, params);
+            return Funz.getIstance().request(Funzione.funzName(nome), tr, v, params);
     }
     private FElement modname(Variabili var)throws CodeException{
             FElement fe=request(var, false);

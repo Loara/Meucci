@@ -100,7 +100,7 @@ public class FunzList extends TList<Callable>{
             }
             throw new CodeException(error);
         }
-        FElement fe=new FElement(Meth.funzKey(filt[0].getName(), param), Meth.modName(filt[0], param), 
+        FElement fe=new FElement(Meth.funzKey(filt[0].memName(), param), Meth.modName(filt[0], param), 
                 pars, retT, false, filt[0].isShadow(), filt[0].getModulo(), true, filt[0].errors());
         //meglio questo che utilizzare direttamente il costruttore con Callable:
         //poichè sui Callable non deve essere effettuato la sostituzione
@@ -117,7 +117,7 @@ public class FunzList extends TList<Callable>{
         TypeName[] pars=null;
         TypeName retT=null;
         for(Callable f:t){
-            if(!f.getName().equals("init_"+name))
+            if(!f.memName().equals("init_"+name))
                 continue;
             if(f.templates().length!=param.length)
                 continue;
@@ -157,7 +157,7 @@ public class FunzList extends TList<Callable>{
             }
             throw new CodeException(error);
         }
-        FElement fe=new FElement(Meth.funzKey(filt[0].getName(), param), Meth.modName(filt[0], param), 
+        FElement fe=new FElement(Meth.funzKey(filt[0].memName(), param), Meth.modName(filt[0], param), 
                 pars, retT, false, filt[0].isShadow(), filt[0].getModulo(), true, filt[0].errors());
         //meglio questo che utilizzare direttamente il costruttore con Callable:
         //poichè sui Callable non deve essere effettuato la sostituzione
@@ -220,7 +220,7 @@ public class FunzList extends TList<Callable>{
         boolean just;
         TypeName[] pars;
         for(Callable f:t){
-            if(!f.getName().equals(name))
+            if(!f.memName().equals(name))
                 continue;
             if(f.templates().length!=param.length)
                 continue;

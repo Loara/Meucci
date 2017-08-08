@@ -19,7 +19,6 @@ package comp.parser;
 import comp.code.Accumulator;
 import comp.code.CodeException;
 import comp.code.Environment;
-import comp.code.FElement;
 import comp.code.Funz;
 import comp.code.Meth;
 import comp.code.ModLoader;
@@ -40,6 +39,7 @@ import comp.scanner.PareToken;
 import comp.scanner.SymbToken;
 import comp.scanner.Token;
 import comp.parser.istruz.MultiIstr;
+import comp.scanner.VirgToken;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.HashSet;
@@ -81,17 +81,24 @@ public class Modulo {
             if(t.get() instanceof IdentToken && ((IdentToken)t.get()).getString().equals("depends")){
                 Stack<String> de=new Stack<>(String.class);
                 Stack<Boolean> pb=new Stack<>(Boolean.class);
-                t.nextEx();
-                while(t.get() instanceof IdentToken){
+                do{
+                    t.nextEx();
+                    if(!(t.get() instanceof IdentToken)){
+                        throw new ParserException("", t);
+                    }
                     if(((IdentToken)t.get()).getString().equals("public")){
                         pb.push(true);
                         t.nextEx();
                     }
                     else
                         pb.push(false);
+                    if(!(t.get() instanceof IdentToken)){
+                        throw new ParserException("", t);
+                    }
                     de.push(((IdentToken)t.get()).getString());
                     t.nextEx();
                 }
+                while(t.get() instanceof VirgToken);
                 deps=de.toArray();
                 publ=pb.toArray();
             }

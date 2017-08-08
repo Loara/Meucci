@@ -73,38 +73,6 @@ public class TNumbers {
         }
         else throw new CodeException(Lingue.getIstance().format("m_cod_temnufn"));
     }
-    /**
-     * Dice se tname è maggiore di val
-     * @param tname
-     * @param numb
-     * @return 
-     * @throws comp.code.CodeException 
-     */
-    public boolean maggioreDi(String tname, long numb)throws CodeException{
-        NumTemplate t=find(tname);
-        if(t==null)
-            throw new CodeException(Lingue.getIstance().format("m_cod_pnftemp"));
-        if(t.hasMin()){
-            return t.getMin()>=numb;
-        }
-        else return false;
-    }
-    /**
-     * Dice se tname è minore di val
-     * @param tname
-     * @param numb
-     * @return 
-     * @throws comp.code.CodeException 
-     */
-    public boolean minoreDi(String tname, long numb)throws CodeException{
-        NumTemplate t=find(tname);
-        if(t==null)
-            throw new CodeException(Lingue.getIstance().format("m_cod_pnftemp"));
-        if(t.hasMax()){
-            return t.getMax()<=numb;
-        }
-        else return false;
-    }
     public int dimension(String tname)throws CodeException{
         NumTemplate t=find(tname);
         if(t==null)

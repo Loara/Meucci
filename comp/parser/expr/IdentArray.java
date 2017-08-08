@@ -101,8 +101,15 @@ public class IdentArray extends Espressione{
         if(chiam instanceof IdentExpr){
             return TNumbers.getIstance().isIn(((IdentExpr)chiam).val());
         }
-        if(chiam instanceof TemplExpr){
-            return true;
+        return chiam instanceof TemplExpr;
+    }
+    public boolean isVariable(){
+        if(elems.length!=0)
+            return false;
+        if(chiam instanceof NumExpr)
+            return false;
+        if(chiam instanceof IdentExpr){
+            return !TNumbers.getIstance().isIn(((IdentExpr)chiam).val());
         }
         else return false;
     }

@@ -37,6 +37,7 @@ public class Variabili {
     private final VarStack vars;
     private final Var[] varSt;
     private final GhostVar gvar;
+    private String costrVarName;
     public Variabili(FunzParam[] dichs, Dichiarazione[] stat, boolean validate, 
             Accumulator acc)throws CodeException{
         varSt=new Var[2];
@@ -50,6 +51,18 @@ public class Variabili {
         else
             vars=new VarStack(dichs, acc);
         varSt[0]=vars;
+        costrVarName=null;
+    }
+    public void setCostrVarName(String vn){
+        costrVarName=vn;
+    }
+    public String getCostrVarName(){
+        return costrVarName;
+    }
+    public IdentArray getCostrAsExpr()throws CodeException{
+        if(costrVarName==null)
+            throw new CodeException("k---");
+        return new IdentArray(costrVarName);
     }
     public void addVarStack(Dichiarazione var)throws CodeException{
         vars.addVar(var.getRType(), var.getIdent());

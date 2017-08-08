@@ -121,10 +121,10 @@ public class WeakSubstitutor extends HashMap<String, TemplateEle>{
             return new FunzDich.SIZEOF(par);
         }
         else if(fd instanceof FunzDich.SUM){
-            return new FunzDich.SUM(par);
+            return new FunzDich.SUM(par, fd.dimension());
         }
         else if(fd instanceof FunzDich.PROD){
-            return new FunzDich.PROD(par);
+            return new FunzDich.PROD(par, fd.dimension());
         }
         else if(fd instanceof FunzDich.DIMENSION){
             return new FunzDich.DIMENSION(par);

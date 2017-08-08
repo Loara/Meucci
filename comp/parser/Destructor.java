@@ -21,7 +21,6 @@ import comp.code.CodeException;
 import comp.code.Environment;
 import comp.code.Funz;
 import comp.code.FElement;
-import comp.code.Meth;
 import comp.code.Register;
 import comp.code.Segmenti;
 import comp.code.TypeElem;
@@ -70,7 +69,7 @@ public class Destructor extends Callable{
     }
     @Override
     public String memName(){
-        return Meth.destructorName(classname);
+        return "end_"+classname;
     }
     @Override
     public void validate(Environment env, Dichiarazione[] varSt)throws CodeException{
@@ -86,7 +85,7 @@ public class Destructor extends Callable{
         if(te.extend!=null){
             TypeElem[] parames=new TypeElem[1];
             parames[0]=te;
-            Funz.getIstance().request(Meth.destructorName(te.extend), parames, true, telem);
+            Funz.getIstance().request(memName(), parames, true, telem);
         }
         Template.removeTemplateConditions(temp);
     }

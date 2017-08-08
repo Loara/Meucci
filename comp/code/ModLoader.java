@@ -10,7 +10,6 @@ import static comp.general.FileManager.findTFile;
 import static comp.general.FileManager.resps;
 import comp.general.Lingue;
 import comp.parser.Callable;
-import comp.parser.Costructor;
 import comp.parser.Membro;
 import comp.parser.Modulo;
 import comp.parser.OpDef;
@@ -253,7 +252,7 @@ public class ModLoader {
         return new TypeElem(name, ex, mem, modulo, explic);
     }
     private void exportCall(Callable fe, ObjectOutputStream out)throws IOException, CodeException{
-        out.writeUTF(fe.getName());
+        out.writeUTF(fe.memName());
         out.writeUTF(Meth.modName(fe));//Genera errori, da controllare
         out.writeBoolean(fe.isShadow());
         out.writeObject(fe.getReturn());

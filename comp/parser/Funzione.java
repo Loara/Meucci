@@ -30,6 +30,13 @@ public class Funzione extends Callable{
     public String getName(){
         return ((IdentToken)nome).getString();
     }
+    @Override
+    public String memName(){
+        return "@"+getName();
+    }
+    public static String funzName(String name){
+        return "@"+name;
+    }
     public Funzione(VScan<Token> t, String modulo)throws ParserException{
         super(t, modulo);
         if(!(nome instanceof IdentToken))

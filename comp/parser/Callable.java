@@ -192,9 +192,16 @@ public abstract class Callable implements Serializable{
     public FunzParam[] getElems(){
         return dichs;
     }
+    /**
+     * Il nome con cui è stata dichiarata la funzione.
+     * <b>NOTA</b>: per le funzioni di accesso vale get o set, mentre per i distruttori
+     * vale end sempre, si consiglia di utilizzare memName per quanto possibile
+     * @return 
+     */
     public abstract String getName();//per via di Token
     /**
-     * Nome da utilizzare per FElement, si consiglia di effettuarne l'override
+     * Nome codificato da utilizzare per FElement, si consiglia di effettuarne l'override
+     * 
      * @return 
      */
     public String memName(){

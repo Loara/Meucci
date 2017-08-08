@@ -44,33 +44,13 @@ public class Meth {
      * @throws CodeException 
      */
     public static String funzKey(String d, TemplateEle[] params)throws CodeException{
-        String a;
-        if(isOp(d)){
-            if(d.startsWith(":"))
-                a="o"+d.substring(1);
-            else
-                a="o"+encode(d);
-        }
-        else 
-            a=d;
+        String a=d;
         if(params.length!=0)
             a += "#A"+paramsName(params)+"#C";
         return a;
     }
     public static String funzKey(String d)throws CodeException{
-        String a;
-        if(isOp(d)){
-            if(d.startsWith(":"))
-                a="o"+d.substring(1);
-            else
-                a="o"+encode(d);
-        }
-        else 
-            a=d;
-        return a;
-    }
-    public static boolean isOp(String n){
-        return n.startsWith(":") || Info.isSymb(n.charAt(0));
+        return d;
     }
     public static String modName(Callable d, TemplateEle... params)throws CodeException{
         String suf=d.getModulo()+"~";
@@ -123,6 +103,12 @@ public class Meth {
         else
             return vv+"#A"+paramsName(te)+"#C";
     }
+    public static String destructorName(TypeName tn){
+        return "end_"+tn.getName();
+    }
+    public static String destructorName(String tn){
+        return "end_"+tn;
+    }
     /**
      * classname è la classe che contiene il membro
      * @param membro
@@ -130,18 +116,10 @@ public class Meth {
      * @param get
      * @return 
      */
-    public static String accessFunzName(String membro, String classname, boolean get){
-        return FMemName(membro, get)+"_"+classname;
+    private static String accessFunzName(String membro, String classname, boolean get){
+        return (get ? "G" : "S")+membro+"_"+classname;
     }
-    public static String destructorName(TypeName classname){
-        return "end_"+classname.getName();//NON vanno considerati anche i parametri
-        //per vari motivi:
-        //1)Sono già considerati come parametri template della funzione
-        //2)Il costruttore è associato a tutta la famiglia di tipi e non ad un tipo in particolare
-    }
-    public static String destructorName(String classname){
-        return "end_"+classname;
-    }
+    
     private static String className(TypeDich vv){
         if(vv.templates().length==0)
             return vv.getName();
@@ -160,15 +138,6 @@ public class Meth {
         for(TypeName tn:mem.params)
             u+="."+className(sub.recursiveGet(tn));
         return u;
-    }
-    /**
-     * Preferire {@link comp.code.Meth#accessFunzName(java.lang.String, java.lang.String, boolean) }
-     * @param name Nome parametro
-     * @param get Accesso al parametro
-     * @return 
-     */
-    public static String FMemName(String name, boolean get){
-        return (get ? "G" : "S")+name;
     }
     /*
     nasm non supporta i simboli, verranno dunque codificati nella forma
