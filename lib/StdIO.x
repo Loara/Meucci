@@ -1,4 +1,4 @@
-modulo StdIO depends Syscalls Strings Arrays{
+modulo StdIO depends public Syscalls, public Strings, Arrays{
 	String codec;
 	static{
 		codec="0123456789abcdefghijklmnopqrstuvwxyz";
@@ -31,7 +31,7 @@ modulo StdIO depends Syscalls Strings Arrays{
 				v =/ b;
 			}
 		}
-		Array[char] ar = :stack DynArray[char](car);
+		Array[char] ar = :stack iniDynArray[char](car);
 		//Conversione
 		for(uint i = car - u1; i >= u0; i =- u1){
 			ar.elem[i] = codec :at (uint)(c :mod b);

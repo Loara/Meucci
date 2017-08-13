@@ -1,19 +1,15 @@
 modulo Stacks depends Memory StdIO{
 	type explicit StackEle[typ Y]{
-		init(Y e, StackEle[Y] b){
-			this.ele=e;
-			this.next=b;
-		};
 		shadow Y ele;
 		shadow StackEle[Y] next;
+	}
+	costructor shadow iE[typ Y](StackEle[Y] this, Y e, StackEle[y] n){
+		this.ele = e;
+		this.next = n;
 	}
 	type Stack[typ o]{
 		explicit read uint dim;
 		shadow StackEle[o] valv;
-		init(){
-			this.dim = u0;
-			this.valv = null;
-		};
 		end(){
 			StackEle[o] cur = this.valv;
 			StackEle[o] next;
@@ -24,12 +20,16 @@ modulo Stacks depends Memory StdIO{
 			}
 		};
 	}
+	costructor iniStack[typ T](Stack[T] this){
+		this.dim = u0;
+		this.valv = null;
+	}
 	void push[typ T](Stack[T] st, T element){
-		StackEle[T] g = :new StackEle[T](element, st.valv);
+		StackEle[T] g = :new iE[T](element, st.valv);
 		st.valv = g;
 		st.dim =+ u1;
 	}
-	T pop[typ T](Stack[T] st)errors empty{
+	T pop[typ T](Stack[T] st) errors empty{
 		if(st.dim > u0){
 			st.dim =- u1;
 			StackEle[T] g = st.valv;

@@ -5,27 +5,6 @@ modulo Pointers{
 	type explicit Rpointer[typ U]{
 		read U el;
 	}
-	pt + (pt p, uint vel){
-		%a{
-	mov	r0,[rbp+16]
-	mov	r3d,[rbp+24]
-	add	r0,r3
-		}
-	}
-	pt - (pt p, uint vel){
-		%a{
-	mov	r0,[rbp+16]
-	mov	r3d,[rbp+24]
-	sub	r0,r3
-		}
-	}
-	pt + (pt p, long vel){
-		%a{
-	mov	r0,[rbp+16]
-	mov	r3,[rbp+24]
-	add	r0,r3
-		}
-	}
 	long offset(pt a, pt b){
 		%a{
 	mov	r0,[rbp+16]

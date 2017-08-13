@@ -10,7 +10,7 @@ modulo Memory depends Syscalls{
 	static{
 		base=null;
 	}
-	Block createBlock(uint i){
+	shadow Block createBlock(uint i){
 		if(i+u8<u8)//Overflow
 			return null;
 		if(i <= u8)
@@ -23,7 +23,7 @@ modulo Memory depends Syscalls{
 		ret.next=null;
 		return ret;
 	}
-	Block requestBlock(uint dim){
+	shadow Block requestBlock(uint dim){
 		if(base==null)
 			return createBlock(dim);
 		Block b=base;

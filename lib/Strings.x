@@ -1,11 +1,11 @@
-modulo Strings depends Memory Pointers{
+modulo Strings depends Memory, Pointers{
 	type explicit String{
 		explicit read uint lenght;
 		shadow Rpointer[char] point;
-		init(uint l, pt data){
-			this.lenght=l;
-			this.point=(Rpointer[char])data;
-		};
+	}
+	costructor iniString(String this, uint len, pt data){
+		this.lenght = len;
+		this.point = (Rpointer[char]) data;
 	}
 	boolean :equals (String s, String tul){
 		if(s.lenght != tul.lenght)
@@ -32,15 +32,41 @@ NOEQ:
 		}
 
 	}
-	String allocaStr(uint dim){
+	costructor allocaStr(String this, uint dim){
 		//crea una stringa vuota formata da dim caratteri (escluso \0)
 		pt data=allocate(dim+u1);
-		return :new String(dim, data);
+		( (pointer[char]) (data + dim) ).el = (char)u0b;
+		:super iniString(dim, data);
 	}
 	char :at(String s, uint val){
 		return Rsomma[char](s.point, val).el;
 	}
 	pt getCstr(String c){
 		return (pt)c.point;
+	}
+	void cMoving(pt des, pt src, ulong nu){
+		%a{
+	mov	rdi,[rbp+16]
+	mov	rsi,[rbp+24]
+	mov	rbx,[rbp+32]
+	mov	rcx,rbx
+	shr	rcx,3
+	cld
+	rep	movsq
+	mov	rcx,rbx
+	and	rcx,7
+	rep	movsb
+		}
+	}
+	String substring(String src, uint begin, uint endd){
+		if((begin > endd) || (endd > src.lenght))
+			throw error;
+		uint len = endd - begin;
+		String ret = :new allocaStr(len);
+		if(len == u0){
+			return ret;
+		}
+		cMoving((pt)ret.point, (pt)Rsomma[char](src.point, begin), (ulong)len);
+		return ret;
 	}
 }

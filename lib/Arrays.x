@@ -1,4 +1,4 @@
-modulo Arrays depends Memory{
+modulo Arrays depends Memory, public Pointers{
 	type Array[typ T]{
 		explicit read uint length;
 		shadow pointer[T] memory;
@@ -9,9 +9,7 @@ modulo Arrays depends Memory{
 					return val.el;
 				}
 				else{
-					%a{
-	xor	r0,r0
-					}
+					throw outOfBounds;
 				}
 			}
 			void set(T va, uint index){
@@ -21,27 +19,27 @@ modulo Arrays depends Memory{
 				}
 			}
 		};
-		init(uint size, pointer[T] data){
-			this.memory = data;
-			this.length=size;
-		};
 		end(){
 
 		};
 	}
+	costructor iniArray[typ T](Array[T] this, uint size, pointer[T] data){
+		this.memory = data;
+		this.length = size;
+	}
 	type DynArray[typ T] extends Array[T]{
-		init(uint size){
-			super(size, (pointer[T])allocate((uint)#SIZEOF(T)*size));
-		};
 		end(){
 			free((pt)this.memory);
 		};
 	}
+	costructor iniDynArray[typ T](DynArray[T] this, uint size){
+		:super iniArray[T](size, (pointer[T])allocate((uint)#SIZEOF(T)*size));
+	}
 	type explicit StaticArray[typ T, num L 2]{
 		T elem packed L;
-		init(){
+	}
+	costructor iniStaticArray[typ T, num L 2](StaticArray[T, L] this){
 
-		};
 	}
 	void copy[typ a](Array[a] dest, Array[a] source, uint dstart, uint sstart, uint len){
 		//La seguente riga di codice è errata a causa dell'associatività
@@ -53,11 +51,9 @@ modulo Arrays depends Memory{
 			dest.elem[dstart+i] = source.elem[sstart+i];
 		}
 	}
-	Array[T] toArray[typ T, num L 2](StaticArray[T, L] sa){
-		Array[T] ar = :new DynArray[T](L);
-		for(uint i=u0; i<L; i =+ u1)
-			ar.elem[i]=sa.elem[i];
-		return ar;
+	costructor linkArray[typ T, num L 2](Array[T] ret, StaticArray[T, L] sa){
+		ret.length = L;
+		ret.memory = (pointer[T])sa;
 	}
 	pt dataPointer[typ T](Array[T] a){
 		return (pt)a.memory;

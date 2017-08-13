@@ -85,7 +85,10 @@ modulo Syscalls depends Pointers{
 		if(ci==null)
 			ci=brk(null);
 		pt ul=ci;
-		ci=brk(ci+i);
+		if(i >=0 )
+			ci=brk(ci+(ulong)i);
+		else
+			ci=brk(ci-(ulong)i);
 		return ul;
 	}
 	pt currentIndex(){
