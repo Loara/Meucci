@@ -92,7 +92,7 @@ public class FunzExpr extends Espressione{
             values[i].validate(var);
             esp1[i]=values[i].returnType(var, true);
         }
-        FElement fe=Funz.getIstance().request(nome, esp1, true, params);
+        FElement fe=Funz.getIstance().request(Funzione.funzName(nome), esp1, true, params);
         if(!Info.containedIn(fe.errors, Environment.errors))
             throw new CodeException("Errori di "+fe.name+" non gestiti correttamente");
     }

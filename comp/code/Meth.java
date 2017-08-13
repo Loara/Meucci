@@ -54,10 +54,6 @@ public class Meth {
     }
     public static String modName(Callable d, TemplateEle... params)throws CodeException{
         String suf=d.getModulo()+"~";
-        if(d instanceof Funzione)
-            suf+="@";
-        else
-            suf+="";
         String nn=suf+funzKey(d.memName(), params);
         WeakSubstitutor sub=new WeakSubstitutor();
         sub.addAll(d.templateNames(), params);

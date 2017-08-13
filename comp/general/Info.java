@@ -54,7 +54,7 @@ public class Info {
     public static final String[] forbittenNames=new String[]{"break", "catch", "continue", "costructor",
         "default", "depends", "destroy", "else", "end", "errors", "explicit", "extends", "for", "ghost", 
         "if", "init", "modulo", "new", "num", "number", "override", "packed", "public", "read", "reference", 
-        "return", "shadow", "static", "super", "this", "throw", "try", "typ", "type", "while"};
+        "return", "shadow", "static", "super", "throw", "try", "typ", "type", "while"};
     
     public static String[] primitive(){
         String[] ret=new String[primitive.length+numbers.length];

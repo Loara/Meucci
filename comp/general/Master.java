@@ -19,12 +19,10 @@ package comp.general;
 import comp.code.CodeException;
 import comp.code.Environment;
 import comp.code.Funz;
-import comp.code.FElement;
 import comp.code.Meth;
 import comp.code.ModLoader;
 import comp.code.ModLoader.MLdone;
 import comp.code.Segmenti;
-import comp.code.TypeElem;
 import comp.code.Types;
 import comp.code.template.Notifica;
 import comp.code.template.Substitutor;
@@ -231,7 +229,7 @@ public class Master {
                         }
                     }
                     if(h==null)
-                        throw new IOException("Funzione template non trovato");
+                        throw new IOException("Funzione template non trovato: "+selected.nome);
                     codificaTFunz(h, selected.parametri);
                     selected.segnato=true;
                 }

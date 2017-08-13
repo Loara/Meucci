@@ -187,7 +187,7 @@ public class Funz {
         }
         else {
             if(e.isEmpty() && te.length>0){
-                FElement fer=fl.generateCostructor(fname, tem, params, noAdd);
+                FElement fer=fl.generateCostructor(fname, te, params, noAdd);
                 s.add(fer);
                 return fer;
             }

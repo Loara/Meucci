@@ -49,7 +49,7 @@ public class Destructor extends Callable{
      * @throws ParserException 
      */
     public Destructor(VScan<Token> t, String type, Template[] params, String modulo)throws ParserException{
-        super(t, modulo);
+        super(t, modulo, false, false);
         if(temp.length!=0)
             throw new ParserException(Lingue.getIstance().format("m_par_temdis"), super.nome);
         if(dichs.length!=0)

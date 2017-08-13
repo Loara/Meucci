@@ -46,7 +46,7 @@ public class FunzMem extends Callable{
      */
     public FunzMem(VScan<Token> t, TypeName type, String ctype, 
             Template[] ctemplate, String name, String modulo)throws ParserException{
-        super(t, modulo);
+        super(t, modulo, false);
         noglobal=true;
         int riga=super.nome.getRiga();
         if(super.temp.length!=0)

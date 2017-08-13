@@ -23,6 +23,7 @@ import comp.code.TypeElem;
 import comp.general.Lingue;
 import comp.general.Stack;
 import comp.parser.Callable;
+import comp.parser.Costructor;
 import comp.parser.TypeName;
 import comp.parser.template.TemplateEle;
 
@@ -54,13 +55,12 @@ public class FunzList extends TList<Callable>{
     */       
     public FElement generate(String name, TemplateEle[] param, TypeElem[] fpdec, boolean noAdd)
             throws CodeException{
-        Callable[] t=find0(name);
         Stack<Callable> sf=new Stack<>(Callable.class);
         boolean just;
         TypeName[] pars=null;
         TypeName retT=null;
-        for(Callable f:t){
-            if(!f.getName().equals(name))
+        for(Callable f:this.val){
+            if(!f.memName().equals(name))
                 continue;
             if(f.templates().length!=param.length)
                 continue;
@@ -111,13 +111,12 @@ public class FunzList extends TList<Callable>{
     }
     public FElement generateCostructor(String name, TemplateEle[] param, TypeElem[] fpdec, boolean noAdd)
             throws CodeException{
-        Callable[] t=find0(name);
         Stack<Callable> sf=new Stack<>(Callable.class);
         boolean just;
         TypeName[] pars=null;
         TypeName retT=null;
-        for(Callable f:t){
-            if(!f.memName().equals("init_"+name))
+        for(Callable f:this.val){
+            if(!f.memName().equals(Costructor.costrName(name)))
                 continue;
             if(f.templates().length!=param.length)
                 continue;
@@ -151,7 +150,8 @@ public class FunzList extends TList<Callable>{
         }
         Callable[] filt=sf.toArray();
         if(filt.length!=1){
-            String error=Lingue.getIstance().format("m_cod_foufunn", filt.length, name)+":";
+            String error=Lingue.getIstance().format("m_cod_foufunn", filt.length, 
+                    Costructor.costrName(name))+":";
             for(Callable c:filt){
                 error+="\n"+Meth.modName(c, param);
             }
@@ -162,7 +162,7 @@ public class FunzList extends TList<Callable>{
         //meglio questo che utilizzare direttamente il costruttore con Callable:
         //poichè sui Callable non deve essere effettuato la sostituzione
         if(!noAdd && isIn(fe.modname, param)==null){
-            nos.add(new Notifica(name, filt[0].getModulo(), param));
+            nos.add(new Notifica(Costructor.costrName(name), filt[0].getModulo(), param));
         }
         return fe;
     }
@@ -173,7 +173,7 @@ public class FunzList extends TList<Callable>{
         boolean just;
         TypeName[] pars;
         for(Callable f:t){
-            if(!f.getName().equals(name))
+            if(!f.memName().equals(name))
                 continue;
             if(f.templates().length!=param.length)
                 continue;
@@ -215,12 +215,11 @@ public class FunzList extends TList<Callable>{
     }
     public void esisteCostructor(String name, TemplateEle[] param, TypeElem[] fpdec)
             throws CodeException{
-        Callable[] t=find0(name);
         Stack<Callable> sf=new Stack<>(Callable.class);
         boolean just;
         TypeName[] pars;
-        for(Callable f:t){
-            if(!f.memName().equals(name))
+        for(Callable f:this.val){
+            if(!f.memName().equals(Costructor.costrName(name)))
                 continue;
             if(f.templates().length!=param.length)
                 continue;

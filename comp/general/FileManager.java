@@ -21,7 +21,8 @@ public class FileManager {
     public static String cpath="";//percorso corrente
     public static ArrayList<String> resps=new ArrayList<>();//repo
     public static Path createAsmFile(String path)throws IOException{
-        Path p=Paths.get(path+".asm");
+        Path p=Paths.get(path+".asm").toAbsolutePath();
+        //System.out.println(p.toString());
         Files.deleteIfExists(p);
         createdFile.add(path);
         return p;

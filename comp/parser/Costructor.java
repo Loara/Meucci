@@ -50,7 +50,7 @@ public class Costructor extends Callable{
      * @throws ParserException 
      */
     public Costructor(VScan<Token> t, String modulo)throws ParserException{
-        super(t, modulo, true);
+        super(t, modulo, true, false);
         fclass=super.dichs[0].getType();
     }
     public String className(){

@@ -116,16 +116,9 @@ public class ModLoader {
             for(TypeDef td:mod.type){
                 exportType(td, out);
             }
-            //Vanno scritte solo le funzioni non shadow
-            int num=0;
+            out.writeInt(mod.ca.length);
             for(Callable c:mod.ca){
-                if(!c.isShadow())
-                    num++;
-            }
-            out.writeInt(num);
-            for(Callable c:mod.ca){
-                if(!c.isShadow())
-                    exportCall(c, out);
+                exportCall(c, out);
             }
         }
         writeTemplates(mod);
@@ -150,6 +143,7 @@ public class ModLoader {
             Path p=findMod(name);
             try(ObjectInputStream in=new ObjectInputStream(new BufferedInputStream
             (Files.newInputStream(p, StandardOpenOption.READ)))){
+                ii.name=name;//Non è memorizzato nel file, ma è il nome del file
                 int i=in.readInt();
                 ii.dep=new String[i];
                 ii.pb=new Boolean[i];
@@ -179,7 +173,7 @@ public class ModLoader {
         if(!ml.contains(ii)){
             ml.add(ii);
             for(int k=0; k<ii.dep.length; k++){
-                if(ii.pb[k]){
+                if(name.equals(oname) || ii.pb[k]){
                     importAllModules(ml, ii.dep[k], oname);
                 }
             }

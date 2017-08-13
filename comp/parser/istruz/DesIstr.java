@@ -26,6 +26,7 @@ import comp.code.TypeElem;
 import comp.code.Types;
 import comp.code.vars.Variabili;
 import comp.parser.Espressione;
+import comp.parser.Funzione;
 import comp.parser.Istruzione;
 import comp.parser.expr.IdentArray;
 
@@ -44,7 +45,7 @@ public class DesIstr extends Istruzione{
         TypeElem te=exp.returnType(var, true);
         if(!te.reference)
             throw new CodeException("Tipo non refernce");
-        Funz.getIstance().esiste("free", new TypeElem[]{Types.getIstance().find("pt")});
+        Funz.getIstance().esiste(Funzione.funzName("free"), new TypeElem[]{Types.getIstance().find("pt")});
     }
     @Override
     public void toCode(Segmenti seg, Variabili var, Environment env, Accumulator acc)throws CodeException{
@@ -65,7 +66,7 @@ public class DesIstr extends Istruzione{
             seg.addIstruzione("call", "["+acc.getAccReg().getReg()+"]", null);//distruttore ad offset zero
             seg.addLabel("DES"+ii);
         }
-        FElement fe=Funz.getIstance().request("free", new TypeElem[]{Types.getIstance().find("pt")},
+        FElement fe=Funz.getIstance().request(Funzione.funzName("free"), new TypeElem[]{Types.getIstance().find("pt")},
                 false);
         if(Environment.template||fe.isExternFile())
             Funz.getIstance().ext.add(fe.modname);

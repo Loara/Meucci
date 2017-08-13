@@ -38,7 +38,7 @@ public class Funzione extends Callable{
         return "@"+name;
     }
     public Funzione(VScan<Token> t, String modulo)throws ParserException{
-        super(t, modulo);
+        super(t, modulo, true);
         if(!(nome instanceof IdentToken))
             throw new ParserException(Lingue.getIstance().format("m_par_invnam"), nome);
     }

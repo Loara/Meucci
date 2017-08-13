@@ -18,7 +18,6 @@ import comp.parser.Istruzione;
 import comp.parser.ParserException;
 import comp.parser.expr.FunzExpr;
 import comp.parser.expr.IdentArray;
-import comp.parser.expr.IdentExpr;
 import comp.parser.template.TemplateEle;
 
 /**
@@ -29,45 +28,35 @@ import comp.parser.template.TemplateEle;
  */
 public class SuperIstr extends Istruzione{
     private final String cname;
-    private final Espressione var;
     private final TemplateEle[] tem;
     private final Espressione[] pars;
     public SuperIstr(FunzExpr fe)throws ParserException{
         cname=fe.getName();
-        var=fe.getValues()[0];
         tem=fe.template();
         pars=fe.getValues();
     }
     @Override
     public void validate(Variabili vars, Environment env)throws CodeException{
-        if(!(var instanceof IdentArray) || !((IdentArray)var).isVariable())
-            throw new CodeException("--");
-        IdentArray fff=(IdentArray)var;
         FElement req=Funz.getIstance().
                 requestCostructor(cname, tem, Info.paramTypes(pars, vars, true), true);
-        if(!var.returnType(vars, true).ifEstende(req.trequest[0], true))
+        if(!vars.getCostrAsExpr().returnType(vars, true).ifEstende(req.trequest[0], true))
             throw new CodeException("-");
-        String vvg=((IdentExpr)fff.getEsp()).val();
-        if(!vvg.equals(vars.getCostrVarName()))
-            throw new CodeException("---");
     }
     @Override
     public void toCode(Segmenti text, Variabili vars, Environment env, Accumulator acc)
             throws CodeException{
-        if(!(var instanceof IdentArray) || !((IdentArray)var).isVariable())
-            throw new CodeException("--");
-        IdentArray fff=(IdentArray)var;
+        IdentArray fff=vars.getCostrAsExpr();
         FElement req=Funz.getIstance().
-                requestCostructor(cname, tem, Info.paramTypes(pars, vars, true), true);
-        if(!var.returnType(vars, true).ifEstende(req.trequest[0], true))
+                requestCostructor(cname, tem, Info.paramTypes(pars, vars, true), false);
+        if(!fff.returnType(vars, true).ifEstende(req.trequest[0], true))
             throw new CodeException("-");
-        String vvg=((IdentExpr)fff.getEsp()).val();
-        if(!vvg.equals(vars.getCostrVarName()))
-            throw new CodeException("---");
         Espressione[] ppp=new Espressione[pars.length+1];
-        ppp[0]=vars.getCostrAsExpr();
+        ppp[0]=fff;
         for(int i=1; i<ppp.length; i++)
             ppp[i]=pars[i-1];
+        vars.getVarStack().pushAll(text);
+        if(req.isExternFile())
+            Funz.getIstance().ext.add(req.modname);
         FunzExpr.perfCall(req, ppp, text, vars, env, acc);
     }
 }

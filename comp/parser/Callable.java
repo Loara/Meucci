@@ -81,9 +81,11 @@ public abstract class Callable implements Serializable{
                 return t.get(1) instanceof PareToken;
         }
         return t.get(2) instanceof PareToken;
+    
+    Se f è true allora cerca se il nome è vietato o no
     }
     */
-    public Callable(VScan<Token> t, String modulo)throws ParserException{
+    public Callable(VScan<Token> t, String modulo, boolean f)throws ParserException{
         //Tutte le dichiarazioni sono effettuate dall'utente. Possibile utilizzare
         //i forbittenNames di Info
         if(t.get() instanceof IdentToken && ((IdentToken)t.get()).getString().equals("shadow")){
@@ -95,7 +97,9 @@ public abstract class Callable implements Serializable{
         if(!(t.get() instanceof IdentToken))
             throw new ParserException(Lingue.getIstance().format("m_par_invret"), t);
         else{
-            Info.isForbitten(((IdentToken)t.get()).getString(), t.get().getRiga());
+            if(f){
+                Info.isForbitten(((IdentToken)t.get()).getString(), t.get().getRiga());
+            }
         }
         retType=new TypeName(t);
         nome=t.get();
@@ -103,8 +107,13 @@ public abstract class Callable implements Serializable{
         
         initRest(t, modulo);
     }
-    protected Callable(VScan<Token> t, String modulo, boolean costr)throws ParserException{
-        t.nextEx();//costructor
+    /*
+    Tipo di ritorno non specificato
+    costr -> scartare il primo token (costructor)
+    */
+    protected Callable(VScan<Token> t, String modulo, boolean costr, boolean f)throws ParserException{
+        if(costr)
+            t.nextEx();//costructor
         if(t.get() instanceof IdentToken && ((IdentToken)t.get()).getString().equals("shadow")){
             shadow=true;
             t.nextEx();
@@ -114,7 +123,8 @@ public abstract class Callable implements Serializable{
         if(!(t.get() instanceof IdentToken))
             throw new ParserException(Lingue.getIstance().format("m_par_invret"), t);
         else{
-            Info.isForbitten(((IdentToken)t.get()).getString(), t.get().getRiga());
+            if(f)
+                Info.isForbitten(((IdentToken)t.get()).getString(), t.get().getRiga());
         }
         retType=new TypeName("void");
         nome=t.get();
@@ -127,9 +137,9 @@ public abstract class Callable implements Serializable{
     protected final void initRest(VScan<Token> t, String modulo)throws ParserException{
         //t deve puntare ai parametri template
         temp=Template.parseTemp(t);
-        if(!(t.get() instanceof PareToken)||((PareToken)t.get()).s!='(')
+        if(!(t.get() instanceof PareToken) || ((PareToken)t.get()).s!='(')
             throw new ParserException(Lingue.getIstance().format("m_par_invfun"), t);
-        t.next();
+        t.nextEx();
         if(t.get() instanceof PareToken && ((PareToken)t.get()).s==')'){
             dichs=new FunzParam[0];
         }

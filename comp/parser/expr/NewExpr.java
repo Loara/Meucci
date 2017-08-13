@@ -27,6 +27,7 @@ import comp.code.Types;
 import comp.code.vars.Variabili;
 import comp.general.Info;
 import comp.parser.Espressione;
+import comp.parser.Funzione;
 import comp.parser.template.TemplateEle;
 
 /**
@@ -58,14 +59,14 @@ public class NewExpr extends Espressione{
     @Override
     public void validate(Variabili var)throws CodeException{
         Funz.getIstance().esisteCostructor(name, temp, Info.paramTypes(vals, var, true));
-        Funz.getIstance().esiste("allocate", new TypeElem[]{Types.getIstance().find("uint")});
+        Funz.getIstance().esiste(Funzione.funzName("allocate"), new TypeElem[]{Types.getIstance().find("uint")});
     }
     @Override
     public void toCode(Segmenti seg, Variabili var, Environment env, Accumulator acc)
         throws CodeException{
         FElement cos=Funz.getIstance().requestCostructor(name, temp, 
                 Info.paramTypes(vals, var, false), false);
-        FElement allc=Funz.getIstance().request("allocate", 
+        FElement allc=Funz.getIstance().request(Funzione.funzName("allocate"), 
                 new TypeElem[]{Types.getIstance().find("uint")}, false);
         TypeElem tp=Types.getIstance().find(cos.trequest[0], false);
         if(allc.isExternFile())

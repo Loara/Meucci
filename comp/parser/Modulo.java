@@ -19,6 +19,7 @@ package comp.parser;
 import comp.code.Accumulator;
 import comp.code.CodeException;
 import comp.code.Environment;
+import comp.code.FElement;
 import comp.code.Funz;
 import comp.code.Meth;
 import comp.code.ModLoader;
@@ -136,6 +137,14 @@ public class Modulo {
                         td.push(tyde);
                     continue;
                 }
+                if(id.getString().equals("costructor")){
+                    Costructor co=new Costructor(t, nome);
+                    if(co.temp.length!=0)
+                        Tcal.push(co);
+                    else
+                        cal.push(co);
+                    continue;
+                }
                 int iniz=t.getInd();
                 if(id.getString().equals("shadow")){
                     t.nextEx();
@@ -148,9 +157,8 @@ public class Modulo {
                         Tcal.push(op);
                     else
                         cal.push(op);
-                    continue;
                 }
-                if(t.get() instanceof IdentToken){
+                else if(t.get() instanceof IdentToken){
                     if(t.get(1) instanceof EolToken){
                         di.push(new Dichiarazione(tn, ((IdentToken)t.get()).getString()));
                         t.nextEx();
