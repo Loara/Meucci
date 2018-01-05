@@ -18,7 +18,9 @@ package comp.parser;
 
 import comp.general.Lingue;
 import comp.general.VScan;
+import comp.parser.template.ParamDich;
 import comp.parser.template.Template;
+import comp.parser.template.TypeDich;
 import comp.scanner.IdentToken;
 import comp.scanner.Token;
 
@@ -34,6 +36,8 @@ public class GFunzMem extends Callable{
     private String varName, classname;
     //private final FunzParam[] decValues;
     /**
+     * A differenza di FunzMem, qui i parametri sono gli stessi, senza tipi di ritorno
+     * 
      * type è il tipo del parametro a cui si accede
      * ctype è il tipo della classe che contiene il parametro -> classname
      * name è il nome del parametro -> varName
@@ -70,24 +74,31 @@ public class GFunzMem extends Callable{
             varName=name;
         }
         else throw new ParserException(Lingue.getIstance().format("m_par_invnam"),riga);
+        
         classname=ctype;
         FunzParam[] d2=new FunzParam[dichs.length+1];
         d2[0]=new FunzParam(new TypeName(ctype, Template.conversion(temp)), "this");
         System.arraycopy(dichs, 0, d2, 1, dichs.length);
         dichs=d2;
-        if(getAcc){
-            if(!retType.equals(type))
-                throw new ParserException(Lingue.getIstance().
-                        format("m_par_nonret", nome, type.getName()), riga);
+        /*
+        if(dichs.length != 2)
+            errore
+        */
+        
+        TypeName arrayName;
+        if(type.templates().length==0){
+            arrayName=new TypeName("Array", new ParamDich(type.getName()));
         }
         else{
-            if(!dichs[1].dich.type.equals(type))
-                throw new ParserException(Lingue.getIstance().
-                        format("m_par_notfnd", type.getName(), nome),t);
-            if(!retType.equals(new TypeName("void")))
+            arrayName=new TypeName("Array", new TypeDich(type.getName(), type.templates()));
+        }
+        
+        if(!retType.equals(new TypeName("void")))
                 throw new ParserException(Lingue.getIstance().format("m_par_nonret", nome, "void")
                         , riga);
-        }
+        if(!dichs[1].dich.type.equals(arrayName))
+            throw new ParserException(Lingue.getIstance().
+                    format("m_par_notfnd", arrayName.getName(), nome),t);
     }
     protected GFunzMem(TypeName type, String ctype, Template[] ctemplates, String name, 
             String modulo, boolean acc){

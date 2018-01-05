@@ -28,7 +28,7 @@ import java.io.Serializable;
  * @author loara
  */
 public class GFMorg implements Serializable{
-    public FunzMem get, set;
+    public GFunzMem get, set;
     public TypeName type;
     public GFMorg(TypeName type){
         get=null;
@@ -43,7 +43,7 @@ public class GFMorg implements Serializable{
             if(t.get() instanceof PareToken && ((PareToken)t.get()).s=='{'){
                 t.nextEx();
                 while(!(t.get() instanceof PareToken && ((PareToken)t.get()).s=='}')){
-                    FunzMem fm=new FunzMem(t, type, ctype, ctemplate, name, modulo);
+                    GFunzMem fm=new GFunzMem(t, type, ctype, ctemplate, name, modulo);
                     if(fm.getAccess()){
                         if(get!=null)
                             throw new ParserException(Lingue.getIstance().format("m_par_getovw"), t);
