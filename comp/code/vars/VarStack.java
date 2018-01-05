@@ -225,6 +225,9 @@ public class VarStack extends Var{
     public static int pushDim(int adim){
         return 8;
     }
+    /*
+    Ogni volta che si usano le istruzioni push e pop queste funzioni dovrebbero essere chiamate
+    */
     public void doPush(int tim){
         pushes += tim;
     }

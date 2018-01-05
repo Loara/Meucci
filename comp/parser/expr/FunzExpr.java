@@ -273,35 +273,12 @@ public class FunzExpr extends Espressione{
         acc.popAll(text);//Niente eccezioni (per ora)     
     }
     /*
-    public static void perfCall(int fd, int offset, TypeElem rettype, Espressione[] vals, Segmenti text,
-            Variabili vars, Environment env, Accumulator acc)throws CodeException{
-        text.addIstruzione("sub", "rsp", String.valueOf(8*vals.length));
-        vars.getVarStack().doPush(vals.length);
-        for(int i=0; i<vals.length; i++){
-            vals[i].toCode(text, vars, env, acc);
-            TypeElem t=vals[i].returnType(vars, false);
-            if(t.xmmReg()){
-                text.addIstruzione("movq", "[rsp+"+(8*i)+"]", acc.getXAccReg().getReg());
-            }
-            else{
-                text.addIstruzione("mov", "[rsp+"+(8*i)+"]", acc.getAccReg().getReg());
-            }
-        }
-        text.addIstruzione("call", "["+acc.getReg(fd).getReg()+"+"+offset+"]", null);
-        vars.getVarStack().remPush(vals.length);
-        acc.libera(fd);
-        acc.popAll(text);//Niente eccezioni (per ora)
-        if(rettype.name.equals("void"))
-            return;
-        if(rettype.xmmReg())
-            text.addIstruzione("movsd", acc.getXAccReg().getReg(), XReg.XMM0.getReg());
-        else
-            text.addIstruzione("mov", acc.getAccReg().getReg(rettype.realDim()
-                ), Register.AX.getReg(rettype.realDim()));
-    }
-    */
-    /*
     Queste funzioni devono essere utilizzate per l'allocazione di oggetti
+    
+    Questa funzione effettua i seguenti passaggi:
+    - Salva tutti i registri nello stack
+    - Alloca lo spazio per i parametri e per il puntatore all'oggetto
+    - Chiama i parametri e memorizza i loro valori nello stack
     */
     public static void allc1(Segmenti text, Variabili vars, Environment env, Accumulator acc,
             Espressione[] params)throws CodeException{
@@ -325,6 +302,16 @@ public class FunzExpr extends Espressione{
     }
     /*
     Nell'accumulatore vi è il puntatore alla memoria allocata
+    
+    Questa funzione fa le seguenti operazioni:
+    - Mette il puntatore all'oggetto in cima allo stack (affinchè possa essere utilizzato
+    dal costruttore)
+    - Mette lo stesso puntatore alla fine dello stack frame (per essere usato come valore di ritorno
+    del costruttore)
+    - Se c'è, collega la vtable all'oggetto
+    - Chiama il costruttore
+    - Mette l'oggetto inizializzato nell'accumulatore
+    - Ripristina i registri
     */
     public static void allc2(Segmenti text, Variabili vars, Environment env, Accumulator acc,
             Espressione[] params, FElement cos, TypeElem tp)throws CodeException{
