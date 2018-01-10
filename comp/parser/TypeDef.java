@@ -47,6 +47,7 @@ public class TypeDef implements Serializable{
     protected TypeName ext;
     protected Membro[] types;
     protected FMorg[] ffm;
+    protected GFMorg[] gffm;
     protected boolean explicit;
     /*
     protected transient Costructor[] cc;//I costruttori vanno gestiti come funzioni indipendenti
@@ -79,7 +80,7 @@ public class TypeDef implements Serializable{
         }
         Stack<Membro> s=new Stack<>(Membro.class);
         Stack<FMorg> fmm=new Stack<>(FMorg.class);
-        boolean ifTem=tt.length!=0;
+        Stack<GFMorg> gfmm=new Stack<>(GFMorg.class);
         if(t.get() instanceof PareToken && ((PareToken)t.get()).s=='{'){
             t.nextEx();
             boolean hasDes=false;
@@ -105,11 +106,20 @@ public class TypeDef implements Serializable{
                     Membro dich=new Membro(t, explicit);
                     s.push(dich);
                     FMorg ftt;
+                    GFMorg gftt;
                     if(t.get() instanceof PareToken && ((PareToken)t.get()).s=='{'){
-                        ftt=new FMorg(t, dich.getType(), nome, tt, dich.getIdent(), modulo);
+                        if(dich.gpacked){
+                            gftt=new GFMorg(t, dich.getType(), nome, tt, dich.getIdent(), modulo);
+                            ftt=new FMorg(dich.getType());
+                        }
+                        else{
+                            ftt=new FMorg(t, dich.getType(), nome, tt, dich.getIdent(), modulo);
+                            gftt=new GFMorg(dich.getType());
+                        }
                     }
                     else{
                         ftt=new FMorg(dich.getType());
+                        gftt=new GFMorg(dich.getType());
                     }
                     //Generazione automatica
                     if(!dich.explicit && !dich.ghost && !dich.override && !dich.shadow){
@@ -126,6 +136,7 @@ public class TypeDef implements Serializable{
                         }
                     }
                     fmm.push(ftt);
+                    gfmm.push(gftt);
                     if(!t.reqSpace(2))//punto e virgola e successivo
                         throw new FineArrayException();
                     if(!(t.get() instanceof EolToken))
@@ -135,6 +146,7 @@ public class TypeDef implements Serializable{
             }
             types=s.toArray();
             ffm=fmm.toArray();
+            gffm=gfmm.toArray();
             t.next();
         }
         else throw new ParserException(Lingue.getIstance().format("m_par_grftyp"), t);

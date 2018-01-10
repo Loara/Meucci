@@ -45,7 +45,15 @@ import java.io.Serializable;
  */
 public class Membro implements Serializable{
     public final Dichiarazione dich;
-    public boolean shadow, read, explicit, override, ghost;
+    public boolean shadow, read;
+    /*
+    Con la versione 3 sarà abolito definitivamente il modificatore explicit
+    e ogni membro senza modificatore di accesso sarà explicit
+    
+    In tal modo il doppio punto .. sarà superfluo e l'override sarà possibile
+    solo su membri con modificatore di memorizzazione
+    */
+    public boolean explicit, override, ghost, gpacked;
     public final TypeName[] params;
     public TemplateEle packed;
     public Membro(TypeName type, String name, TypeName[] p, boolean shadow, 
@@ -58,6 +66,7 @@ public class Membro implements Serializable{
         params=p;
         ghost=gh;
         packed=pack;
+        gpacked=false;
     }
     public Membro(TypeName type, String name, boolean shadow, boolean read){
         this(type, name, new TypeName[0], shadow, read, false, false, null);
@@ -71,6 +80,7 @@ public class Membro implements Serializable{
         params=sup.params;
         ghost=sup.ghost;
         packed=pac;
+        gpacked=sup.gpacked;
     }
     public Membro(VScan<Token> t, boolean typeExpl)throws ParserException{
         if(t.get() instanceof IdentToken){
@@ -125,6 +135,7 @@ public class Membro implements Serializable{
             override=false;
             explicit=true;
             ghost=false;
+            gpacked=false;
             if(((IdentToken)t.get()).getString().equals("explicit"))
                 t.nextEx();
             return;
@@ -144,6 +155,11 @@ public class Membro implements Serializable{
         }
         ghost = ((IdentToken)t.get()).getString().equals("ghost");
         if(ghost){
+            t.nextEx();
+            return;
+        }
+        gpacked = ((IdentToken)t.get()).getString().equals("gpacked");
+        if(gpacked){
             t.nextEx();
         }
     }

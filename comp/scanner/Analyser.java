@@ -66,6 +66,12 @@ public class Analyser {
                 scan.next();
                 continue;
             }
+            if(scan.get()==':' && scan.get(1)=='='){
+                scan.next();
+                scan.next();
+                tok.add(new AssignToken(criga));
+                continue;
+            }
             if(scan.get()=='='){
                 if(scan.next()){
                     char c=scan.get();
