@@ -182,11 +182,21 @@ public class ModLoader {
     private void exportType(TypeDef te, ObjectOutputStream out)throws IOException{
         out.writeUTF(te.getName());
         out.writeBoolean(te.classExplicit());
-        out.writeInt(te.getMembri().length);
-        for(Membro mem:te.getMembri()){
+        
+        //escludere membri override
+        Membro[] i=te.getMembri();
+        int l=0;
+        for(Membro m:i){
+            if(!m.override)
+                l++;
+        }
+        out.writeInt(l);
+        for(Membro mem:i){
+            if(mem.override)
+                continue;
             int perms=0;
             //non ci sono override
-            if(mem.explicit)
+            if(mem.gpacked)
                 perms=1;
             else if(mem.ghost)
                 perms=2;
@@ -236,9 +246,9 @@ public class ModLoader {
             boolean shadow=(perms % 3)==1;
             boolean read=(perms % 3)==2;
             perms=perms/3;
-            boolean explicit=(perms % 3)==1;
+            boolean gpacked=(perms % 3)==1;
             boolean ghost=(perms % 3)==2;
-            mem[j]=new Membro(ty, na, par, shadow, read, explicit, ghost, pack);
+            mem[j]=new Membro(ty, na, par, shadow, read, gpacked, ghost, pack);
         }
         TypeName ex=null;
         if(in.readBoolean())

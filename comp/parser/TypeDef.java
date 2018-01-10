@@ -121,20 +121,7 @@ public class TypeDef implements Serializable{
                         ftt=new FMorg(dich.getType());
                         gftt=new GFMorg(dich.getType());
                     }
-                    //Generazione automatica
-                    if(!dich.explicit && !dich.ghost && !dich.override && !dich.shadow){
-                        if(ftt.get==null){
-                            if(dich.params.length>0)
-                                throw new ParserException(Lingue.getIstance().format("m_par_ngenac"), t);
-                            ftt.get=new DefFunzMem(dich.getType(), nome, tt, dich.getIdent(), modulo, true);
-                        }
-                        if(ftt.set==null){
-                            if(dich.params.length>0)
-                                throw new ParserException(Lingue.getIstance().format("m_par_ngenac"), t);
-                            if(!dich.read)
-                                ftt.get=new DefFunzMem(dich.getType(), nome, tt, dich.getIdent(), modulo, false);
-                        }
-                    }
+                    //Niente generazione automatica
                     fmm.push(ftt);
                     gfmm.push(gftt);
                     if(!t.reqSpace(2))//punto e virgola e successivo
@@ -251,23 +238,30 @@ public class TypeDef implements Serializable{
         //I packed sono explicit
         for(int i=0; i<types.length; i++){//mantiene l'ordine di salvataggio
             if(ffm[i].get!=null){
-                if(types[i].explicit || types[i].shadow)
+                if(!types[i].hasAccFunction())
                     throw new CodeException("Funzioni accesso non valide");
                 ffm[i].get.validate(env, varSt);
             }
             else{
-                if(types[i].ghost)
-                    throw new CodeException("Funzioni accesso non valide");
+                //Se non c'è nella vtable và messo null
             }
             if(ffm[i].set!=null){
-                if(types[i].explicit || types[i].shadow || types[i].read)
+                if(!types[i].hasAccFunction())
                     throw new CodeException("Funzioni accesso non valide");
                 ffm[i].set.validate(env, varSt);
             }
-            else{
-                if(!types[i].read && types[i].ghost)
+            
+            if(gffm[i].get!=null){
+                if(!types[i].hasGAccFunction())
                     throw new CodeException("Funzioni accesso non valide");
+                gffm[i].get.validate(env, varSt);
             }
+            if(gffm[i].set!=null){
+                if(!types[i].hasGAccFunction())
+                    throw new CodeException("Funzioni accesso non valide");
+                gffm[i].set.validate(env, varSt);
+            }
+            
             if(types[i].override){
                 if(ext==null)
                     throw new CodeException("Funzioni accesso non valide");
@@ -275,56 +269,7 @@ public class TypeDef implements Serializable{
                 th.checkCorrectOverride(types[i], true);                
             }
         }
-        Template.removeTemplateConditions(tt);
-            //I controlli di parametro di packed sono già fatti
-            /*
-            if(types[i].explicit || types[i].shadow){
-                if(ffm[i]!=null)
-                    throw new CodeException("Funzioni accesso non valide");
-                types[i].chechPack(true);
-                continue;
-            }
-            else if(types[i].ghost){
-                if(ffm[i]==null || ffm[i].get==null)
-                    throw new CodeException("Funzione accesso non valida");
-                if(!types[i].read && ffm[i].set==null)
-                    throw new CodeException("Funzione accesso non valida");
-            }
-            else if(types[i].override){
-                if(ext==null)
-                    throw new CodeException("Uso improprio del modificatore override");
-                TypeElem th=Types.getIstance().find(ext, true);
-                th.checkCorrectOverride(types[i], true);
-            }
-            else if(types[i].read){
-                //non explicit, nè override, nè ghost
-                if(ffm[i]!=null && ffm[i].set!=null)
-                    throw new CodeException("Funzione set in membro read");
-            }
-            if(!types[i].override && ext!=null){
-                TypeElem th=Types.getIstance().find(ext, true);
-                if(th.informationSafe(types[i].getIdent(), true)!=null)
-                    throw new CodeException("Ri-dichiarazione di membro senza override");
-            }
-            if(ffm[i]==null){
-                if(types[i].params.length!=0)
-                    throw new CodeException("Impossibile generare funzioni di accesso di default");
-            }
-            else{
-                if(ffm[i].get!=null){
-                    ffm[i].get.validate(env, varSt);
-                }
-                else if(types[i].params.length!=0)
-                    throw new CodeException("Impossibile generare funzioni di accesso di default");
-                //funzione set
-                if(ffm[i].set!=null){
-                    ffm[i].set.validate(env, varSt);
-                }
-                else if(types[i].params.length!=0)
-                    throw new CodeException("Impossibile generare funzioni di accesso di default");
-            }
-            */
-        
+        Template.removeTemplateConditions(tt);        
     }
     /**
      * scrive funzione che si occupa dell'inizializzazione vtables. Chiamato solo da non explicit
@@ -371,112 +316,108 @@ public class TypeDef implements Serializable{
         seg.addIstruzione("mov", "["+rax+"]", rbx);
         
         for(int i=0; i<types.length; i++){//mantiene l'ordine di salvataggio
-            if(types[i].explicit || types[i].shadow){
-                if(ffm[i].get!=null || ffm[i].set!=null)
-                    throw new CodeException("Funzioni accesso non valide");
-                continue;//non bisogna generare vtable
-            }
-            rd=th.vt.index(types[i].getIdent(), true);//L'elemento sta in vtable (almeno il get)
-            if(types[i].ghost){
-                if(types[i].read){
-                    if(ffm[i]==null || ffm[i].get==null || ffm[i].set!=null)
-                        throw new CodeException("Funzioni accesso errate a membro ghost");
-                    seg.addIstruzione("lea",rbx,"["+Meth.modName(ffm[i].get, vparams)+"]");
-                    seg.addIstruzione("mov","["+rax+"+"+rd+"]",rbx);
-                }
-                else{
-                    if(ffm[i]==null || ffm[i].get==null || ffm[i].set==null)
-                        throw new CodeException("Funzioni accesso errate a membro ghost");
-                    seg.addIstruzione("lea",rbx,"["+Meth.modName(ffm[i].get, vparams)+"]");
-                    seg.addIstruzione("mov","["+rax+"+"+rd+"]",rbx);
-                    seg.addIstruzione("lea",rbx,"["+Meth.modName(ffm[i].set, vparams)+"]");
-                    seg.addIstruzione("mov","["+rax+"+"+(rd+Info.pointerdim)+"]",rbx);
-                }
-            }
-            else if(types[i].override){
-                th.checkCorrectOverride(types[i], false);
-                if(ffm[i]!=null){
-                    if(ffm[i].get!=null){
+            if(!types[i].override){
+                if(types[i].hasAccFunction()){
+                    rd=th.vt.index(types[i].getIdent(), true);
+                    if(ffm[i].get==null){
+                        seg.addIstruzione("mov", "qword ["+rax+"+"+rd+"]", "0");
+                    }
+                    else{
                         seg.addIstruzione("lea",rbx,"["+Meth.modName(ffm[i].get, vparams)+"]");
                         seg.addIstruzione("mov","["+rax+"+"+rd+"]",rbx);
                     }
-                    if(ffm[i].set!=null){
+                    if(ffm[i].set==null){
+                        seg.addIstruzione("mov", "qword ["+rax+"+"+(rd+Info.pointerdim)+"]", "0");
+                    }
+                    else{
                         seg.addIstruzione("lea",rbx,"["+Meth.modName(ffm[i].set, vparams)+"]");
+                        seg.addIstruzione("mov","["+rax+"+"+(rd+Info.pointerdim)+"]",rbx);
+                    }
+                }
+                else if(types[i].hasGAccFunction()){
+                    rd=th.vt.index(types[i].getIdent(), true);
+                    if(gffm[i].get==null){
+                        seg.addIstruzione("mov", "qword ["+rax+"+"+rd+"]", "0");
+                    }
+                    else{
+                        seg.addIstruzione("lea",rbx,"["+Meth.modName(gffm[i].get, vparams)+"]");
+                        seg.addIstruzione("mov","["+rax+"+"+rd+"]",rbx);
+                    }
+                    if(gffm[i].set==null){
+                        seg.addIstruzione("mov", "qword ["+rax+"+"+(rd+Info.pointerdim)+"]", "0");
+                    }
+                    else{
+                        seg.addIstruzione("lea",rbx,"["+Meth.modName(gffm[i].set, vparams)+"]");
                         seg.addIstruzione("mov","["+rax+"+"+(rd+Info.pointerdim)+"]",rbx);
                     }
                 }
             }
             else{
-                String[] yte=templateNames();
-                if(types[i].read){
-                    if(ffm[i]!=null && ffm[i].set!=null)
-                        throw new CodeException("Funzione set in membro read");
-                    if(ffm[i]!=null && ffm[i].get!=null)
+                th.checkCorrectOverride(types[i], false);
+                if(types[i].hasAccFunction()){
+                    rd=th.vt.index(types[i].getIdent(), true);
+                    if(ffm[i].get==null){
+                        //niente
+                    }
+                    else{
+                        if(types[i].shadow)
+                            throw new CodeException(Lingue.getIstance().format("m_cod_illovrr"));
                         seg.addIstruzione("lea",rbx,"["+Meth.modName(ffm[i].get, vparams)+"]");
-                    else
-                        seg.addIstruzione("lea", rbx, "["+Meth.generate(types[i], nome, true, modulo, vparams, yte)+"]");
-                    seg.addIstruzione("mov","["+rax+"+"+rd+"]",rbx);
+                        seg.addIstruzione("mov","["+rax+"+"+rd+"]",rbx);
+                    }
+                    if(ffm[i].set==null){
+                        
+                    }
+                    else{
+                        if(types[i].shadow || types[i].read)
+                            throw new CodeException(Lingue.getIstance().format("m_cod_illovrr"));
+                        seg.addIstruzione("lea",rbx,"["+Meth.modName(ffm[i].set, vparams)+"]");
+                        seg.addIstruzione("mov","["+rax+"+"+(rd+Info.pointerdim)+"]",rbx);
+                    }
                 }
-                else{
-                    if(ffm[i]!=null && ffm[i].get!=null)
-                        seg.addIstruzione("lea",rbx,"["+Meth.modName(ffm[i].get, vparams)+"]");
-                    else
-                        seg.addIstruzione("lea", rbx, "["+Meth.generate(types[i], nome, true, modulo, vparams, yte)+"]");
-                    seg.addIstruzione("mov","["+rax+"+"+rd+"]",rbx);
-                    if(ffm[i]!=null && ffm[i].get!=null)
-                        seg.addIstruzione("lea",rbx,"["+Meth.modName(ffm[i].get, vparams)+"]");
-                    else
-                        seg.addIstruzione("lea", rbx, "["+Meth.generate(types[i], nome, false, modulo, vparams, yte)+"]");
-                    seg.addIstruzione("mov","["+rax+"+"+(rd+Info.pointerdim)+"]",rbx);
+                else if(types[i].hasGAccFunction()){
+                    rd=th.vt.index(types[i].getIdent(), true);
+                    if(gffm[i].get==null){
+                        
+                    }
+                    else{
+                        if(types[i].shadow)
+                            throw new CodeException(Lingue.getIstance().format("m_cod_illovrr"));
+                        seg.addIstruzione("lea",rbx,"["+Meth.modName(gffm[i].get, vparams)+"]");
+                        seg.addIstruzione("mov","["+rax+"+"+rd+"]",rbx);
+                    }
+                    if(gffm[i].set==null){
+                        
+                    }
+                    else{
+                        if(types[i].shadow || types[i].read)
+                            throw new CodeException(Lingue.getIstance().format("m_cod_illovrr"));
+                        seg.addIstruzione("lea",rbx,"["+Meth.modName(gffm[i].set, vparams)+"]");
+                        seg.addIstruzione("mov","["+rax+"+"+(rd+Info.pointerdim)+"]",rbx);
+                    }
                 }
             }
-        }
+        } 
         seg.addIstruzione("leave", null, null);
         seg.addIstruzione("ret", null, null);
+        
         //Fine inizializzatore vtable
         //Generazione effettiva delle funzioni
         //i controlli sono già stati effettuati
         for(int i=0; i<types.length; i++){
-            if(types[i].explicit || types[i].shadow)
-                continue;
-            if(types[i].ghost){
-                ffm[i].get.toCode(seg, varSt, env, vparams);
+            if(types[i].hasAccFunction()){
+                if(ffm[i].get!=null)
+                    ffm[i].get.toCode(seg, varSt, env, vparams);
                 if(ffm[i].set!=null)
                     ffm[i].set.toCode(seg, varSt, env, vparams);
             }
-            else if(types[i].override){
-                if(ffm[i]!=null){
-                    if(ffm[i].get!=null)
-                        ffm[i].get.toCode(seg, varSt, env, vparams);
-                    if(ffm[i].set!=null)
-                        ffm[i].set.toCode(seg, varSt, env, vparams);
-                }
-            }
-            else{
-                //rd=th.getElement(types[i].getIdent(), false);
-                if(ffm[i]!=null && ffm[i].get!=null)
-                    ffm[i].get.toCode(seg, varSt, env, vparams);
-                /*
-                else
-                    generateAccessFunz(seg, types[i], true, rd, vparams);
-                */
-                if(ffm[i]!=null && ffm[i].set!=null)
-                    ffm[i].set.toCode(seg, varSt, env, vparams);
-                /*
-                else if(!types[i].read)
-                    generateAccessFunz(seg, types[i], false, rd, vparams);
-                */
+            else if(types[i].hasGAccFunction()){
+                if(gffm[i].get!=null)
+                    gffm[i].get.toCode(seg, varSt, env, vparams);
+                if(gffm[i].set!=null)
+                    gffm[i].set.toCode(seg, varSt, env, vparams);
             }
         }
-    }
-    public void println(int i){
-        String h=Info.cSpace(i);
-        System.out.println(h+"Type: "+nome);
-        System.out.println(h+"Dichiarazioni:");
-        for(Membro e:types){
-            System.out.println(h+" "+e.toString());
-        }
-        System.out.println(h+"FunzMem:");
     }
     public String getName(){
         return nome;

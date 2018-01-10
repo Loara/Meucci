@@ -306,6 +306,8 @@ public class TypeElem {
             /**
              * Se over è override di un membro, determina se l'override è stato
              * compilato correttamente.
+             * 
+             * override è un parametro a sè stante
              * @param over
      * @param v
              * @throws CodeException 
@@ -314,9 +316,10 @@ public class TypeElem {
         Membro il=information(over.getIdent(), v);
         boolean correct=(il.getType().equals(over.getType()))
                 &&(il.read==over.read)
-                &&(il.shadow==over.shadow);
+                &&(il.shadow==over.shadow)
+                &&(il.ghost==over.ghost)
+                &&(il.gpacked==over.gpacked);
         if(!correct) throw new CodeException(Lingue.getIstance().format("m_cod_illovrr"));
-        if(il.explicit) throw new CodeException(Lingue.getIstance().format("m_cod_illovrr"));
         if(il.shadow) throw new CodeException(Lingue.getIstance().format("m_cod_illovrr"));
         correct=il.compatible(over.params);
         if(!correct) throw new CodeException(Lingue.getIstance().format("m_cod_illovrr"));
@@ -391,7 +394,7 @@ public class TypeElem {
     public boolean directAccess(String ident, boolean dd)throws CodeException{
         for(Membro m:subtypes){
             if(m.dich.getIdent().equals(ident)){
-                return !m.ghost && ((m.explicit || m.shadow) || (!dd && !isExternal()));
+                return !(m.ghost || m.gpacked);
             }
         }
         if(extend!=null)

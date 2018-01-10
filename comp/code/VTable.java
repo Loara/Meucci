@@ -35,29 +35,22 @@ public class VTable {
     public String cname;
     public TypeName extend;
     public Membro[] membs;
-    public int[] allineamenti;
       
     public VTable(Membro[] mems, String classname, TypeName ext){
         extend=ext;
         cname=classname;
-        int i=0, j=0;
+        int i=0;
         for(Membro m:mems)
-            if(!m.explicit && !m.override && !m.shadow)
+            if(m.newVTableRecord())
                 i++;
         membs=new Membro[i];
-        allineamenti=new int[i];
         i=0;
         for(Membro m:mems)
-            if(!m.explicit && !m.override && !m.shadow){
+            if(m.newVTableRecord()){
                 membs[i]=m;
-                allineamenti[i]=j;
-                if(m.read)
-                    j+=1;
-                else
-                    j+=2;
                 i++;
             }
-        dim=j*Info.pointerdim;
+        dim=2*i*Info.pointerdim;
     }
     public int dimension()throws CodeException{
         int prec;
@@ -65,11 +58,11 @@ public class VTable {
             prec=Types.getIstance().find(extend, false).vt.dimension();
         }
         else
-            prec=8;//distruttore
+            prec=Info.pointerdim;//distruttore
         return dim+prec;
     }
     public int getReadAcc(IdentEle val, Variabili var, Environment env)throws CodeException{
-        int j=8, f;//distruttore
+        int j=Info.pointerdim, f;//distruttore
         if(extend!=null){
             VTable eee=Types.getIstance().find(extend, false).vt;
             int i=eee.getReadAcc(val, var, env);
@@ -81,7 +74,7 @@ public class VTable {
         for(int i=0; i<membs.length; i++){
             f=membs[i].compatible(val, var, false);
             if(f==0){
-                j+=allineamenti[i]*Info.pointerdim;
+                j+=2*i*Info.pointerdim;
                 return j;
             }
             else if(f!=-1)
@@ -110,7 +103,7 @@ public class VTable {
         for(int i=0; i<membs.length; i++){
             int rey=membs[i].compatible(val, var, false);
             if(rey==0){//E' garantita la scrittura
-                j+=(allineamenti[i]+1)*Info.pointerdim;
+                j+=(2*i+1)*Info.pointerdim;
                 return j;
             }
             else
@@ -138,9 +131,9 @@ public class VTable {
         for(int i=0; i<membs.length; i++){
             if(ident.equals(membs[i].getIdent())){
                 if(get)
-                    j+=allineamenti[i]*Info.pointerdim;
+                    j+=2*i*Info.pointerdim;
                 else
-                    j+=(allineamenti[i]+1)*Info.pointerdim;
+                    j+=(2*i+1)*Info.pointerdim;
                 return j;
             }
         }

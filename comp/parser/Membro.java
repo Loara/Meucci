@@ -52,21 +52,31 @@ public class Membro implements Serializable{
     
     In tal modo il doppio punto .. sarà superfluo e l'override sarà possibile
     solo su membri con modificatore di memorizzazione
+  
+    Quindi ghost sarà compatibile anche con read e shadow dato che le funzioni saranno chiamabili
+    all'interno dello stesso modulo, mentre non si può fare l'override di membri shadow
+    mentre con quelli read si può modificare solo la funzione get.
+    
+    Inoltre solo i membri ghost e gpacked creano nuove voci nella vtable
+    
+    override diventa un modificatore a sè stante, ma ha bisogno di uno tra ghost e gpacked
     */
-    public boolean explicit, override, ghost, gpacked;
+    public boolean override, ghost, gpacked;
     public final TypeName[] params;
     public TemplateEle packed;
+    /*
+    Usata per generare TypeElem, nessun override presente
+    */
     public Membro(TypeName type, String name, TypeName[] p, boolean shadow, 
-            boolean read, boolean exp, boolean gh, TemplateEle pack){
+            boolean read, boolean gpacked, boolean ghost, TemplateEle pack){
         dich=new Dichiarazione(type, name);
         this.shadow=shadow;
         this.read=read;
-        explicit=exp;
         override=false;//caricato da file
         params=p;
-        ghost=gh;
+        this.ghost=ghost;
         packed=pack;
-        gpacked=false;
+        this.gpacked=gpacked;
     }
     public Membro(TypeName type, String name, boolean shadow, boolean read){
         this(type, name, new TypeName[0], shadow, read, false, false, null);
@@ -75,7 +85,6 @@ public class Membro implements Serializable{
         dich=new Dichiarazione(conv, sup.dich.getIdent());
         shadow=sup.shadow;
         read=sup.read;
-        explicit=sup.explicit;
         override=sup.override;
         params=sup.params;
         ghost=sup.ghost;
@@ -89,9 +98,11 @@ public class Membro implements Serializable{
             dich=new Dichiarazione(t);
             Info.isForbitten(dich.getIdent(), t.get().getRiga());
             if(t.get() instanceof PareToken && ((PareToken)t.get()).s=='['){
-                if(explicit)
-                    throw new ParserException(Lingue.getIstance().format("m_par_expacc", dich.lvalue), t);
                 t.nextEx();
+                if(!hasParameter()){
+                    throw new ParserException(Lingue.getIstance()
+                            .format("m_par_expacc", dich.lvalue), t);
+                }
                 Stack<TypeName> ss=new Stack<>(TypeName.class);
                 if(t.get() instanceof IdentToken){
                     ss.push(new TypeName(t));
@@ -105,7 +116,7 @@ public class Membro implements Serializable{
                     }
                     t.nextEx();
                     params=ss.toArray();
-                    packed=null;
+                    packed=null;//non vi può essere packed
                 }
                 else throw new ParserException("Tipo errato", t);
             }
@@ -113,8 +124,8 @@ public class Membro implements Serializable{
                 if(t.get() instanceof IdentToken && ((IdentToken)t.get()).getString().equals("packed")){
                     t.nextEx();
                     packed=Template.detect(t);
-                    if(!explicit)
-                        throw new ParserException(Lingue.getIstance().format("m_par_notexp"), t);
+                    if(ghost || gpacked || override)
+                        throw new ParserException(Lingue.getIstance().format("m_par_errpak"), t);
                     params=new TypeName[]{new TypeName("uint")};
                 }
                 else{
@@ -131,27 +142,15 @@ public class Membro implements Serializable{
     }
     //Se il tipo è esplicito, tutti i membri sono espliciti
     private void detectAttr(VScan<Token> t, boolean expl)throws ParserException{
-        if(expl){
-            override=false;
-            explicit=true;
-            ghost=false;
-            gpacked=false;
-            if(((IdentToken)t.get()).getString().equals("explicit"))
-                t.nextEx();
+        override=false;
+        ghost=false;
+        gpacked=false;
+        if(expl)
             return;
-        }
-        override=((IdentToken)t.get()).getString().equals("override");
+        override = ((IdentToken)t.get()).getString().equals("override");
         if(override){
             t.nextEx();
-            explicit=false;
-            ghost=false;
-            return;
-        }
-        explicit = ((IdentToken)t.get()).getString().equals("explicit");
-        if(explicit){
-            t.nextEx();
-            ghost=false;
-            return;
+            //modificatore a sè stante
         }
         ghost = ((IdentToken)t.get()).getString().equals("ghost");
         if(ghost){
@@ -161,7 +160,10 @@ public class Membro implements Serializable{
         gpacked = ((IdentToken)t.get()).getString().equals("gpacked");
         if(gpacked){
             t.nextEx();
+            return;
         }
+        if(override)
+            throw new ParserException("Uso improprio di override", t);
     }
     private void detectAcc(VScan<Token> t)throws ParserException{
         shadow=((IdentToken)t.get()).getString().equals("shadow");
@@ -244,5 +246,27 @@ public class Membro implements Serializable{
                 return false;
         }
         return true;
+    }
+    /**
+     * Determina se nella dichiarazione si possono specificare i parametri
+     * @return 
+     */
+    public final boolean hasParameter(){
+        return (override || ghost);
+        /*
+        il controllo su gpacked è superfluo dato che anche se c'è non si possono 
+        specificare i parametri
+        
+        se c'è packed non ci possono essere override o ghost
+        */
+    }
+    public boolean hasAccFunction(){
+        return ghost;
+    }
+    public boolean hasGAccFunction(){
+        return gpacked;
+    }
+    public boolean newVTableRecord(){
+        return (ghost || gpacked) && !override;
     }
 }
