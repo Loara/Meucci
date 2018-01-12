@@ -399,7 +399,7 @@ public class TypeElem {
              * @param env
              * @param elem
              * @param acc
-             * @return
+             * @return Tipo dell'elemento ottenuto
              * @throws CodeException 
              */
     public TypeElem getTypeElement(Segmenti text, Variabili var, Environment env, 
@@ -413,7 +413,7 @@ public class TypeElem {
             throw new CodeException(Lingue.getIstance().format("m_cod_accgpak", m.dich.getIdent()));
         TypeElem ter=Types.getIstance().find(m.getType(), false);
                 
-        if(!m.ghost){//vedere file doubledot
+        if(!m.ghost){
             int sc=getElement(elem.getIdent(), false);//se è ghost genera errore
             if(m.packed!=null){
                 int rd=acc.saveAccumulator();
@@ -588,6 +588,47 @@ public class TypeElem {
             */
         }
                 
+    }
+    /**
+     * L'array in cui scrivere deve essere nel registro memorizzato in array, l'oggetto
+     * nell'accumulatore
+     * @param text
+     * @param var
+     * @param env
+     * @param elem
+     * @param array
+     * @param acc
+     * @throws CodeException 
+     */
+    public void readArrayGP(Segmenti text, Variabili var, Environment env, 
+            IdentEle elem, int array, Accumulator acc)throws CodeException{
+        canRead(elem.getIdent(), false);
+        Membro m=this.information(elem.getIdent(), false);
+        if(!m.gpacked)
+            throw new CodeException(Lingue.getIstance().format("m_cod_notgpak", elem.getIdent()));
+        int sc=vt.getReadAcc(elem, var, env);
+        if(sc==-1)
+            throw new CodeException(Lingue.getIstance().format("m_cod_nfndmb", elem, name));
+        var.getVarStack().pushAll(text);//il pushall và prima, onde evitare corruzione stack
+        int tic=acc.prenota();//puntatore vtable
+        text.addIstruzione("mov",acc.getReg(tic).getReg(),
+                "["+acc.getAccReg().getReg()+"]");
+        FunzExpr.readGPacked(tic, array, sc, text, var, env, acc);
+    }
+    public void writeArrayGP(Segmenti text, Variabili var, Environment env, 
+            IdentEle elem, int array, Accumulator acc)throws CodeException{
+        canWrite(elem.getIdent(), false);
+        Membro m=this.information(elem.getIdent(), false);
+        if(!m.gpacked)
+            throw new CodeException(Lingue.getIstance().format("m_cod_notgpak", elem.getIdent()));
+        int sc=vt.getWriteAcc(elem, var, env);
+        if(sc==-1)
+            throw new CodeException(Lingue.getIstance().format("m_cod_nfndmb", elem, name));
+        var.getVarStack().pushAll(text);//il pushall và prima, onde evitare corruzione stack
+        int tic=acc.prenota();//puntatore vtable
+        text.addIstruzione("mov",acc.getReg(tic).getReg(),
+                "["+acc.getAccReg().getReg()+"]");
+        FunzExpr.writeGPacked(tic, array, sc, text, var, env, acc);
     }
     public int getElement(String name, boolean v)throws CodeException{
         if(primitive)

@@ -124,12 +124,14 @@ public class FunzExpr extends Espressione{
         text.addIstruzione("call", fe.modname, null);
         vars.getVarStack().remPush(values.length);
         vars.getVarStack().popAll(text);//non modifica rax, xmm0 e rdx
+        
         //C'è un problema: dopo aver effettuato il pushall e viene generata un eccezione
         //durante l'esecuzione dei parametri (prima della chiamata alla funzione
         //vera e propria), chi pulisce lo stack? Non ci sarebbero problemi di esecuzione
         //ma solamente uno spreco di memoria
         //Una soluzione: far gestire il pushall da VarStack e non Accumulator, la
         //risoluzione verrà effettuata durante l'ottimizzazione delle letture in memora
+        
         if(fe.errors.length>0){
             String trb;//Il catch su cui saltare
             int yy;
@@ -272,6 +274,56 @@ public class FunzExpr extends Espressione{
         acc.libera(input);
         acc.popAll(text);//Niente eccezioni (per ora)     
     }
+    
+    //Membri gpacked
+    /*
+    robj punta alla vtable
+    l'oggetto è nell'accumulatore
+    array è l'array in cui scrivere
+    offst è l'offset della funzione da chiamare all'interno della vtable
+    
+    Ricordare che il primo parametro è sempre l'oggetto, il secondo è sempre l'array
+    
+     non fà il pushall
+    */
+    public static void readGPacked(int robj, int array, int offst
+            , Segmenti text, Variabili var, Environment env, Accumulator acc)
+            throws CodeException{
+        text.addIstruzione("sub", "rsp", "16");
+        var.getVarStack().doPush(2);
+        text.addIstruzione("mov", "[rsp]", acc.getAccReg().getReg());
+        text.addIstruzione("mov", "[rsp+8]", acc.getReg(array).getReg());
+        text.addIstruzione("call", "["+acc.getReg(robj).getReg()+"+"+offst+"]", null);
+        var.getVarStack().remPush(2);
+        acc.libera(robj);
+        acc.libera(array);
+        acc.popAll(text);     
+    }
+    /*
+    robj punta alla vtable
+    l'oggetto è nell'accumulatore
+    array è l'array da cui leggere
+    offst è l'offset della funzione da chiamare all'interno della vtable
+    
+    Ricordare che il primo parametro è sempre l'oggetto, il secondo è il valore da settare
+    
+     non fà il pushall
+    */
+    public static void writeGPacked(int robj, int array, int offst
+            , Segmenti text, Variabili var, Environment env, Accumulator acc)
+            throws CodeException{
+        text.addIstruzione("sub", "rsp", "16");
+        var.getVarStack().doPush(2);
+        text.addIstruzione("mov", "[rsp]", acc.getAccReg().getReg());
+        text.addIstruzione("mov", "[rsp+8]", acc.getReg(array).getReg());
+        text.addIstruzione("call", "["+acc.getReg(robj).getReg()+"+"+offst+"]", null);
+        var.getVarStack().remPush(2);
+        acc.libera(robj);
+        acc.libera(array);
+        acc.popAll(text);      
+    }
+    
+    
     /*
     Queste funzioni devono essere utilizzate per l'allocazione di oggetti
     
