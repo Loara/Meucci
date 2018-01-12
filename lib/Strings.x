@@ -1,6 +1,6 @@
 modulo Strings depends Memory, Pointers{
 	type explicit String{
-		explicit read uint lenght;
+		read uint lenght;
 		shadow Rpointer[char] point;
 	}
 	costructor iniString(String this, uint len, pt data){

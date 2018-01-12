@@ -1,6 +1,6 @@
 modulo Arrays depends Memory, public Pointers{
 	type Array[typ T]{
-		explicit read uint length;
+		read uint length;
 		shadow pointer[T] memory;
 		ghost T elem[uint]{
 			T get(uint index){
@@ -51,9 +51,11 @@ modulo Arrays depends Memory, public Pointers{
 			dest.elem[dstart+i] = source.elem[sstart+i];
 		}
 	}
-	costructor linkArray[typ T, num L 2](Array[T] ret, StaticArray[T, L] sa){
-		ret.length = L;
-		ret.memory = (pointer[T])sa;
+	Array[T] toArray[typ T, num L 2](StaticArray[T, L] sa){
+		Array[T] ar = :new iniDynArray[T](L);
+		for(uint i=u0; i<L; i =+ u1)
+			ar.elem[i]=sa.elem[i];
+		return ar;
 	}
 	pt dataPointer[typ T](Array[T] a){
 		return (pt)a.memory;

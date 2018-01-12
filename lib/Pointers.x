@@ -20,4 +20,7 @@ modulo Pointers{
 		pt rey=(pt)p+(uint)(index*#SIZEOF(V));
 		return (Rpointer[V])rey;
 	}
+	Rpointer[B] share[typ B](pointer[B] s){
+		return (Rpointer[B])s;
+	}
 }

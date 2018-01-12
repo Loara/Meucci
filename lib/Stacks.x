@@ -8,7 +8,7 @@ modulo Stacks depends Memory StdIO{
 		this.next = n;
 	}
 	type Stack[typ o]{
-		explicit read uint dim;
+		read uint dim;
 		shadow StackEle[o] valv;
 		end(){
 			StackEle[o] cur = this.valv;
