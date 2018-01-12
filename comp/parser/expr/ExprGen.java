@@ -62,21 +62,14 @@ public class ExprGen {
         Espressione ev=toUnaryExpr(t);
         if(!(t.get() instanceof DotToken)){
             if(ev instanceof IdentExpr || ev instanceof NumExpr || ev instanceof TemplExpr){
-                return new IdentArray(ev, null, null);
+                return new IdentArray(ev, null);
             }
             else
                 return ev;
         }
         Stack<IdentEle> se=new Stack<>(IdentEle.class);
-        Stack<Boolean> be=new Stack<>(Boolean.class);
         do{
             t.nextEx();
-            if(t.get() instanceof DotToken){//doubledot
-                be.push(Boolean.TRUE);
-                t.nextEx();
-            }
-            else
-                be.push(Boolean.FALSE);
             if(t.get() instanceof IdentToken){
                 IdentToken id=(IdentToken)t.get();
                 Info.isForbitten(id.getString(), id.getRiga());
@@ -102,7 +95,7 @@ public class ExprGen {
             else throw new ParserException(Lingue.getIstance().format("m_par_invnam"), t);
         }
         while(t.get() instanceof DotToken);
-        return new IdentArray(ev, se.toArray(), Info.conversion(be.toArray()));
+        return new IdentArray(ev, se.toArray());
     }
     //Fà un albero di espressioni del tipo valore o op1 o funz
     private static Espressione toUnaryExpr(VScan<Token> t)throws ParserException{

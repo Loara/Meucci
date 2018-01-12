@@ -125,11 +125,10 @@ public class Variabili {
         i.getEsp().toCode(text, this, env, acc);
         IdentEle[] ee=i.getElems();
         if(ee.length>0){
-            boolean[] dd=i.getDDots();
             TypeElem tp=i.getEsp().returnType(this, false)
-                    .getTypeElement(text, this, env, ee[0], acc, dd[0]);
+                    .getTypeElement(text, this, env, ee[0], acc);
             for(int ii=1; ii<ee.length; ii++)
-                tp=tp.getTypeElement(text, this, env, ee[ii], acc, dd[ii]);
+                tp=tp.getTypeElement(text, this, env, ee[ii], acc);
         }       
     }
     /**
@@ -153,14 +152,13 @@ public class Variabili {
         }
         int rd=acc.saveAccumulator();//valore da inserire
         IdentEle[] kk=i.getElems();
-        boolean[] bb=i.getDDots();
         i.getEsp().toCode(text, this, env, acc);
         TypeElem ty=i.getEsp().returnType(this, false);
         for(int j=0; j<l-1; j++){
-            ty=ty.getTypeElement(text, this, env, kk[j], acc, bb[j]);
+            ty=ty.getTypeElement(text, this, env, kk[j], acc);
         }
         ty.canWrite(kk[l-1].getIdent(), false);//sempre positivo
-        ty.setValueElement(text, this, env, kk[l-1], rd, acc, bb[l-1]);
+        ty.setValueElement(text, this, env, kk[l-1], rd, acc);
         //acc.restoreAccumulator(rd);
         //viene liberato automaticamente dal setValueElem
     }
@@ -185,14 +183,13 @@ public class Variabili {
             else throw new CodeException(Lingue.getIstance().format("m_cod_invassg"));
         }
         IdentEle[] kk=i.getElems();
-        boolean[] bb=i.getDDots();
         i.getEsp().toCode(text, this, env, acc);
         TypeElem ty=i.getEsp().returnType(this, false);
         for(int j=0; j<l-1; j++){
-            ty=ty.getTypeElement(text, this, env, kk[j], acc, bb[j]);
+            ty=ty.getTypeElement(text, this, env, kk[j], acc);
         }
         ty.canWrite(kk[l-1].getIdent(), false);//sempre positivo
-        ty.setXValueElement(text, this, env, kk[l-1], rd, acc, bb[l-1]);
+        ty.setXValueElement(text, this, env, kk[l-1], rd, acc);
         //acc.xrestoreAccumulator(rd);
     }
     /**

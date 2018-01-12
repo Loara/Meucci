@@ -243,7 +243,7 @@ public class TypeElem {
     }
     public int realDim()throws CodeException{
         if(reference)
-            return 8;
+            return Info.pointerdim;
         else if(template)
             throw new CodeException(Lingue.getIstance().format("m_cod_ukndimn"));
         if(name.equals(":null"))
@@ -391,17 +391,6 @@ public class TypeElem {
         else
             throw new CodeException(Lingue.getIstance().format("m_cod_nfndmb", el, name));
     }
-    public boolean directAccess(String ident, boolean dd)throws CodeException{
-        for(Membro m:subtypes){
-            if(m.dich.getIdent().equals(ident)){
-                return !(m.ghost || m.gpacked);
-            }
-        }
-        if(extend!=null)
-            return Types.getIstance().find(extend, false).directAccess(ident, dd);
-        else
-            throw new CodeException(Lingue.getIstance().format("m_cod_nfndmb", ident, name));
-    }
             /**
              * Stampa in {@code text} e {@code data} la lettura di un elemento. 
              * Non è un validate (richiede segmenti)
@@ -410,20 +399,21 @@ public class TypeElem {
              * @param env
              * @param elem
              * @param acc
-             * @param dd doubledot
              * @return
              * @throws CodeException 
              */
     public TypeElem getTypeElement(Segmenti text, Variabili var, Environment env, 
-            IdentEle elem, Accumulator acc, boolean dd) throws CodeException{
+            IdentEle elem, Accumulator acc) throws CodeException{
         if(primitive)
             throw new CodeException(Lingue.getIstance().format("m_cod_prmtype"));
         //Controlla se può leggerlo
         canRead(elem.getIdent(), false);
         Membro m=information(elem.getIdent(), false);
+        if(m.gpacked)
+            throw new CodeException(Lingue.getIstance().format("m_cod_accgpak", m.dich.getIdent()));
         TypeElem ter=Types.getIstance().find(m.getType(), false);
                 
-        if(directAccess(m.getIdent(), dd)){//vedere file doubledot
+        if(!m.ghost){//vedere file doubledot
             int sc=getElement(elem.getIdent(), false);//se è ghost genera errore
             if(m.packed!=null){
                 int rd=acc.saveAccumulator();
@@ -488,22 +478,18 @@ public class TypeElem {
      * @param elem
      * @param input
      * @param acc
-     * @param dd
      * @throws CodeException 
      */
     public void setValueElement(Segmenti text, Variabili var, Environment env, 
-            IdentEle elem, int input, Accumulator acc, boolean dd)throws CodeException{
+            IdentEle elem, int input, Accumulator acc)throws CodeException{
         if(primitive)
             throw new CodeException(Lingue.getIstance().format("m_cod_prmtype"));
         canWrite(elem.getIdent(), false);
         Membro m=information(elem.getIdent(), false);
+        if(m.gpacked)
+            throw new CodeException(Lingue.getIstance().format("m_cod_accgpak", m.dich.getIdent()));
         TypeElem ter=Types.getIstance().find(m.getType(), false);
-        if(directAccess(m.getIdent(), dd)){
-            /*
-            if(ter.xmmReg()){
-                throw new CodeException("Tipi incompatibili: "+elem.getIdent()+" è reale");
-            }
-            */
+        if(!m.ghost){
             int sc=getElement(elem.getIdent(), false);//se è ghost genera errore
             if(m.packed!=null){
                 int rd=acc.saveAccumulator();
@@ -548,13 +534,14 @@ public class TypeElem {
                 
     }
     public void setXValueElement(Segmenti text, Variabili var, Environment env, 
-        IdentEle elem, int input, Accumulator acc, boolean dd)throws CodeException{
+        IdentEle elem, int input, Accumulator acc)throws CodeException{
         if(primitive)
             throw new CodeException(Lingue.getIstance().format("m_cod_prmtype"));
         canWrite(elem.getIdent(), false);
         Membro m=information(elem.getIdent(), false);
-        TypeElem ter=Types.getIstance().find(m.getType(), false);
-        if(directAccess(m.getIdent(), dd)){
+        if(m.gpacked)
+            throw new CodeException(Lingue.getIstance().format("m_cod_accgpak", m.dich.getIdent()));
+        if(!m.ghost){
             int sc=getElement(elem.getIdent(), false);
             /*
             if(!ter.xmmReg()){

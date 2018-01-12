@@ -36,11 +36,9 @@ import comp.parser.template.ParamDich;
 public class IdentArray extends Espressione{
     private Espressione chiam;
     private final IdentEle[] elems;
-    private final boolean[] doubledot;
-    public IdentArray(Espressione ex, IdentEle[] ie, boolean[] dd)throws ParserException{
+    public IdentArray(Espressione ex, IdentEle[] ie)throws ParserException{
         if(ie==null || ie.length==0){
             elems=new IdentEle[0];
-            doubledot=new boolean[0];
             if(ex instanceof IdentExpr || ex instanceof NumExpr || ex instanceof TemplExpr)
                 chiam=ex;
             //else throw new ParserException("Non è un IdentExpr o un numero", 0);
@@ -49,13 +47,11 @@ public class IdentArray extends Espressione{
         else{
             elems=ie;
             chiam=ex;
-            doubledot=dd;
         }
     }
     public IdentArray(String it){
         chiam=new IdentExpr(it);
         elems=new IdentEle[0];
-        doubledot=new boolean[0];
     }
     @Override
     public TypeElem returnType(Variabili var, boolean v)throws CodeException{
@@ -131,9 +127,6 @@ public class IdentArray extends Espressione{
     }
     public IdentEle[] getElems(){
         return elems;
-    }
-    public boolean[] getDDots(){
-        return doubledot;
     }
     public void canRead(Variabili var, boolean validate)throws CodeException{
         TypeElem typ=chiam.returnType(var, validate);
