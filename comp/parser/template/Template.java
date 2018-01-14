@@ -277,4 +277,10 @@ public abstract class Template implements Serializable{
             }
         }
     }
+    public static TemplateEle typeToTemplate(TypeName tn){
+        if(tn.templates().length==0)
+            return new ParamDich(tn.getName());
+        else
+            return new TypeDich(tn.getName(), tn.templates());
+    }
 }

@@ -100,13 +100,6 @@ public class Variabili {
         }
         throw new CodeException(Lingue.getIstance().format("m_cod_uknvarb", ident));
     }
-    /**
-     * Ritorna variabile nell'accumulatore
-     * @param text
-     * @param acc
-     * @param ident
-     * @throws comp.code.CodeException 
-     */
     public void getVar(Segmenti text, Accumulator acc, String ident)throws CodeException{
         for(Var v:varSt){
             if(v.isIn(ident)){
@@ -119,81 +112,8 @@ public class Variabili {
         }
         throw new CodeException(Lingue.getIstance().format("m_cod_uknvarb", ident));
     }
-    
-    public void getVar(IdentArray i, Segmenti text,
-            Environment env, Accumulator acc)throws CodeException{
-        i.getEsp().toCode(text, this, env, acc);
-        IdentEle[] ee=i.getElems();
-        if(ee.length>0){
-            TypeElem tp=i.getEsp().returnType(this, false)
-                    .getTypeElement(text, this, env, ee[0], acc);
-            for(int ii=1; ii<ee.length; ii++)
-                tp=tp.getTypeElement(text, this, env, ee[ii], acc);
-        }       
-    }
     /**
-     * 
-     * @param i
-     * @param text
-     * @param env
-     * @param acc
-     * @throws CodeException 
-     */
-    public void setVar(IdentArray i, Segmenti text,
-            Environment env, Accumulator acc)throws CodeException{
-        int l=i.getElems().length;
-        if(l==0){
-            if(i.getEsp() instanceof IdentExpr){
-                IdentExpr id=(IdentExpr)i.getEsp();
-                setVar(text, acc, id.val());
-                return;
-            }
-            else throw new CodeException(Lingue.getIstance().format("m_cod_invassg"));
-        }
-        int rd=acc.saveAccumulator();//valore da inserire
-        IdentEle[] kk=i.getElems();
-        i.getEsp().toCode(text, this, env, acc);
-        TypeElem ty=i.getEsp().returnType(this, false);
-        for(int j=0; j<l-1; j++){
-            ty=ty.getTypeElement(text, this, env, kk[j], acc);
-        }
-        ty.canWrite(kk[l-1].getIdent(), false);//sempre positivo
-        ty.setValueElement(text, this, env, kk[l-1], rd, acc);
-        //acc.restoreAccumulator(rd);
-        //viene liberato automaticamente dal setValueElem
-    }
-    /**
-     * da aggiustare, mette l'accumulatore X nella variabile
-     * @param i
-     * @param text
-     * @param env
-     * @param acc
-     * @throws CodeException 
-     */
-    public void setXVar(IdentArray i, Segmenti text, Environment env, 
-            Accumulator acc)throws CodeException{
-        int l=i.getElems().length;
-        int rd=acc.xsaveAccumulator();//valore da inserire, utilizzato prima
-        if(l==0){
-            if(i.getEsp() instanceof IdentExpr){
-                IdentExpr id=(IdentExpr)i.getEsp();
-                setVar(text, acc, id.val());
-                return;
-            }
-            else throw new CodeException(Lingue.getIstance().format("m_cod_invassg"));
-        }
-        IdentEle[] kk=i.getElems();
-        i.getEsp().toCode(text, this, env, acc);
-        TypeElem ty=i.getEsp().returnType(this, false);
-        for(int j=0; j<l-1; j++){
-            ty=ty.getTypeElement(text, this, env, kk[j], acc);
-        }
-        ty.canWrite(kk[l-1].getIdent(), false);//sempre positivo
-        ty.setXValueElement(text, this, env, kk[l-1], rd, acc);
-        //acc.xrestoreAccumulator(rd);
-    }
-    /**
-     * mette ax nella variabile
+     * mette ax o xmm0 nella variabile
      * @param text
      * @param acc
      * @param ident

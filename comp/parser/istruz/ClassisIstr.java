@@ -134,14 +134,14 @@ public class ClassisIstr extends Istruzione{
                     if(!ope.returnType(var, false).ifEstende(e.returnType(var, false), false))
                         throw new CodeException("Impossibile effettuare l'assegnazione");
                     ope.toCode(text, var, env, acc);
-                    var.setVar(e, text, env, acc);
+                    e.setVar(text, var, env, acc);
                 }
                 else{
                     if(!epr.returnType(var, false).ifEstende(e.returnType(var, false), false))
                         throw new CodeException("impossibile effettuare l'assegnazione\n"+
                                 epr.returnType(var, false).name+" non estende "+e.returnType(var, false).name);
                     epr.toCode(text, var, env, acc);
-                    var.setVar(e, text, env, acc);
+                    e.setVar(text, var, env, acc);
                     //Utilizza ottimizzazione di CodeMap
                 }
             }

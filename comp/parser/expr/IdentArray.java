@@ -24,6 +24,7 @@ import comp.code.TypeElem;
 import comp.code.Types;
 import comp.code.template.TNumbers;
 import comp.code.vars.Variabili;
+import comp.general.Lingue;
 import comp.parser.Espressione;
 import comp.parser.Membro;
 import comp.parser.ParserException;
@@ -57,7 +58,25 @@ public class IdentArray extends Espressione{
     public TypeElem returnType(Variabili var, boolean v)throws CodeException{
         TypeElem tp=chiam.returnType(var, v);
         for(IdentEle ee: elems){
-            tp=Types.getIstance().find(tp.information(ee.getIdent(), v).getType(), v);
+            Membro m = tp.information(ee.getIdent(), v);
+            if(m.gpacked)
+                throw new CodeException(Lingue.getIstance()
+                        .format("m_cod_accgpak", m.dich.getIdent()));
+            tp=Types.getIstance().find(m.getType(), v);
+        }
+        return tp;
+    }
+    public TypeElem partialReturnType(Variabili var, int deep, boolean v)throws CodeException{
+        if(deep >elems.length)
+            throw new CodeException("Internal error, please report it");
+        //deep == length equiv to classic returnType
+        TypeElem tp=chiam.returnType(var, v);
+        for(int i=0; i<deep; i++){
+            Membro m = tp.information(elems[i].getIdent(), v);
+            if(m.gpacked)
+                throw new CodeException(Lingue.getIstance()
+                        .format("m_cod_accgpak", m.dich.getIdent()));
+            tp=Types.getIstance().find(m.getType(), v);
         }
         return tp;
     }
@@ -65,25 +84,33 @@ public class IdentArray extends Espressione{
     public void validate(Variabili vars)throws CodeException{
         chiam.validate(vars);
         TypeElem ty=chiam.returnType(vars, true);
-        for (IdentEle elem : elems) {
-            Membro m = ty.information(elem.getIdent(), true);
-            for (Espressione val : elem.getVals()) {
+        for (int i = 0; i< elems.length; i++) {
+            Membro m = ty.information(elems[i].getIdent(), true);
+            if(i< elems.length - 1){
+                if(m.gpacked)
+                    throw new CodeException(Lingue.getIstance()
+                            .format("m_cod_accgpak", m.dich.getIdent()));
+                //i gpacked si possono usare solo con l'assegnamento
+            }
+            for (Espressione val : elems[i].getVals()) {
                 val.validate(vars);
             }
-            if (m.compatible(elem, vars, true)!=0) {
-                throw new CodeException("Parametri di accesso al parametro " + elem.getIdent() + " non validi");
+            if (m.compatible(elems[i], vars, true)!=0) {
+                throw new CodeException("Parametri di accesso al parametro " + elems[i].getIdent() + " non validi");
             }
-            ty.canRead(elem.getIdent(), true);
-            ty = Types.getIstance().find(ty.information(elem.getIdent(), true).getType(), true);
+            ty.canRead(elems[i].getIdent(), true);
+            ty = Types.getIstance().find(ty.information(elems[i].getIdent(), true).getType(), true);
         }
     }
     @Override
     public void toCode(Segmenti text, Variabili vars, Environment env, Accumulator acc)
     throws CodeException{
+        chiam.toCode(text, vars, env, acc);
         if(elems.length==0)
-            chiam.toCode(text, vars, env, acc);//gestisce true, false, null, etc.
-        else
-            vars.getVar(this, text, env, acc);//gestisce anche i numeri
+            return;
+        TypeElem tp=chiam.returnType(vars, false);
+        for(int ii=0; ii<elems.length; ii++)
+            tp=tp.getTypeElement(text, vars, env, elems[ii], acc);
     }
     /**
      * Da non confondere con returnType. Da utilizzare solamente in congiunzione di numValue
@@ -165,5 +192,59 @@ public class IdentArray extends Espressione{
             throw new CodeException("Parametro accesso membro non valido");
         }
         typ.canWrite(elems[i].getIdent(), validate);
+    }
+    public TypeElem getVar(int deep, Segmenti text, Variabili vars,
+            Environment env, Accumulator acc)throws CodeException{
+        chiam.toCode(text, vars, env, acc);
+        int m = deep < elems.length ? deep : elems.length;
+        TypeElem tp=chiam.returnType(vars, false);
+        for(int ii=0; ii<m; ii++)
+            tp=tp.getTypeElement(text, vars, env, elems[ii], acc);
+        return tp;
+    }
+    public TypeElem getVar(Segmenti text, Variabili vars,
+            Environment env, Accumulator acc)throws CodeException{
+        return this.getVar(elems.length, text, vars, env, acc);
+    }
+    public void setVar(Segmenti text, Variabili var,
+            Environment env, Accumulator acc)throws CodeException{
+        if(elems.length==0){
+            if(chiam instanceof IdentExpr){
+                IdentExpr id=(IdentExpr)chiam;
+                var.setVar(text, acc, id.val());
+                return;
+            }
+            else throw new CodeException(Lingue.getIstance().format("m_cod_invassg"));
+        }
+        int rd=acc.saveAccumulator();//valore da inserire
+        chiam.toCode(text, var, env, acc);
+        TypeElem ty=chiam.returnType(var, false);
+        for(int j=0; j<elems.length-1; j++){
+            ty=ty.getTypeElement(text, var, env, elems[j], acc);
+        }
+        ty.canWrite(elems[elems.length-1].getIdent(), false);//sempre positivo
+        ty.setValueElement(text, var, env, elems[elems.length-1], rd, acc);
+        //acc.restoreAccumulator(rd);
+        //viene liberato automaticamente dal setValueElem
+    }
+    public void setXVar(Segmenti text, Variabili var, Environment env, 
+            Accumulator acc)throws CodeException{
+        int rd=acc.xsaveAccumulator();//valore da inserire, utilizzato prima
+        if(elems.length==0){
+            if(chiam instanceof IdentExpr){
+                IdentExpr id=(IdentExpr)chiam;
+                var.setVar(text, acc, id.val());
+                return;
+            }
+            else throw new CodeException(Lingue.getIstance().format("m_cod_invassg"));
+        }
+        chiam.toCode(text, var, env, acc);
+        TypeElem ty=chiam.returnType(var, false);
+        for(int j=0; j<elems.length-1; j++){
+            ty=ty.getTypeElement(text, var, env, elems[j], acc);
+        }
+        ty.canWrite(elems[elems.length-1].getIdent(), false);//sempre positivo
+        ty.setXValueElement(text, var, env, elems[elems.length-1], rd, acc);
+        //acc.xrestoreAccumulator(rd);
     }
 }

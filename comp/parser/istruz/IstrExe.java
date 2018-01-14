@@ -29,6 +29,7 @@ import comp.parser.expr.*;
 import comp.parser.template.Template;
 import comp.parser.template.TemplateEle;
 import comp.scanner.ASMToken;
+import comp.scanner.AssignToken;
 import comp.scanner.EolToken;
 import comp.scanner.IdentToken;
 import comp.scanner.PareToken;
@@ -230,9 +231,7 @@ public class IstrExe {
                     if(ug.getSymb()!=null)
                         throw new ParserException(Lingue.getIstance().
                                 format("m_par_varnin", d.getIdent()), t);
-                    if(!t.next()){
-                        throw new FineArrayException();
-                    }
+                    t.nextEx();
                     Espressione e=toExpr(t);
                     if(checkEol){
                         if(t.get() instanceof EolToken){
@@ -310,7 +309,17 @@ public class IstrExe {
                 }
             }
             throw new ParserException(Lingue.getIstance().format("m_par_invass"), t);
-        }else if(!checkEol || t.get() instanceof EolToken){
+        }
+        else if(t.get() instanceof AssignToken){
+            t.nextEx();
+            Espressione des = toExpr(t);
+            if(!checkEol || t.get() instanceof EolToken){
+                t.next();
+                return new AssignIstr(e, des);
+            }
+            throw new ParserException(Lingue.getIstance().format("m_par_invass"), t);
+        }
+        else if(!checkEol || t.get() instanceof EolToken){
             t.next();
             return new ClassisIstr(null, null, null, e);
         }
