@@ -259,7 +259,7 @@ public class IstrExe {
                     .equals("declare")){
                 t.nextEx();
                 while(!(t.get() instanceof IdentToken && 
-                        "end".equals(((IdentToken)t.get()).getString()))){
+                        "enddec".equals(((IdentToken)t.get()).getString()))){
                     TypeName tn = new TypeName(t);
                     do{
                         if(t.get() instanceof IdentToken){
