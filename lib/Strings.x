@@ -8,11 +8,15 @@ modulo Strings depends Memory, Pointers{
 		this.point = (Rpointer[char]) data;
 	}
 	boolean :equals (String s, String tul){
+		declare
+			pt ps pp;
+			uint l;
+		enddec
 		if(s.lenght != tul.lenght)
 			return false;
-		pt ps=(pt)s.point;
-		pt pp=(pt)tul.point;
-		uint l=s.lenght;
+		ps=(pt)s.point;
+		pp=(pt)tul.point;
+		l=s.lenght;
 
 		%a{
 	mov	rdi,[rbp-8]
@@ -34,7 +38,10 @@ NOEQ:
 	}
 	costructor allocaStr(String this, uint dim){
 		//crea una stringa vuota formata da dim caratteri (escluso \0)
-		pt data=allocate(dim+u1);
+		declare
+			pt data;
+		enddec
+		data = allocate(dim+u1);
 		( (pointer[char]) (data + dim) ).el = (char)u0b;
 		:super iniString(dim, data);
 	}
@@ -59,10 +66,14 @@ NOEQ:
 		}
 	}
 	String substring(String src, uint begin, uint endd){
+		declare
+			uint len;
+			String ret;
+		enddec
 		if((begin > endd) || (endd > src.lenght))
 			throw error;
-		uint len = endd - begin;
-		String ret = :new allocaStr(len);
+		len = endd - begin;
+		ret = :new allocaStr(len);
 		if(len == u0){
 			return ret;
 		}

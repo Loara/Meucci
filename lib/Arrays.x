@@ -45,15 +45,22 @@ modulo Arrays depends Memory, public Pointers{
 		//La seguente riga di codice è errata a causa dell'associatività
 		//if((dstart+len)>=dest.length || (sstart+len)>=source.length)
 		//La seguente è corretta
+		declare
+			uint i;
+		enddec
 		if(dstart+len >= dest.length || (sstart+len >= source.length))
 			return;
-		for(uint i=u0; i<len; i =+ u1){
+		for(i=u0; i<len; i =+ u1){
 			dest.elem[dstart+i] = source.elem[sstart+i];
 		}
 	}
 	Array[T] toArray[typ T, num L 2](StaticArray[T, L] sa){
-		Array[T] ar = :new iniDynArray[T](L);
-		for(uint i=u0; i<L; i =+ u1)
+		declare
+			Array[T] ar;
+			uint i;
+		enddec
+		ar = :new iniDynArray[T](L);
+		for(i=u0; i<L; i =+ u1)
 			ar.elem[i]=sa.elem[i];
 		return ar;
 	}

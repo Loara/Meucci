@@ -13,11 +13,17 @@ modulo Pointers{
 		}
 	}
 	pointer[U] somma[typ U](pointer[U] p, uint index){
-		pt rey=(pt)p+(uint)(index*#SIZEOF(U));
+		declare
+			pt rey;
+		enddec
+		rey=(pt)p+(uint)(index*#SIZEOF(U));
 		return (pointer[U])rey;
 	}
 	Rpointer[V] Rsomma[typ V](Rpointer[V] p, uint index){
-		pt rey=(pt)p+(uint)(index*#SIZEOF(V));
+		declare
+			pt rey;
+		enddec
+		rey=(pt)p+(uint)(index*#SIZEOF(V));
 		return (Rpointer[V])rey;
 	}
 	Rpointer[B] share[typ B](pointer[B] s){

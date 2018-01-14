@@ -25,12 +25,19 @@ modulo Stacks depends Memory StdIO{
 		this.valv = null;
 	}
 	void push[typ T](Stack[T] st, T element){
-		StackEle[T] g = :new iE[T](element, st.valv);
+		declare
+			StackEle[T] g;
+		enddec
+		g = :new iE[T](element, st.valv);
 		st.valv = g;
 		st.dim =+ u1;
 	}
 	T pop[typ T](Stack[T] st) errors empty{
 		if(st.dim > u0){
+			declare
+				StackEle[T] g
+				T rec;
+			enddec
 			st.dim =- u1;
 			StackEle[T] g = st.valv;
 			st.valv = g.next;

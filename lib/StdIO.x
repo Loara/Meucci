@@ -15,25 +15,28 @@ modulo StdIO depends public Syscalls, public Strings, Arrays{
 		newLine();
 	}
 	void print(ulong c, uint base){
+		declare
+			ulong b v;
+			uint car i;
+			Array[char] ar;
+		enddec
 		if(base <= u1B || (base > codec.lenght))
 			return;
 		if(c == u0l){
 			putChar('0');
 			return;
 		}
-		ulong b = (ulong)base;
+		b = (ulong)base;
 		//Determina lunghezza stringa
-		uint car = u1;
-		{
-			ulong v = c;
-			while(v >= b){
-				car =+ u1;
-				v =/ b;
-			}
+		car = u1;
+		v = c;
+		while(v >= b){
+			car =+ u1;
+			v =/ b;
 		}
-		Array[char] ar = :stack iniDynArray[char](car);
+		ar = :stack iniDynArray[char](car);
 		//Conversione
-		for(uint i = car - u1; i >= u0; i =- u1){
+		for(i = car - u1; i >= u0; i =- u1){
 			ar.elem[i] = codec :at (uint)(c :mod b);
 			c =/ b;
 		}
