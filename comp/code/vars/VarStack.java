@@ -26,6 +26,7 @@ import comp.code.XReg;
 import comp.general.Info;
 import comp.general.Lingue;
 import comp.general.Stack;
+import comp.parser.Dichiarazione;
 import comp.parser.FunzParam;
 import comp.parser.TypeName;
 
@@ -165,6 +166,11 @@ public class VarStack extends Var{
         if(rrsp>maxdim)
             maxdim=rrsp;
         al.push(ve);
+    }
+    public void addVars(Dichiarazione[] vai)throws CodeException{
+        for(int i=0; i<vai.length; i++){
+            addVar(vai[i].getRType(), vai[i].getIdent());
+        }
     }
     /**
      * Alloca spazio (in byte) con inizio allineato, da usare ad esempio 
@@ -397,7 +403,7 @@ public class VarStack extends Var{
     }
     /**
      * Distrugge lo spazio allocato e distruttibile all'interno del RELATIVO
-     * BLOCCO TRY (ed eventualmente quelli contenuti), senza eliminarli dallo stack.
+     * BLOCCO TRY (ed eventualmente quelli contenuti), senza eliminarli dallo stack (al).
      * Da chiamare prima di passare dal blocco try a quello catch relativo.
      * @param seg
      * @param tryname

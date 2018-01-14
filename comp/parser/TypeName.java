@@ -37,8 +37,8 @@ import java.util.Objects;
  * @author loara
  */
 public class TypeName implements Serializable{
-    private String typename;
-    private TemplateEle[] params;
+    private final String typename;
+    private final TemplateEle[] params;
     public TypeName(VScan<Token> t)throws ParserException{
         if(!t.reqSpace(1))
             throw new FineArrayException();

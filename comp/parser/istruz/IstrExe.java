@@ -16,6 +16,7 @@
  */
 package comp.parser.istruz;
 
+import comp.general.Info;
 import comp.general.Lingue;
 import comp.general.Stack;
 import comp.general.VScan;
@@ -24,6 +25,7 @@ import comp.parser.Espressione;
 import comp.parser.FineArrayException;
 import comp.parser.Istruzione;
 import comp.parser.ParserException;
+import comp.parser.TypeName;
 import static comp.parser.expr.ExprGen.toExpr;
 import comp.parser.expr.*;
 import comp.parser.template.Template;
@@ -115,52 +117,52 @@ public class IstrExe {
                     return wi;
             }
             if(idt.getString().equals("for")){
-                    if(!(t.get() instanceof PareToken && ((PareToken)t.get()).s=='('))
-                        throw new ParserException(Lingue.getIstance().format("m_par_generr", "for"), t);
-                    if(!t.next()){
-                        throw new FineArrayException();
-                    }
-                    Istruzione i, f;
-                    if(t.get() instanceof EolToken){
-                        i=null;
-                        t.nextEx();
-                    }
-                    else{
-                        i=toIstr(t, true);
-                        if(!(i instanceof ClassisIstr))
-                            throw new ParserException(Lingue.getIstance().format("m_par_fisnad", "for"), t);
-                    }
-                    Espressione e;
-                    if(t.get() instanceof EolToken){
-                        e=null;
-                        t.nextEx();
-                    }
-                    else{
-                        e=toExpr(t);
-                    }
-                    if(!(t.get() instanceof EolToken)){
-                        throw new ParserException(Lingue.getIstance().format("m_par_dotcom"), t);
-                    }
+                if(!(t.get() instanceof PareToken && ((PareToken)t.get()).s=='('))
+                    throw new ParserException(Lingue.getIstance().format("m_par_generr", "for"), t);
+                if(!t.next()){
+                    throw new FineArrayException();
+                }
+                Istruzione i, f;
+                if(t.get() instanceof EolToken){
+                    i=null;
                     t.nextEx();
-                    if(t.get() instanceof PareToken && ((PareToken)t.get()).s==')')
-                        f=null;
-                    else{
-                        f=toIstr(t, false);
-                        if(!(f instanceof ClassisIstr))
-                            throw new ParserException(Lingue.getIstance().format("m_par_fisnad", "for"), t);
-                        t.previous();
-                    }
-                    if(!(t.get() instanceof PareToken && ((PareToken)t.get()).s==')')){
-                        throw new ParserException(Lingue.getIstance().format("m_par_parncl"), t);
-                    }
+                }
+                else{
+                    i=toIstr(t, true);
+                    if(!(i instanceof ClassisIstr))
+                        throw new ParserException(Lingue.getIstance().format("m_par_fisnad", "for"), t);
+                }
+                Espressione e;
+                if(t.get() instanceof EolToken){
+                    e=null;
                     t.nextEx();
-                    Istruzione doi=toIstr(t);
-                    ForIstr fi=new ForIstr();
-                    fi.frist=(ClassisIstr)i;
-                    fi.wh=e;
-                    fi.after=(ClassisIstr)f;
-                    fi.doi=doi;
-                    return fi;
+                }
+                else{
+                    e=toExpr(t);
+                }
+                if(!(t.get() instanceof EolToken)){
+                    throw new ParserException(Lingue.getIstance().format("m_par_dotcom"), t);
+                }
+                t.nextEx();
+                if(t.get() instanceof PareToken && ((PareToken)t.get()).s==')')
+                    f=null;
+                else{
+                    f=toIstr(t, false);
+                    if(!(f instanceof ClassisIstr))
+                        throw new ParserException(Lingue.getIstance().format("m_par_fisnad", "for"), t);
+                    t.previous();
+                }
+                if(!(t.get() instanceof PareToken && ((PareToken)t.get()).s==')')){
+                    throw new ParserException(Lingue.getIstance().format("m_par_parncl"), t);
+                }
+                t.nextEx();
+                Istruzione doi=toIstr(t);
+                ForIstr fi=new ForIstr();
+                fi.frist=(ClassisIstr)i;
+                fi.wh=e;
+                fi.after=(ClassisIstr)f;
+                fi.doi=doi;
+                return fi;
             }
             //try
             if(idt.getString().equals("try")){
@@ -219,44 +221,9 @@ public class IstrExe {
                 }
                 else return ti;
             }
-            //dichiarazione
-            int i=t.getInd();
-            TemplateEle[] te=Template.detectTemplate(t);
-            if(t.get() instanceof IdentToken){
-                String lval=((IdentToken)t.get()).getString();
-                t.nextEx();
-                Dichiarazione d=new Dichiarazione(idt.getString(), lval, te);//chiaramente
-                if(t.get() instanceof UgualToken){
-                    UgualToken ug=(UgualToken)t.get();
-                    if(ug.getSymb()!=null)
-                        throw new ParserException(Lingue.getIstance().
-                                format("m_par_varnin", d.getIdent()), t);
-                    t.nextEx();
-                    Espressione e=toExpr(t);
-                    if(checkEol){
-                        if(t.get() instanceof EolToken){
-                            t.nextEx();
-                            return new ClassisIstr(d, ug, null, e);
-                        }
-                        else{
-                            throw new ParserException(Lingue.getIstance().format("m_par_dotcom"), t);
-                        }
-                    }
-                    else return new ClassisIstr(d, ug, null, e);
-                }
-                else if(!checkEol || t.get() instanceof EolToken){
-                    t.next();
-                    return new ClassisIstr(d, null, null, null);
-                }
-                else{
-                    throw new ParserException(Lingue.getIstance().format("m_par_invdich"), t);
-                }
-            }
-            else{
-                t.setInd(i);//ripristinare tutto
-            }
-            t.previous();//reinserisce l'identtoken nello scan
+            t.previous();
         }
+        
         if(t.get() instanceof SymbToken){
             SymbToken st=(SymbToken)t.get();
             if(st.getString().equals(":destroy")){
@@ -286,14 +253,35 @@ public class IstrExe {
         }
         //multi
         if(t.reqSpace(2) && t.get() instanceof PareToken && ((PareToken)t.get()).s=='{'){
-            t.next();
+            t.nextEx();
+            Stack<Dichiarazione> dec = new Stack<>(Dichiarazione.class);
+            if(t.get() instanceof IdentToken && ((IdentToken)t.get()).getString()
+                    .equals("declare")){
+                t.nextEx();
+                while(!(t.get() instanceof IdentToken && 
+                        "end".equals(((IdentToken)t.get()).getString()))){
+                    TypeName tn = new TypeName(t);
+                    do{
+                        if(t.get() instanceof IdentToken){
+                            String name = ((IdentToken)t.get()).getString();
+                            Info.isForbitten(name, t.get().getRiga());
+                            t.nextEx();
+                            dec.push(new Dichiarazione(tn, name));
+                        }
+                        else throw new ParserException(Lingue.getIstance().format("m_par_invnam"), t);
+                    }
+                    while(!(t.get() instanceof EolToken));
+                    t.nextEx();
+                }
+                t.nextEx();
+            }
             Stack<Istruzione> i=new Stack<>(Istruzione.class);
             while(!(t.get() instanceof PareToken && ((PareToken)t.get()).s=='}')){
                 Istruzione e=toIstr(t);
                 i.push(e);
             }
             t.next();
-            MultiIstr n= new MultiIstr(i.toArray());
+            MultiIstr n= new MultiIstr(i.toArray(), dec.toArray());
             return n;
         }
         //Espressione - assegnazione
@@ -305,7 +293,7 @@ public class IstrExe {
                 Espressione ee=toExpr(t);
                 if(!checkEol || t.get() instanceof EolToken){
                     t.next();
-                    return new ClassisIstr(null, ut, (IdentArray)e, ee);
+                    return new ClassisIstr(ut, (IdentArray)e, ee);
                 }
             }
             throw new ParserException(Lingue.getIstance().format("m_par_invass"), t);
@@ -321,7 +309,7 @@ public class IstrExe {
         }
         else if(!checkEol || t.get() instanceof EolToken){
             t.next();
-            return new ClassisIstr(null, null, null, e);
+            return new ClassisIstr(null, null, e);
         }
         else{
             throw new ParserException(Lingue.getIstance().format("m_par_dotcom"), t);

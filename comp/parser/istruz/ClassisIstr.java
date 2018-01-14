@@ -20,13 +20,9 @@ import comp.code.Accumulator;
 import comp.code.CodeException;
 import comp.code.Environment;
 import comp.code.Segmenti;
-import comp.code.TypeElem;
-import comp.code.Types;
 import comp.code.vars.Variabili;
-import comp.parser.Dichiarazione;
 import comp.parser.Espressione;
 import comp.parser.Istruzione;
-import comp.general.Info;
 import comp.parser.ParserException;
 import comp.parser.expr.IdentArray;
 import comp.parser.expr.Op2Expr;
@@ -39,53 +35,22 @@ import comp.scanner.UgualToken;
  */
 public class ClassisIstr extends Istruzione{
     //possono essere nulli
-    private final Dichiarazione d;
+    //private final Dichiarazione d;
+    //Ora le dichiarazioni devono stare all'inizio del blocco (MultiIstr)
     private final IdentArray e;
     private final Espressione epr;
     private final SymbToken sb;
-    public ClassisIstr(Dichiarazione di, UgualToken ug, IdentArray ie, Espressione ex)throws ParserException{
-        d=di;
+    public ClassisIstr(UgualToken ug, IdentArray ie, Espressione ex)throws ParserException{
         e=ie;
         epr=ex;
         if(ug==null || ug.getSymb()==null)
             sb=null;
         else
             sb=new SymbToken(ug.getSymb(), 0);
-        if(di!=null){
-            Info.isForbitten(di.getIdent(), di.getTokIdent().getRiga());
-        }
-    }
-    public TypeElem effectiveType(Variabili var, boolean v)throws CodeException{
-        if(d!=null){
-            if(!d.getType().equals("auto"))
-                return Types.getIstance().find(d.getRType(), v);
-            else{
-                if(epr==null)
-                    throw new CodeException("Modificatore auto utilizzato impropriamente");
-                return epr.returnType(var, v);
-            }
-        }
-        else return null;
     }
     @Override
     public void validate(Variabili var, Environment env)throws CodeException{
-        if(d!=null){
-            TypeElem dt=Types.getIstance().find(d.getRType(), true);//per vedere se esiste
-            var.addGhostVar(new Dichiarazione(effectiveType(var, true).name, d.getIdent()));
-            if(epr!=null){
-                if(sb!=null){
-                    Espressione vt=new Op2Expr(d.getTokIdent(), sb, epr);
-                    if(!vt.returnType(var, true).ifEstende(dt, true))
-                        throw new CodeException(vt.returnType(var, true)+" non estende "+d.getType());
-                    vt.validate(var);
-                    return;
-                }
-                else if(!epr.returnType(var, true).ifEstende(dt, true))
-                    throw new CodeException(epr.returnType(var, true).name+" non estende "+d.getType());
-                epr.validate(var);
-            }
-        }
-        else if(e!=null){
+        if(e!=null){
             if(epr==null)
                 throw new CodeException("Istruzione erronea");
             if(sb!=null){
@@ -109,24 +74,7 @@ public class ClassisIstr extends Istruzione{
     }
     @Override
     public void toCode(Segmenti text, Variabili var, Environment env, Accumulator acc)throws CodeException{
-        if(d!=null){
-            if(epr!=null){
-                if(sb!=null)
-                    throw new CodeException("Variabile non inizializzata");
-                else{
-                    if(!epr.returnType(var, false).ifEstende(d.getRType(), false))
-                        throw new CodeException("impossibile effettuare l'assegnazione: "+
-                                epr.returnType(var, false).name+" non estende "+d.getRType().getName());
-                    epr.toCode(text, var, env, acc);
-                    var.addVarStack(d);
-                    var.setVar(text, acc, d.getIdent());//fa in automatico
-                    //anche il caso xmm. Utilizza ottimizzazione codeMap
-                }
-            }
-            else  
-                var.addVarStack(d);
-        }
-        else if(e!=null){
+        if(e!=null){
             if(epr!=null){
                 if(sb!=null){
                     Op2Expr ope=new Op2Expr(e, sb, epr);//Non è necessario richiamare
@@ -152,7 +100,7 @@ public class ClassisIstr extends Istruzione{
             epr.toCode(text, var, env, new Accumulator());
     }
     public boolean isExpression(){
-        return d==null && e==null;
+        return e==null;
     }
     public Espressione getExpr(){
         return epr;

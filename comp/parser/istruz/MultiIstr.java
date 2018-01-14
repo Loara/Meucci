@@ -21,6 +21,7 @@ import comp.code.CodeException;
 import comp.code.Environment;
 import comp.code.Segmenti;
 import comp.code.vars.Variabili;
+import comp.parser.Dichiarazione;
 import comp.parser.Istruzione;
 
 /**
@@ -29,8 +30,10 @@ import comp.parser.Istruzione;
  */
 public class MultiIstr extends Istruzione{
     public final Istruzione[] m;
-    public MultiIstr(Istruzione[] i){
+    public final Dichiarazione[] decs;
+    public MultiIstr(Istruzione[] i, Dichiarazione[] d){
         m=i;
+        decs=d;
     }
     @Override
     public void validate(Variabili var, Environment env)throws CodeException{
@@ -44,6 +47,7 @@ public class MultiIstr extends Istruzione{
     @Override
     public void toCode(Segmenti text, Variabili var, Environment env, Accumulator acc)throws CodeException{
         var.getVarStack().addBlock();
+        var.getVarStack().addVars(decs);
         for(Istruzione e:m){
             if(e!=null)
                 e.toCode(text, var, env, acc);
