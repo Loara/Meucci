@@ -21,6 +21,7 @@ If you have installed "Apache Ant", you can simply follow these step:
 
 To run the compiler you have to be installed:
 
+- Java 8 or later
 - nasm assembler
 - ld linker (binutils - Linux Package)
 
