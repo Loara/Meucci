@@ -11,10 +11,10 @@ modulo Memory depends Syscalls{
 		base=null;
 	}
 	shadow Block createBlock(uint i){
-		declare
+		declare{
 			pt g;
 			Block ret;
-		enddec
+		}
 		if(i+u8<u8)//Overflow
 			return null;
 		if(i <= u8)
@@ -28,9 +28,9 @@ modulo Memory depends Syscalls{
 		return ret;
 	}
 	shadow Block requestBlock(uint dim){
-		declare
+		declare{
 			Block b;
-		enddec
+		}
 		if(base==null)
 			return createBlock(dim);
 		b=base;
@@ -40,9 +40,9 @@ modulo Memory depends Syscalls{
 		}
 		while(b.next!=null){
 			if(b.next.dim>=dim){
-				declare
+				declare{
 					Block ret;
-				enddec
+				}
 				ret=b.next;
 				b.next=b.next.next;
 				return ret;
@@ -52,17 +52,17 @@ modulo Memory depends Syscalls{
 		return createBlock(dim);
 	}
 	pt allocate(uint dim){
-		declare
+		declare{
 			Block b;
-		enddec
+		}
 		b=requestBlock(dim);
 		b.next=null;//Per sicurezza
 		return (pt)b+u8;//Allineamento e preservare dim
 	}
 	void free(pt ob){
-		declare
+		declare{
 			Block b;
-		enddec
+		}
 		b=(Block)(ob-u8);
 		b.next=base;
 		base=b;

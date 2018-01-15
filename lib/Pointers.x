@@ -13,16 +13,16 @@ modulo Pointers{
 		}
 	}
 	pointer[U] somma[typ U](pointer[U] p, uint index){
-		declare
+		declare{
 			pt rey;
-		enddec
+		}
 		rey=(pt)p+(uint)(index*#SIZEOF(U));
 		return (pointer[U])rey;
 	}
 	Rpointer[V] Rsomma[typ V](Rpointer[V] p, uint index){
-		declare
+		declare{
 			pt rey;
-		enddec
+		}
 		rey=(pt)p+(uint)(index*#SIZEOF(V));
 		return (Rpointer[V])rey;
 	}

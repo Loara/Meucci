@@ -38,17 +38,15 @@ modulo Syscalls depends Pointers{
 		}
 	}
 	char getChar(){
-		declare
-			char value;
-		enddec
 		%a{
 	mov	eax,0
 	mov	edi,0
-	lea	rsi,[rbp-1]
+	push	rax
+	mov	rsi,rsp
 	mov	edx,1
 	syscall
+	pop	rsi
 		}
-		return value;
 	}
 	void putChar(char c){
 		%a{
@@ -84,9 +82,9 @@ modulo Syscalls depends Pointers{
 		}
 	}
 	pt sbrk(long i){
-		declare
+		declare{
 			pt ul;
-		enddec
+		}
 		if(ci==null)
 			ci=brk(null);
 		ul=ci;

@@ -15,11 +15,11 @@ modulo StdIO depends public Syscalls, public Strings, Arrays{
 		newLine();
 	}
 	void print(ulong c, uint base){
-		declare
+		declare{
 			ulong b v;
 			uint car i;
 			Array[char] ar;
-		enddec
+		}
 		if(base <= u1B || (base > codec.lenght))
 			return;
 		if(c == u0l){

@@ -8,10 +8,10 @@ modulo Strings depends Memory, Pointers{
 		this.point = (Rpointer[char]) data;
 	}
 	boolean :equals (String s, String tul){
-		declare
+		declare{
 			pt ps pp;
 			uint l;
-		enddec
+		}
 		if(s.lenght != tul.lenght)
 			return false;
 		ps=(pt)s.point;
@@ -38,9 +38,9 @@ NOEQ:
 	}
 	costructor allocaStr(String this, uint dim){
 		//crea una stringa vuota formata da dim caratteri (escluso \0)
-		declare
+		declare{
 			pt data;
-		enddec
+		}
 		data = allocate(dim+u1);
 		( (pointer[char]) (data + dim) ).el = (char)u0b;
 		:super iniString(dim, data);
@@ -66,10 +66,10 @@ NOEQ:
 		}
 	}
 	String substring(String src, uint begin, uint endd){
-		declare
+		declare{
 			uint len;
 			String ret;
-		enddec
+		}
 		if((begin > endd) || (endd > src.lenght))
 			throw error;
 		len = endd - begin;
