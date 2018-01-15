@@ -25,6 +25,7 @@ import comp.code.Types;
 import comp.code.XReg;
 import comp.general.Info;
 import comp.general.Lingue;
+import comp.general.MergeSort;
 import comp.general.Stack;
 import comp.parser.Dichiarazione;
 import comp.parser.FunzParam;
@@ -167,9 +168,19 @@ public class VarStack extends Var{
             maxdim=rrsp;
         al.push(ve);
     }
-    public void addVars(Dichiarazione[] vai)throws CodeException{
+    /*
+    Le ordina in modo da ridurre gli spazi per l'allineamento
+    */
+    public void addVars(Dichiarazione[] vai, Variabili vars)throws CodeException{
+        int[] vals = new int[vai.length];
+        int[] ind = new int[vai.length];
+        for(int i=0; i<ind.length; i++){
+            ind[i]=i;
+            vals[i]=Types.getIstance().find(vai[i].getRType(), false).realDim();
+        }
+        MergeSort.sort(vals, ind);
         for(int i=0; i<vai.length; i++){
-            addVar(vai[i].getRType(), vai[i].getIdent());
+            addVar(vai[ind[i]].getRType(), vai[ind[i]].getIdent());
         }
     }
     /**

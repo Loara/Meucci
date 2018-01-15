@@ -258,8 +258,11 @@ public class IstrExe {
             if(t.get() instanceof IdentToken && ((IdentToken)t.get()).getString()
                     .equals("declare")){
                 t.nextEx();
-                while(!(t.get() instanceof IdentToken && 
-                        "enddec".equals(((IdentToken)t.get()).getString()))){
+                if(!(t.get() instanceof PareToken && ((PareToken)t.get()).s=='{'))
+                    throw new ParserException(Lingue.getIstance().format("m_par_decmnc"), t);
+                t.nextEx();
+                while(!(t.get() instanceof PareToken && 
+                        ((PareToken)t.get()).s=='}')){
                     TypeName tn = new TypeName(t);
                     do{
                         if(t.get() instanceof IdentToken){

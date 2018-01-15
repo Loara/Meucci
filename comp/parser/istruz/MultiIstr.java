@@ -47,7 +47,7 @@ public class MultiIstr extends Istruzione{
     @Override
     public void toCode(Segmenti text, Variabili var, Environment env, Accumulator acc)throws CodeException{
         var.getVarStack().addBlock();
-        var.getVarStack().addVars(decs);
+        var.getVarStack().addVars(decs, var);
         for(Istruzione e:m){
             if(e!=null)
                 e.toCode(text, var, env, acc);
