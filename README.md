@@ -4,9 +4,9 @@ Meucci is a new programming language, based on the concept of "module" as a cont
 
 This compiler works currently only on **Linux** systems with **Intel64** (x86_64) or **AMD64** processors with SSE2 extension if you want to use floating point arithmetic.
 
-## Errors in the manual
+## Manual
 
-Instead of what I wrote in the manual, you can't compile sources with `mecc`, but you have to use `java -jar Meucci.jar [options] sources...`. Type `java -jar Meucci.jar` to get all the options currently available.
+See the [Wiki](https://github.com/Loara/Meucci/wiki) to obtain more information about this compiler and Meucci programming language.
 
 ## Installation
 
