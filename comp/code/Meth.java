@@ -16,11 +16,9 @@
  */
 package comp.code;
 
-import comp.code.template.WeakSubstitutor;
 import comp.general.Info;
 import comp.parser.Callable;
 import comp.parser.Costructor;
-import comp.parser.Funzione;
 import comp.parser.Membro;
 import comp.parser.TypeName;
 import comp.parser.template.FunzDich;
@@ -55,12 +53,14 @@ public class Meth {
     public static String modName(Callable d, TemplateEle... params)throws CodeException{
         String suf=d.getModulo()+"~";
         String nn=suf+funzKey(d.memName(), params);
-        WeakSubstitutor sub=new WeakSubstitutor();
-        sub.addAll(d.templateNames(), params);
+        //Dato che per i template non esiste l'overloading
+        //è inutile memorizzare i parametri nel modname
+        if(params.length!=0)
+            return nn;
         int s=d instanceof Costructor ? 1 : 0;
         //Se è un costruttore il primo parametro non conta 
         for(int i=s; i<d.getElems().length; i++)
-            nn+="."+className(sub.recursiveGet(d.getElems()[i].dich.getRType()));
+            nn+="."+className(d.getElems()[i].dich.getRType());
         return nn;
     }
     public static String paramsName(TemplateEle[] vv){
@@ -128,11 +128,9 @@ public class Meth {
             TemplateEle[] tparams, String[] ttemp)throws CodeException{
         String u=modulo+"~"+accessFunzName(mem.getIdent(), clas, get);
         if(tparams.length!=0)
-            u+="#A"+paramsName(tparams)+"#C";
-        WeakSubstitutor sub=new WeakSubstitutor();
-        sub.addAll(ttemp, tparams);
+            return u;
         for(TypeName tn:mem.params)
-            u+="."+className(sub.recursiveGet(tn));
+            u+="."+className(tn);
         return u;
     }
     /*

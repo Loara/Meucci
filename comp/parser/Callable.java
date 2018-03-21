@@ -94,6 +94,7 @@ public abstract class Callable implements Serializable{
         }
         else
             shadow=false;
+        retType=new TypeName(t);
         if(!(t.get() instanceof IdentToken))
             throw new ParserException(Lingue.getIstance().format("m_par_invret"), t);
         else{
@@ -101,32 +102,36 @@ public abstract class Callable implements Serializable{
                 Info.isForbitten(((IdentToken)t.get()).getString(), t.get().getRiga());
             }
         }
-        retType=new TypeName(t);
         nome=t.get();
         t.nextEx();
         
         initRest(t, modulo);
     }
     /*
-    Tipo di ritorno non specificato
-    costr -> scartare il primo token (costructor)
+    costr -> scartare il primo token (constructor), altrimenti è un distruttore
     */
     protected Callable(VScan<Token> t, String modulo, boolean costr, boolean f)throws ParserException{
         if(costr)
-            t.nextEx();//costructor
+            t.nextEx();//constructor
         if(t.get() instanceof IdentToken && ((IdentToken)t.get()).getString().equals("shadow")){
+            if(!costr){
+                throw new ParserException(Lingue.getIstance().format("shderr"), t);
+            }
             shadow=true;
             t.nextEx();
         }
         else
             shadow=false;
+        if(costr)
+            retType=new TypeName(t);
+        else
+            retType=new TypeName("void");
         if(!(t.get() instanceof IdentToken))
             throw new ParserException(Lingue.getIstance().format("m_par_invret"), t);
         else{
             if(f)
                 Info.isForbitten(((IdentToken)t.get()).getString(), t.get().getRiga());
         }
-        retType=new TypeName("void");
         nome=t.get();
         if(!(nome instanceof IdentToken))
             throw new ParserException(Lingue.getIstance().format("m_par_invcos"), t);

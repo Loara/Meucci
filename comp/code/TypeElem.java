@@ -44,8 +44,6 @@ import java.util.Objects;
  * 
  * ....
  * 
- * AGGIORNAMENTO: se un membro NON è explicit, viene generata una funzione di accesso
- * automatica (in pratica viene chiamata sempre una funzione)
  * 
  * TypeElem non contiene membri override: tale parametro ha importanza solo per compilazione
  * @author loara

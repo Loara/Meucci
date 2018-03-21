@@ -8,7 +8,8 @@ package comp.general;
 /**
  * Serve un algoritmo di ordinamento STABILE
  * 
- * una sue array: uno contiene i valori su cui si basa l'ordinamento, l'altro gli indici dell'array originario
+ * ci sono due array: uno contiene i valori su cui si basa l'ordinamento, l'altro 
+ * gli indici dell'array originario
  * @author loara
  */
 public class MergeSort {

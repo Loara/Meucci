@@ -30,6 +30,7 @@ import java.util.HashSet;
  */
 public class TNumbers {
     private static TNumbers tnumb;
+    private final HashSet<NumTemplate> hs;
     private Substitutor suds;
     static{
         tnumb=null;
@@ -39,7 +40,6 @@ public class TNumbers {
             tnumb=new TNumbers();
         return tnumb;
     }
-    private final HashSet<NumTemplate> hs;
     public TNumbers(){
         hs=new HashSet<>();
         suds=null;
