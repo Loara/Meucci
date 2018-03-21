@@ -47,7 +47,6 @@ public class TypeDef implements Serializable{
     protected TypeName ext;
     protected Membro[] types;
     protected FMorg[] ffm;
-    protected GFMorg[] gffm;
     protected boolean explicit;
     /*
     protected transient Costructor[] cc;//I costruttori vanno gestiti come funzioni indipendenti
@@ -80,7 +79,6 @@ public class TypeDef implements Serializable{
         }
         Stack<Membro> s=new Stack<>(Membro.class);
         Stack<FMorg> fmm=new Stack<>(FMorg.class);
-        Stack<GFMorg> gfmm=new Stack<>(GFMorg.class);
         if(t.get() instanceof PareToken && ((PareToken)t.get()).s=='{'){
             t.nextEx();
             boolean hasDes=false;
@@ -106,24 +104,14 @@ public class TypeDef implements Serializable{
                     Membro dich=new Membro(t, explicit);
                     s.push(dich);
                     FMorg ftt;
-                    GFMorg gftt;
                     if(t.get() instanceof PareToken && ((PareToken)t.get()).s=='{'){
-                        if(dich.gpacked){
-                            gftt=new GFMorg(t, dich.getType(), nome, tt, dich.getIdent(), modulo);
-                            ftt=new FMorg(dich.getType());
-                        }
-                        else{
-                            ftt=new FMorg(t, dich.getType(), nome, tt, dich.getIdent(), modulo);
-                            gftt=new GFMorg(dich.getType());
-                        }
+                        ftt=new FMorg(t, dich.getType(), nome, tt, dich.getIdent(), modulo);
                     }
                     else{
                         ftt=new FMorg(dich.getType());
-                        gftt=new GFMorg(dich.getType());
                     }
                     //Niente generazione automatica
                     fmm.push(ftt);
-                    gfmm.push(gftt);
                     if(!t.reqSpace(2))//punto e virgola e successivo
                         throw new FineArrayException();
                     if(!(t.get() instanceof EolToken))
@@ -133,7 +121,6 @@ public class TypeDef implements Serializable{
             }
             types=s.toArray();
             ffm=fmm.toArray();
-            gffm=gfmm.toArray();
             t.next();
         }
         else throw new ParserException(Lingue.getIstance().format("m_par_grftyp"), t);
@@ -251,17 +238,6 @@ public class TypeDef implements Serializable{
                 ffm[i].set.validate(env, varSt);
             }
             
-            if(gffm[i].get!=null){
-                if(!types[i].hasGAccFunction())
-                    throw new CodeException("Funzioni accesso non valide");
-                gffm[i].get.validate(env, varSt);
-            }
-            if(gffm[i].set!=null){
-                if(!types[i].hasGAccFunction())
-                    throw new CodeException("Funzioni accesso non valide");
-                gffm[i].set.validate(env, varSt);
-            }
-            
             if(types[i].override){
                 if(ext==null)
                     throw new CodeException("Funzioni accesso non valide");
@@ -334,23 +310,7 @@ public class TypeDef implements Serializable{
                         seg.addIstruzione("mov","["+rax+"+"+(rd+Info.pointerdim)+"]",rbx);
                     }
                 }
-                else if(types[i].hasGAccFunction()){
-                    rd=th.vt.index(types[i].getIdent(), true);
-                    if(gffm[i].get==null){
-                        seg.addIstruzione("mov", "qword ["+rax+"+"+rd+"]", "0");
-                    }
-                    else{
-                        seg.addIstruzione("lea",rbx,"["+Meth.modName(gffm[i].get, vparams)+"]");
-                        seg.addIstruzione("mov","["+rax+"+"+rd+"]",rbx);
-                    }
-                    if(gffm[i].set==null){
-                        seg.addIstruzione("mov", "qword ["+rax+"+"+(rd+Info.pointerdim)+"]", "0");
-                    }
-                    else{
-                        seg.addIstruzione("lea",rbx,"["+Meth.modName(gffm[i].set, vparams)+"]");
-                        seg.addIstruzione("mov","["+rax+"+"+(rd+Info.pointerdim)+"]",rbx);
-                    }
-                }
+                
             }
             else{
                 th.checkCorrectOverride(types[i], false);
@@ -375,27 +335,6 @@ public class TypeDef implements Serializable{
                         seg.addIstruzione("mov","["+rax+"+"+(rd+Info.pointerdim)+"]",rbx);
                     }
                 }
-                else if(types[i].hasGAccFunction()){
-                    rd=th.vt.index(types[i].getIdent(), true);
-                    if(gffm[i].get==null){
-                        
-                    }
-                    else{
-                        if(types[i].shadow)
-                            throw new CodeException(Lingue.getIstance().format("m_cod_illovrr"));
-                        seg.addIstruzione("lea",rbx,"["+Meth.modName(gffm[i].get, vparams)+"]");
-                        seg.addIstruzione("mov","["+rax+"+"+rd+"]",rbx);
-                    }
-                    if(gffm[i].set==null){
-                        
-                    }
-                    else{
-                        if(types[i].shadow || types[i].read)
-                            throw new CodeException(Lingue.getIstance().format("m_cod_illovrr"));
-                        seg.addIstruzione("lea",rbx,"["+Meth.modName(gffm[i].set, vparams)+"]");
-                        seg.addIstruzione("mov","["+rax+"+"+(rd+Info.pointerdim)+"]",rbx);
-                    }
-                }
             }
         } 
         seg.addIstruzione("leave", null, null);
@@ -410,12 +349,6 @@ public class TypeDef implements Serializable{
                     ffm[i].get.toCode(seg, varSt, env, vparams);
                 if(ffm[i].set!=null)
                     ffm[i].set.toCode(seg, varSt, env, vparams);
-            }
-            else if(types[i].hasGAccFunction()){
-                if(gffm[i].get!=null)
-                    gffm[i].get.toCode(seg, varSt, env, vparams);
-                if(gffm[i].set!=null)
-                    gffm[i].set.toCode(seg, varSt, env, vparams);
             }
         }
     }

@@ -53,8 +53,8 @@ public class Info {
     //Nomi vietati per nomi funzioni normali, variabili, nome tipi
     public static final String[] forbittenNames=new String[]{"break", "catch", 
         "continue", "constructor", "declare", "default", "depends", "destroy", 
-        "else", "end", "errors", "explicit", "extends", "for", "ghost", 
-        "gpacked", "if", "init", "modulo", "new", "num", "number", "override", 
+        "else", "end", "errors", "explicit", "extends", "for", "ghost", "if",
+        "modulo", "new", "num", "number", "override", 
         "packed", "public", "read", "reference", "return", "shadow", "static", 
         "super", "throw", "try", "typ", "type", "while"};
     

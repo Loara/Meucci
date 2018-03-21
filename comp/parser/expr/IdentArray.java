@@ -59,9 +59,6 @@ public class IdentArray extends Espressione{
         TypeElem tp=chiam.returnType(var, v);
         for(IdentEle ee: elems){
             Membro m = tp.information(ee.getIdent(), v);
-            if(m.gpacked)
-                throw new CodeException(Lingue.getIstance()
-                        .format("m_cod_accgpak", m.dich.getIdent()));
             tp=Types.getIstance().find(m.getType(), v);
         }
         return tp;
@@ -73,9 +70,6 @@ public class IdentArray extends Espressione{
         TypeElem tp=chiam.returnType(var, v);
         for(int i=0; i<deep; i++){
             Membro m = tp.information(elems[i].getIdent(), v);
-            if(m.gpacked)
-                throw new CodeException(Lingue.getIstance()
-                        .format("m_cod_accgpak", m.dich.getIdent()));
             tp=Types.getIstance().find(m.getType(), v);
         }
         return tp;
@@ -86,12 +80,6 @@ public class IdentArray extends Espressione{
         TypeElem ty=chiam.returnType(vars, true);
         for (int i = 0; i< elems.length; i++) {
             Membro m = ty.information(elems[i].getIdent(), true);
-            if(i< elems.length - 1){
-                if(m.gpacked)
-                    throw new CodeException(Lingue.getIstance()
-                            .format("m_cod_accgpak", m.dich.getIdent()));
-                //i gpacked si possono usare solo con l'assegnamento
-            }
             for (Espressione val : elems[i].getVals()) {
                 val.validate(vars);
             }

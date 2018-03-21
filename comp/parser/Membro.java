@@ -57,18 +57,18 @@ public class Membro implements Serializable{
     all'interno dello stesso modulo, mentre non si può fare l'override di membri shadow
     mentre con quelli read si può modificare solo la funzione get.
     
-    Inoltre solo i membri ghost e gpacked creano nuove voci nella vtable
+    Inoltre solo i membri ghost e creano nuove voci nella vtable
     
     override diventa un modificatore a sè stante, ma ha bisogno di uno tra ghost e gpacked
     */
-    public boolean override, ghost, gpacked;
+    public boolean override, ghost;
     public final TypeName[] params;
     public TemplateEle packed;
     /*
     Usata per generare TypeElem, nessun override presente
     */
     public Membro(TypeName type, String name, TypeName[] p, boolean shadow, 
-            boolean read, boolean gpacked, boolean ghost, TemplateEle pack){
+            boolean read, boolean ghost, TemplateEle pack){
         dich=new Dichiarazione(type, name);
         this.shadow=shadow;
         this.read=read;
@@ -76,10 +76,9 @@ public class Membro implements Serializable{
         params=p;
         this.ghost=ghost;
         packed=pack;
-        this.gpacked=gpacked;
     }
     public Membro(TypeName type, String name, boolean shadow, boolean read){
-        this(type, name, new TypeName[0], shadow, read, false, false, null);
+        this(type, name, new TypeName[0], shadow, read, false, null);
     }
     public Membro(Membro sup, TypeName conv, TemplateEle pac){
         dich=new Dichiarazione(conv, sup.dich.getIdent());
@@ -89,7 +88,6 @@ public class Membro implements Serializable{
         params=sup.params;
         ghost=sup.ghost;
         packed=pac;
-        gpacked=sup.gpacked;
     }
     public Membro(VScan<Token> t, boolean typeExpl)throws ParserException{
         if(t.get() instanceof IdentToken){
@@ -124,7 +122,7 @@ public class Membro implements Serializable{
                 if(t.get() instanceof IdentToken && ((IdentToken)t.get()).getString().equals("packed")){
                     t.nextEx();
                     packed=Template.detect(t);
-                    if(ghost || gpacked || override)
+                    if(ghost || override)
                         throw new ParserException(Lingue.getIstance().format("m_par_errpak"), t);
                     params=new TypeName[]{new TypeName("uint")};
                 }
@@ -144,7 +142,6 @@ public class Membro implements Serializable{
     private void detectAttr(VScan<Token> t, boolean expl)throws ParserException{
         override=false;
         ghost=false;
-        gpacked=false;
         if(expl)
             return;
         override = ((IdentToken)t.get()).getString().equals("override");
@@ -154,11 +151,6 @@ public class Membro implements Serializable{
         }
         ghost = ((IdentToken)t.get()).getString().equals("ghost");
         if(ghost){
-            t.nextEx();
-            return;
-        }
-        gpacked = ((IdentToken)t.get()).getString().equals("gpacked");
-        if(gpacked){
             t.nextEx();
             return;
         }
@@ -263,10 +255,7 @@ public class Membro implements Serializable{
     public boolean hasAccFunction(){
         return ghost;
     }
-    public boolean hasGAccFunction(){
-        return gpacked;
-    }
     public boolean newVTableRecord(){
-        return (ghost || gpacked) && !override;
+        return ghost && !override;
     }
 }

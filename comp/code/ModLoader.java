@@ -195,11 +195,8 @@ public class ModLoader {
             if(mem.override)
                 continue;
             int perms=0;
-            //non ci sono override
-            if(mem.gpacked)
+            if(mem.ghost)
                 perms=1;
-            else if(mem.ghost)
-                perms=2;
             perms*=3;
             if(mem.shadow)
                 perms+=1;
@@ -246,9 +243,8 @@ public class ModLoader {
             boolean shadow=(perms % 3)==1;
             boolean read=(perms % 3)==2;
             perms=perms/3;
-            boolean gpacked=(perms % 3)==1;
-            boolean ghost=(perms % 3)==2;
-            mem[j]=new Membro(ty, na, par, shadow, read, gpacked, ghost, pack);
+            boolean ghost=(perms % 3)==1;
+            mem[j]=new Membro(ty, na, par, shadow, read, ghost, pack);
         }
         TypeName ex=null;
         if(in.readBoolean())
