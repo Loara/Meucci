@@ -55,10 +55,10 @@ public class TypeDef implements Serializable{
     protected Template[] tt;
     public TypeDef(VScan<Token> t, String modulo, Stack<Callable> des,
             Stack<Callable> Tdes)throws ParserException{
-        if(!(t.get() instanceof IdentToken) || !((IdentToken)t.get()).getString().equals("type"))
+        if(!(t.get().isIdent("type")))
             throw new ParserException(Lingue.getIstance().format("m_par_invtyp"), t);
         t.nextEx();
-        if(t.get() instanceof IdentToken && ((IdentToken)t.get()).getString().equals("explicit")){
+        if(t.get().isIdent("explicit")){
             explicit=true;
             t.nextEx();
         }
@@ -71,7 +71,7 @@ public class TypeDef implements Serializable{
         Info.isForbitten(nome, t.get().getRiga());
         t.nextEx();
         tt=Template.parseTemp(t);
-        if(t.get() instanceof IdentToken && ((IdentToken)t.get()).getString().equals("extends")){
+        if(t.get().isIdent("extends")){
             if(!(t.get(1) instanceof IdentToken))
                 throw new ParserException(Lingue.getIstance().format("m_par_exterr"), t);
             t.nextEx();
@@ -83,7 +83,7 @@ public class TypeDef implements Serializable{
             t.nextEx();
             boolean hasDes=false;
             while(!(t.get() instanceof PareToken && ((PareToken)t.get()).s=='}')){
-                if(t.get() instanceof IdentToken && ((IdentToken)t.get()).getString().equals("end")){
+                if(t.get().isIdent("end")){
                     Destructor ccc=new Destructor(t, nome, tt, modulo);
                     if(hasDes)
                         throw new ParserException(Lingue.getIstance().format("m_par_onedis"), t);

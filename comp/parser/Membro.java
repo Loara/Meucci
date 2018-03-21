@@ -119,7 +119,7 @@ public class Membro implements Serializable{
                 else throw new ParserException("Tipo errato", t);
             }
             else{
-                if(t.get() instanceof IdentToken && ((IdentToken)t.get()).getString().equals("packed")){
+                if(t.get().isIdent("packed")){
                     t.nextEx();
                     packed=Template.detect(t);
                     if(ghost || override)

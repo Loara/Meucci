@@ -31,4 +31,7 @@ public abstract class Token implements Serializable{
     public int getRiga(){
         return riga;
     }
+    public boolean isIdent(String id){
+        return (this instanceof IdentToken && ((IdentToken)this).getString().equals(id));
+    }
 }

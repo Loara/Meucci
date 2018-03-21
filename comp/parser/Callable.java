@@ -88,7 +88,7 @@ public abstract class Callable implements Serializable{
     public Callable(VScan<Token> t, String modulo, boolean f)throws ParserException{
         //Tutte le dichiarazioni sono effettuate dall'utente. Possibile utilizzare
         //i forbittenNames di Info
-        if(t.get() instanceof IdentToken && ((IdentToken)t.get()).getString().equals("shadow")){
+        if(t.get().isIdent("shadow")){
             shadow=true;
             t.nextEx();
         }
@@ -113,7 +113,7 @@ public abstract class Callable implements Serializable{
     protected Callable(VScan<Token> t, String modulo, boolean costr, boolean f)throws ParserException{
         if(costr)
             t.nextEx();//constructor
-        if(t.get() instanceof IdentToken && ((IdentToken)t.get()).getString().equals("shadow")){
+        if(t.get().isIdent("shadow")){
             if(!costr){
                 throw new ParserException(Lingue.getIstance().format("shderr"), t);
             }
@@ -133,8 +133,6 @@ public abstract class Callable implements Serializable{
                 Info.isForbitten(((IdentToken)t.get()).getString(), t.get().getRiga());
         }
         nome=t.get();
-        if(!(nome instanceof IdentToken))
-            throw new ParserException(Lingue.getIstance().format("m_par_invcos"), t);
         t.nextEx();
         
         initRest(t, modulo);
@@ -164,10 +162,11 @@ public abstract class Callable implements Serializable{
             dichs=es.toArray();
         }
         t.nextEx();
-        if(t.get() instanceof IdentToken && ((IdentToken)t.get()).getString().equals("errors")){
+        if(t.get().isIdent("errors")){
             Stack<String> sta = new Stack<>(String.class);
             t.nextEx();
             while(t.get() instanceof IdentToken){
+                Info.isForbitten(((IdentToken)t.get()).getString(), t.get().getRiga());
                 sta.push(((IdentToken)t.get()).getString());
                 t.nextEx();
             }

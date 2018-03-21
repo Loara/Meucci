@@ -169,8 +169,7 @@ public class IstrExe {
                 MultiIstr mi=(MultiIstr)u;
                 Stack<String> en=new Stack<>(String.class);
                 Stack<MultiIstr> mu=new Stack<>(MultiIstr.class);
-                while(t.get() instanceof IdentToken && 
-                        ((IdentToken)t.get()).getString().equals("catch")){
+                while(t.get().isIdent("catch")){
                     t.nextEx();
                     if(!(t.get() instanceof PareToken && ((PareToken)t.get()).s=='('))
                         throw new ParserException(Lingue.getIstance().format("m_par_generr", "catch"), t);
@@ -189,8 +188,7 @@ public class IstrExe {
                     mu.push((MultiIstr)u);
                 }
                 MultiIstr def;
-                if(t.get() instanceof IdentToken && ((IdentToken)t.get())
-                        .getString().equals("default")){
+                if(t.get().isIdent("default")){
                     t.nextEx();
                     u=IstrExe.toIstr(t, true);
                     if(!(u instanceof MultiIstr))
@@ -252,8 +250,7 @@ public class IstrExe {
         if(t.reqSpace(2) && t.get() instanceof PareToken && ((PareToken)t.get()).s=='{'){
             t.nextEx();
             Stack<Dichiarazione> dec = new Stack<>(Dichiarazione.class);
-            if(t.get() instanceof IdentToken && ((IdentToken)t.get()).getString()
-                    .equals("declare")){
+            if(t.get().isIdent("declare")){
                 t.nextEx();
                 if(!(t.get() instanceof PareToken && ((PareToken)t.get()).s=='{'))
                     throw new ParserException(Lingue.getIstance().format("m_par_decmnc"), t);

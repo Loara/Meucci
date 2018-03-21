@@ -72,14 +72,14 @@ public class Modulo {
     public Modulo(VScan<Token> t)throws ParserException{
         if(!t.reqSpace(4))
             throw new FineArrayException();
-        if(t.get() instanceof IdentToken && ((IdentToken)t.get()).getString().equals("modulo")){
+        if(t.get().isIdent("modulo")){
             t.nextEx();
             if(t.get() instanceof IdentToken)
                 nome=((IdentToken)t.get()).getString();
             else throw new ParserException("Nome mod non valido", t);
             t.nextEx();
             //dipendenze
-            if(t.get() instanceof IdentToken && ((IdentToken)t.get()).getString().equals("depends")){
+            if(t.get().isIdent("depends")){
                 Stack<String> de=new Stack<>(String.class);
                 Stack<Boolean> pb=new Stack<>(Boolean.class);
                 do{
