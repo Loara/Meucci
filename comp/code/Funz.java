@@ -32,11 +32,12 @@ import java.util.HashSet;
  */
 public class Funz {
     private final HashSet<FElement> s;
-    private final FunzList fl;
+    //private final FunzList fl;
+    //Potrebbe non servire
     private Substitutor suds;
     public void clearAll(){
         s.clear();
-        fl.clearAll();
+        //fl.clearAll();
         glob.clear();
         ext.clear();
         suds=null;
@@ -47,7 +48,7 @@ public class Funz {
     }
     private Funz(){
         s=new HashSet<>();
-        fl=new FunzList();
+        //fl=new FunzList();
         suds=null;
     }
     private static Funz f;
@@ -72,9 +73,11 @@ public class Funz {
     public boolean load(FElement f){
         return s.add(f);
     }
+    /*
     public boolean loadTemplate(Callable c){
         return fl.add(c);
     }
+    */
     public boolean loadAll(FElement[] e){
         boolean a=true;
         for(FElement tt:e){
@@ -82,9 +85,11 @@ public class Funz {
         }
         return a;
     }
+    /*
     public boolean loadAllTemplates(Callable[] td){
         return fl.addAll(td);
     }
+    */
     /*
     noAdd serve a FunzList per non aggiungere la funzione (e quindi i relativi tipi a
     ClassList)
@@ -118,11 +123,13 @@ public class Funz {
             return e.get(0);
         }
         else {
+            /*
             if(e.isEmpty() && te.length>0){
                 FElement fer=fl.generate(name, te, types, noAdd);
                 s.add(fer);
                 return fer;
             }
+            */
             String err=Lingue.getIstance().format("m_cod_foufunn", e.size(), 
                     Meth.funzKey(name, te))+":\n";
             err = e.stream().map((ex) -> ex.modname+"\n").reduce(err, String::concat);
@@ -186,11 +193,13 @@ public class Funz {
             return e.get(0);
         }
         else {
+            /*
             if(e.isEmpty() && te.length>0){
                 FElement fer=fl.generateCostructor(fname, te, params, noAdd);
                 s.add(fer);
                 return fer;
             }
+            */
             String err=Lingue.getIstance().format("m_cod_foufunn", e.size(), 
                     Meth.funzKey(Costructor.costrName(fname), te))+":\n";
             err = e.stream().map((ex) -> ex.modname+"\n").reduce(err, String::concat);
@@ -221,10 +230,12 @@ public class Funz {
             e.add(i);
         }
         if(e.size()!=1){
+            /*
             if(e.isEmpty() && te.length>0){
                 fl.esiste(name, te, types);
                 return;
             }
+            */
             String err=Lingue.getIstance().format("m_cod_foufunn", e.size(), 
                     Meth.funzKey(name, te))+":\n";
             err = e.stream().map((ex) -> ex.modname+"\n").reduce(err, String::concat);
@@ -273,20 +284,23 @@ public class Funz {
             e.add(i);
         }
         if(e.size()!=1){
+            /*
             if(e.isEmpty() && te.length>0){
                 fl.esisteCostructor(fname, tem, params);
                 return;
             }
+            */
             String err=Lingue.getIstance().format("m_cod_foufunn", e.size(), 
                     Meth.funzKey(Costructor.costrName(fname), te))+":\n";
             err = e.stream().map((ex) -> ex.modname+"\n").reduce(err, String::concat);
             throw new CodeException(err);
         }
     }
-    
+    /*
     public FunzList getFunzList(){
         return fl;
     }
+    */
     public HashSet<String> glob=new HashSet<>();
     public HashSet<String> ext=new HashSet<>();
 }

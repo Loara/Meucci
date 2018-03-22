@@ -19,14 +19,11 @@ package comp.parser;
 import comp.code.Accumulator;
 import comp.code.CodeException;
 import comp.code.Environment;
-import comp.code.FElement;
 import comp.code.Funz;
-import comp.code.Meth;
 import comp.code.ModLoader;
 import comp.code.ModLoader.MLdone;
 import comp.code.Segmenti;
 import comp.code.Types;
-import comp.code.template.Notifica;
 import comp.code.template.TNumbers;
 import comp.code.vars.Variabili;
 import comp.general.Lingue;
@@ -65,8 +62,8 @@ public class Modulo {
     public final String nome;
     public final String[] deps;
     public final Boolean[] publ;
-    public final TypeDef[] type, Ttype;
-    public final Callable[] ca, Tca;
+    public final TypeDef[] type;
+    public final Callable[] ca;
     public final Dichiarazione[] internal;//variabili interne, non si esportano, sono shadow
     public final MultiIstr Static;//inizializzatore codice
     public Modulo(VScan<Token> t)throws ParserException{
@@ -111,8 +108,8 @@ public class Modulo {
             if(!(t.get() instanceof PareToken && ((PareToken)t.get()).s=='{'))
                 throw new ParserException(Lingue.getIstance().format("m_par_invmod", nome), t);
             t.nextEx();
-            Stack<TypeDef> td=new Stack<>(TypeDef.class), Ttd=new Stack<>(TypeDef.class);
-            Stack<Callable> cal=new Stack<>(Callable.class), Tcal=new Stack<>(Callable.class);
+            Stack<TypeDef> td=new Stack<>(TypeDef.class);
+            Stack<Callable> cal=new Stack<>(Callable.class);
             Stack<Dichiarazione> di=new Stack<>(Dichiarazione.class);
             MultiIstr mit=null;
             while(!(t.get() instanceof PareToken && ((PareToken)t.get()).s=='}')){
@@ -130,19 +127,13 @@ public class Modulo {
                     continue;
                 }
                 if(id.getString().equals("type")){
-                    TypeDef tyde=new TypeDef(t, nome, cal, Tcal);
-                    if(tyde.templates().length!=0)
-                        Ttd.push(tyde);
-                    else
-                        td.push(tyde);
+                    TypeDef tyde=new TypeDef(t, nome, cal);
+                    td.push(tyde);
                     continue;
                 }
                 if(id.getString().equals("costructor")){
                     Costructor co=new Costructor(t, nome);
-                    if(co.temp.length!=0)
-                        Tcal.push(co);
-                    else
-                        cal.push(co);
+                    cal.push(co);
                     continue;
                 }
                 int iniz=t.getInd();
@@ -153,10 +144,7 @@ public class Modulo {
                 if(t.get() instanceof SymbToken){
                     t.setInd(iniz);
                     OpDef op=new OpDef(t, nome);
-                    if(op.templates().length!=0)
-                        Tcal.push(op);
-                    else
-                        cal.push(op);
+                    cal.push(op);
                 }
                 else if(t.get() instanceof IdentToken){
                     if(t.get(1) instanceof EolToken){
@@ -167,17 +155,12 @@ public class Modulo {
                     }
                     t.setInd(iniz);
                     Funzione f=new Funzione(t, nome);
-                    if(f.templates().length!=0)
-                        Tcal.push(f);
-                    else
-                        cal.push(f);
+                    cal.push(f);
                 }
             }
             t.next();//così, per sfizio;
             type=td.toArray();
-            Ttype=Ttd.toArray();
             ca=cal.toArray();
-            Tca=Tcal.toArray();
             internal=di.toArray();
             Static=mit;
         }
@@ -213,6 +196,13 @@ public class Modulo {
         loadedModules.stream().map((m) -> {
             Types.getIstance().loadAll(m.typ);
             return m;
+        }).forEach((m) -> {
+            Funz.getIstance().loadAll(m.fun);
+        });
+        /*
+        loadedModules.stream().map((m) -> {
+            Types.getIstance().loadAll(m.typ);
+            return m;
         }).map((m) -> {
             Types.getIstance().loadAllTemplates(m.Ttyp);
             return m;
@@ -223,6 +213,7 @@ public class Modulo {
             Funz.getIstance().loadAllTemplates(m.Tcal);
         });
         //Anche gli shadow vanno nell'intestazione
+        */
     }
     public void Codifica(PrintWriter out, Master mas)
             throws CodeException, IOException, ClassNotFoundException{
@@ -253,17 +244,13 @@ public class Modulo {
         for(TypeDef td:type){
             td.toCode(text, internal, env);
         }
-        for(Callable Tcal:Tca){
-            Tcal.validate(env, internal);
-        }
-        for(TypeDef Ttd:Ttype){
-            Ttd.validate(internal, env);
-        }
+        /*
         Types.getIstance().getClassList().notifiche().forEach((Notifica t) -> {
             //Per i template
             Funz.getIstance().ext.add("_VT_INIT_"+Meth.className(t.nome, t.parametri));
             //Tra le notifiche niente classi esplicite
         });
+        */
         text.closeAll();//effettua il flush a tutti
         out.println("\tglobal\t_INIT_MOD_"+nome+":function");
         for(String dep:deps)

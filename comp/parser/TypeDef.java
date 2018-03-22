@@ -29,7 +29,6 @@ import comp.general.Info;
 import comp.general.Lingue;
 import comp.general.Stack;
 import comp.general.VScan;
-import comp.parser.template.Template;
 import comp.parser.template.TemplateEle;
 import comp.scanner.EolToken;
 import comp.scanner.IdentToken;
@@ -48,13 +47,7 @@ public class TypeDef implements Serializable{
     protected Membro[] types;
     protected FMorg[] ffm;
     protected boolean explicit;
-    /*
-    protected transient Costructor[] cc;//I costruttori vanno gestiti come funzioni indipendenti
-    //quindi non vengono aggiunti
-    */
-    protected Template[] tt;
-    public TypeDef(VScan<Token> t, String modulo, Stack<Callable> des,
-            Stack<Callable> Tdes)throws ParserException{
+    public TypeDef(VScan<Token> t, String modulo, Stack<Callable> des)throws ParserException{
         if(!(t.get().isIdent("type")))
             throw new ParserException(Lingue.getIstance().format("m_par_invtyp"), t);
         t.nextEx();
@@ -70,7 +63,6 @@ public class TypeDef implements Serializable{
         nome=((IdentToken)t.get()).getString();
         Info.isForbitten(nome, t.get().getRiga());
         t.nextEx();
-        tt=Template.parseTemp(t);
         if(t.get().isIdent("extends")){
             if(!(t.get(1) instanceof IdentToken))
                 throw new ParserException(Lingue.getIstance().format("m_par_exterr"), t);
@@ -84,17 +76,14 @@ public class TypeDef implements Serializable{
             boolean hasDes=false;
             while(!(t.get() instanceof PareToken && ((PareToken)t.get()).s=='}')){
                 if(t.get().isIdent("end")){
-                    Destructor ccc=new Destructor(t, nome, tt, modulo);
+                    Destructor ccc=new Destructor(t, nome, modulo);
                     if(hasDes)
                         throw new ParserException(Lingue.getIstance().format("m_par_onedis"), t);
                     else if(explicit)
                         throw new ParserException(Lingue.getIstance().format("m_par_expdis"), t);
                     else{
                         hasDes=true;
-                        if(tt.length==0)//Per chiamate di sovradistruttori
-                            des.push(ccc);
-                        else
-                            Tdes.push(ccc);
+                        des.push(ccc);
                     }
                     if(!(t.get() instanceof EolToken))
                         throw new ParserException(Lingue.getIstance().format("m_par_dotcom"), t);
@@ -105,7 +94,7 @@ public class TypeDef implements Serializable{
                     s.push(dich);
                     FMorg ftt;
                     if(t.get() instanceof PareToken && ((PareToken)t.get()).s=='{'){
-                        ftt=new FMorg(t, dich.getType(), nome, tt, dich.getIdent(), modulo);
+                        ftt=new FMorg(t, dich.getType(), nome, dich.getIdent(), modulo);
                     }
                     else{
                         ftt=new FMorg(dich.getType());
@@ -151,13 +140,11 @@ public class TypeDef implements Serializable{
      * @param tparams 
      * @throws comp.code.CodeException 
      */
-    public void toCode(Segmenti seg, Dichiarazione[] varSt, Environment env, TemplateEle... tparams)throws CodeException{
-        if(tparams.length!=tt.length)
-            throw new CodeException("Parametri incompatibili");
-        Environment.template=tt.length!=0;
+    public void toCode(Segmenti seg, Dichiarazione[] varSt, Environment env)throws CodeException{
+        Environment.template=false;
         String rax=Register.AX.getReg();
         String rbx=Register.BX.getReg();
-        String rnome=Meth.className(nome, tparams);//Il nome del relativo TypeElem
+        String rnome=Meth.className(nome);//Il nome del relativo TypeElem
         if(explicit){
             if(ext!=null){
                 if(!Types.getIstance().find(ext, false).explicit)
@@ -176,7 +163,7 @@ public class TypeDef implements Serializable{
         for(Membro type:types)
             type.chechPack(false);
         if(hasVTable()){//Se classe esplicita non ha bisogno di generare vtable
-            generateVT(seg, env, varSt, tparams);
+            generateVT(seg, env, varSt);
             seg.addLabel("_INIT_"+rnome);//assegna la vtable all'oggetto nello stack
             Funz.getIstance().glob.add("_INIT_"+rnome);
             seg.addIstruzione("enter","0","0");
@@ -205,7 +192,6 @@ public class TypeDef implements Serializable{
         }
     }
     public void validate(Dichiarazione[] varSt, Environment env)throws CodeException{
-        Template.addTemplateConditions(tt);
         if(explicit){
             if(ext!=null){
                 if(!Types.getIstance().find(ext, true).explicit)
@@ -244,8 +230,7 @@ public class TypeDef implements Serializable{
                 TypeElem th=Types.getIstance().find(ext, true);
                 th.checkCorrectOverride(types[i], true);                
             }
-        }
-        Template.removeTemplateConditions(tt);        
+        }     
     }
     /**
      * scrive funzione che si occupa dell'inizializzazione vtables. Chiamato solo da non explicit
@@ -365,16 +350,6 @@ public class TypeDef implements Serializable{
         if(ext==null)
             return null;
         return ext;
-    }
-    public Template[] templates(){
-        return tt;
-    }
-    public String[] templateNames(){
-        String[] n=new String[tt.length];
-        for(int i=0; i<tt.length; i++){
-            n[i]=tt[i].getIdent();
-        }
-        return n;
     }
     public String modulo(){
         return modulo;

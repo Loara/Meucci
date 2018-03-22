@@ -16,22 +16,14 @@
  */
 package comp.code.template;
 
-import comp.code.CodeException;
-import comp.code.FElement;
-import comp.code.Meth;
-import comp.code.TypeElem;
-import comp.general.Lingue;
-import comp.general.Stack;
 import comp.parser.Callable;
-import comp.parser.Costructor;
-import comp.parser.TypeName;
-import comp.parser.template.TemplateEle;
 
 /**
- *
+ * Si veda ClassList
  * @author loara
  */
 public class FunzList extends TList<Callable>{
+    /*
     public FunzList(){
         super();
     }
@@ -49,10 +41,10 @@ public class FunzList extends TList<Callable>{
         else
             throw new CodeException(Lingue.getIstance().format("m_cod_foufunn", ret.length, name));
     }
-    /*
+
     noAdd da impostare a true se è utilizzato durante il validate, in modo da
-    non generare un file inutile
-    */       
+    non generare un file inutile    
+
     public FElement generate(String name, TemplateEle[] param, TypeElem[] fpdec, boolean noAdd)
             throws CodeException{
         Stack<Callable> sf=new Stack<>(Callable.class);
@@ -259,4 +251,5 @@ public class FunzList extends TList<Callable>{
             throw new CodeException(error);
         }
     }
+    */
 }

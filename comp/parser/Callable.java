@@ -50,7 +50,6 @@ public abstract class Callable implements Serializable{
     protected Token nome;//può essere o ident o symb
     protected FunzParam[] dichs;
     protected MultiIstr istr;
-    protected Template[] temp;//solo per funzioni
     private String mod;
     protected boolean noglobal;
     protected String[] errors;//Errori che può generare. CONTA l'ordine
@@ -65,7 +64,6 @@ public abstract class Callable implements Serializable{
         istr=i;
         noglobal=false;
         retType=new TypeName("void");
-        temp=new Template[0];
         this.mod=mod;
         this.errors=errors;
         this.shadow=shadow;
@@ -139,7 +137,6 @@ public abstract class Callable implements Serializable{
     }
     protected final void initRest(VScan<Token> t, String modulo)throws ParserException{
         //t deve puntare ai parametri template
-        temp=Template.parseTemp(t);
         if(!(t.get() instanceof PareToken) || ((PareToken)t.get()).s!='(')
             throw new ParserException(Lingue.getIstance().format("m_par_invfun"), t);
         t.nextEx();
@@ -187,16 +184,6 @@ public abstract class Callable implements Serializable{
         }
         return t;
     }
-    public Template[] templates(){
-        return temp;
-    }
-    public String[] templateNames(){
-        String[] n=new String[temp.length];
-        for(int i=0; i<temp.length; i++){
-            n[i]=temp[i].getIdent();
-        }
-        return n;
-    }
     public boolean isShadow(){
         return shadow;
     }
@@ -229,13 +216,10 @@ public abstract class Callable implements Serializable{
     }
     public void toCode(Segmenti text, Dichiarazione[] varSt, Environment env, 
             TemplateEle... temps)throws CodeException{
-        if(temp.length!=temps.length)
-            throw new CodeException("Lunghezza parametri di template diversa: "+temp.length+
-                    " contro "+temps.length);
         Accumulator acc=new Accumulator();//servirà in VarStack
         Variabili vs=new Variabili(dichs, varSt, false, acc);
         Environment.ret=Types.getIstance().find(retType, false);
-        Environment.template=temp.length!=0;
+        Environment.template=false;
         Environment.errors=errors;
         String mname=Meth.modName(this, temps);
         if(!noglobal)//Per le FunzMem
@@ -266,13 +250,11 @@ public abstract class Callable implements Serializable{
         
     }
     public void validate(Environment env, Dichiarazione[] varSt)throws CodeException{
-        Template.addTemplateConditions(temp);
         Variabili vs=new Variabili(dichs, varSt, true, null);
         Environment.ret=Types.getIstance().find(retType, true);
         Environment.template=true;
         Environment.errors=errors;
         istr.validate(vs, env);
-        Template.removeTemplateConditions(temp);
     }
     public String getModulo(){
         return mod;

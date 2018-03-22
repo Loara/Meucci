@@ -44,21 +44,16 @@ public class Destructor extends Callable{
      * 
      * @param t
      * @param type Nome della classe in cui è dichiarato il costruttore
-     * @param params Dichiarazione template della classem madre
      * @param modulo
      * @throws ParserException 
      */
-    public Destructor(VScan<Token> t, String type, Template[] params, String modulo)throws ParserException{
+    public Destructor(VScan<Token> t, String type, String modulo)throws ParserException{
         super(t, modulo, false, false);
-        if(temp.length!=0)
-            throw new ParserException(Lingue.getIstance().format("m_par_temdis"), super.nome);
         if(dichs.length!=0)
             throw new ParserException(Lingue.getIstance().format("m_par_pardis"), super.nome);
-        temp=params;
         classname=type;
         dichs=new FunzParam[1];
-        dichs[0]=new FunzParam(new TypeName(type, Template.conversion(params)), "this");
-        temParam=Template.conversion(params);
+        dichs[0]=new FunzParam(new TypeName(type), "this");
     }
     public String className(){
         return classname;
@@ -73,21 +68,18 @@ public class Destructor extends Callable{
     }
     @Override
     public void validate(Environment env, Dichiarazione[] varSt)throws CodeException{
-        Template.addTemplateConditions(temp);
         Variabili vs=new Variabili(dichs, varSt, true, null);
         Environment.ret=Types.getIstance().find(retType, true);
         Environment.template=true;
         Environment.errors=errors;
-        TemplateEle[] telem=Template.conversion(temp);
-        TypeName tne=new TypeName(classname, telem);
+        TypeName tne=new TypeName(classname);
         TypeElem te=Types.getIstance().find(tne, true);
         istr.validate(vs, env);
         if(te.extend!=null){
             TypeElem[] parames=new TypeElem[1];
             parames[0]=te;
-            Funz.getIstance().request(memName(), parames, true, telem);
+            Funz.getIstance().request(memName(), parames, true);
         }
-        Template.removeTemplateConditions(temp);
     }
     @Override
     public void postCode(Segmenti text, Variabili var, Environment env,

@@ -16,22 +16,18 @@
  */
 package comp.code.template;
 
-import comp.code.CodeException;
-import comp.code.Meth;
-import comp.code.TypeElem;
-import comp.general.Lingue;
-import comp.parser.Membro;
 import comp.parser.TypeDef;
-import comp.parser.TypeName;
-import comp.parser.template.Template;
-import comp.parser.template.TemplateEle;
 
 /**
  * Trasforma i TypeDef con parametri template in TypeElem finiti, in base a parametri aggiuntivi
+ * 
+ * Dato che i template ora vengono gestiti a livello dei moduli bisogna vedere se
+ * questa classe possa servire o no
  * passati.
  * @author loara
  */
 public class ClassList extends TList<TypeDef>{
+    /*
     public TypeDef find(String name)throws CodeException{
         for(TypeDef te:super.val){
             if(te.getName().equals(name))
@@ -82,4 +78,5 @@ public class ClassList extends TList<TypeDef>{
                 throw new CodeException(Lingue.getIstance().format("m_cod_errpara"));
         }
     }
+    */
 }

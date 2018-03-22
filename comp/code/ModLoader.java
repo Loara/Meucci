@@ -6,7 +6,6 @@
 package comp.code;
 
 import static comp.general.FileManager.cpath;
-import static comp.general.FileManager.findTFile;
 import static comp.general.FileManager.resps;
 import comp.general.Lingue;
 import comp.parser.Callable;
@@ -121,7 +120,7 @@ public class ModLoader {
                 exportCall(c, out);
             }
         }
-        writeTemplates(mod);
+        //writeTemplates(mod);
     }
     /**
      * Aggiunge i Tipi e i Callable ai Funz e Types (anche template), e lo fa ricorsivamente.
@@ -161,7 +160,7 @@ public class ModLoader {
                     ii.fun[j]=importCall(in, name);
                 }
             }
-            readTemplates(name, ii);
+            //readTemplates(name, ii);
             modLoaded.add(ii);
         }
         ii.external=ext;
@@ -283,6 +282,8 @@ public class ModLoader {
             err[u]=in.readUTF();
         return new FElement(name, modname, ty, ret, op, shd, modulo, false, err);
     }
+    /*
+    Si veda il file Master per delucidazioni
     private void writeTemplates(Modulo mod)throws IOException{
         if(mod.Tca.length==0 && mod.Ttype.length==0)
             return;
@@ -310,4 +311,5 @@ public class ModLoader {
             throw new IOException(ex);
         }
     }
+    */
 }

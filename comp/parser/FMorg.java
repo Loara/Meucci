@@ -18,7 +18,6 @@ package comp.parser;
 
 import comp.general.Lingue;
 import comp.general.VScan;
-import comp.parser.template.Template;
 import comp.scanner.PareToken;
 import comp.scanner.Token;
 import java.io.Serializable;
@@ -35,15 +34,15 @@ public class FMorg implements Serializable{
         set=null;
         this.type=type;
     }
-    public FMorg(VScan<Token> t, TypeName type, String ctype, 
-            Template[] ctemplate, String name, String modulo)throws ParserException{
+    public FMorg(VScan<Token> t, TypeName type, String ctype, String name, 
+            String modulo)throws ParserException{
             get=null;
             set=null;
             this.type=type;
             if(t.get() instanceof PareToken && ((PareToken)t.get()).s=='{'){
                 t.nextEx();
                 while(!(t.get() instanceof PareToken && ((PareToken)t.get()).s=='}')){
-                    FunzMem fm=new FunzMem(t, type, ctype, ctemplate, name, modulo);
+                    FunzMem fm=new FunzMem(t, type, ctype, name, modulo);
                     if(fm.getAccess()){
                         if(get!=null)
                             throw new ParserException(Lingue.getIstance().format("m_par_getovw"), t);

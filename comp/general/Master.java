@@ -17,22 +17,9 @@
 package comp.general;
 
 import comp.code.CodeException;
-import comp.code.Environment;
-import comp.code.Funz;
-import comp.code.Meth;
 import comp.code.ModLoader;
-import comp.code.ModLoader.MLdone;
-import comp.code.Segmenti;
-import comp.code.Types;
-import comp.code.template.Notifica;
-import comp.code.template.Substitutor;
-import comp.code.template.TNumbers;
-import comp.parser.Callable;
-import comp.parser.Dichiarazione;
 import comp.parser.Modulo;
 import comp.parser.ParserException;
-import comp.parser.TypeDef;
-import comp.parser.template.TemplateEle;
 import comp.scanner.Analyser;
 import comp.scanner.Analyser.ScanException;
 import comp.scanner.Token;
@@ -44,9 +31,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import static comp.general.FileManager.createAsmFile;
 
 /**
  * Gestisce tutti i passi della compilazione
@@ -147,14 +132,17 @@ public class Master {
         }
         if(!compile)
             return;
+        /*
         HashSet<Notifica> Tty=new HashSet<>(), Tfun=new HashSet<>();
         Types.getIstance().getClassList().setHashNotif(Tty);
         Funz.getIstance().getFunzList().setHashNotif(Tfun);
+        */
         for(Modulo m:mods){
             currentFile=m.nome;
             codifica(m);
         }
-        codificaTemplate(Tty, Tfun);
+        //codificaTemplate(Tty, Tfun);
+        //temporaneamente rimosso
     }
     public List<Token> analyze(Path p)throws IOException, ScanException{
         ArrayList<Character> c=new ArrayList<>();
@@ -185,6 +173,11 @@ public class Master {
             m.Codifica(pw, this);//effettua il clean di Types e Funz
         }
     }
+    /*
+    Dato che i template ora andranno gestiti solamente a livello di 
+    moduli/protocolli/estensione di moduli e non più tipi e funzioni il seguente
+    codice potrebbe essere eliminato
+    
     public void codificaTemplate(HashSet<Notifica> tty, HashSet<Notifica> tfun)throws CodeException,
             IOException, ClassNotFoundException{
         boolean type;
@@ -382,6 +375,7 @@ public class Master {
         }
         return null;
     }
+
     private Notifica getNoSigned(HashSet<Notifica> nos, String modulo){
         for(Notifica no:nos){
             if(!no.segnato && no.modulo.equals(modulo))
@@ -389,4 +383,5 @@ public class Master {
         }
         return null;
     }
+    */
 }

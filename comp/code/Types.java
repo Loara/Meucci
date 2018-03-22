@@ -38,19 +38,19 @@ public class Types {
         return t;
     }
     private final HashSet<TypeElem> elems, Telems;//Tipi template e tipi con parametri template
-    private final ClassList cl;
+    //private final ClassList cl;
     private Substitutor suds;
     public void clearAll(){
         elems.clear();
         Telems.clear();
-        cl.clearAll();
+        //cl.clearAll();
         suds=null;
         addPrim();
     }
     private Types(){
         elems=new HashSet<>();
         addPrim();
-        cl=new ClassList();
+        //cl=new ClassList();
         Telems=new HashSet<>();
         suds=null;
     }
@@ -92,6 +92,7 @@ public class Types {
         }
         return a;
     }
+    /*
     public boolean loadAllTemplates(TypeDef[] td){
         boolean a=true;
         for(TypeDef tt:td){
@@ -99,6 +100,7 @@ public class Types {
         }
         return a;
     }
+    */
     public boolean loadTemplate(TypTemplate td)throws CodeException{
         td.validate();
         boolean b=Telems.add(new TypeElem(td.getIdent(), td.ext(), new Membro[0],
@@ -152,12 +154,12 @@ public class Types {
             if(i.name.equals(mname))
                 return i;
         }
-        if(t.templates().length==0){
         throw new CodeException(Lingue.getIstance().format("m_cod_typnfnd", t.getName()));
-        }
+        /*
         TypeElem tt=cl.generate(t.getName(), t.templates(), validate);
         Telems.add(tt);
         return tt;
+        */
     }
     /*
     Controlla solo l'esistenza del tipo, non lo definisce. Utile nei validate
@@ -187,9 +189,11 @@ public class Types {
             if(i.name.equals(mname))
                 return;
         }
-        cl.esiste(t.getName(), t.templates());
+        //cl.esiste(t.getName(), t.templates());
     }
+    /*
     public ClassList getClassList(){
         return cl;
     }
+    */
 }

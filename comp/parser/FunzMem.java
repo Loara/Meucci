@@ -39,21 +39,17 @@ public class FunzMem extends Callable{
      * @param t
      * @param type
      * @param ctype
-     * @param ctemplate
      * @param name
      * @param modulo
      * @throws ParserException 
      */
-    public FunzMem(VScan<Token> t, TypeName type, String ctype, 
-            Template[] ctemplate, String name, String modulo)throws ParserException{
+    public FunzMem(VScan<Token> t, TypeName type, String ctype, String name, 
+            String modulo)throws ParserException{
         super(t, modulo, false);
         noglobal=true;
         int riga=super.nome.getRiga();
-        if(super.temp.length!=0)
-            throw new ParserException(Lingue.getIstance().format("m_par_temacc"), riga);
         if(shadow)
             throw new ParserException(Lingue.getIstance().format("m_par_shderr"), riga);
-        super.temp=ctemplate;
         if(nome instanceof IdentToken){
             String n=((IdentToken)nome).getString();
             switch (n) {
@@ -71,7 +67,7 @@ public class FunzMem extends Callable{
         else throw new ParserException(Lingue.getIstance().format("m_par_invnam"),riga);
         classname=ctype;
         FunzParam[] d2=new FunzParam[dichs.length+1];
-        d2[0]=new FunzParam(new TypeName(ctype, Template.conversion(temp)), "this");
+        d2[0]=new FunzParam(new TypeName(ctype), "this");
         System.arraycopy(dichs, 0, d2, 1, dichs.length);
         dichs=d2;
         if(getAcc){
@@ -88,24 +84,22 @@ public class FunzMem extends Callable{
                         , riga);
         }
     }
-    protected FunzMem(TypeName type, String ctype, Template[] ctemplates, String name, 
+    protected FunzMem(TypeName type, String ctype, String name, 
             String modulo, boolean acc){
         super(modulo);
         istr=null;
-        temp=ctemplates;
         noglobal=true;
         getAcc=acc;
         classname=ctype;
         varName=name;
         if(acc){
             retType=type;
-            dichs=new FunzParam[]{new FunzParam(new TypeName(ctype, Template.
-                    conversion(ctemplates)), "this")};
+            dichs=new FunzParam[]{new FunzParam(new TypeName(ctype), "this")};
         }
         else{
             retType=new TypeName("void");
-            dichs=new FunzParam[]{new FunzParam(new TypeName(ctype, Template.
-                    conversion(ctemplates)), "this"),new FunzParam(type, "aaa")};
+            dichs=new FunzParam[]{new FunzParam(new TypeName(ctype), "this"),
+                new FunzParam(type, "aaa")};
         }
     }
     @Override

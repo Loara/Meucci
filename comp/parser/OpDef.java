@@ -29,8 +29,6 @@ import comp.scanner.Token;
 public class OpDef extends Callable{
     public OpDef(VScan<Token> t, String modulo)throws ParserException{
         super(t, modulo, true);
-        if(super.temp.length!=0)
-            throw new ParserException(Lingue.getIstance().format("m_par_temopr"), super.nome);
         if(!(nome instanceof SymbToken))
             throw new ParserException(Lingue.getIstance().format("m_par_invnap"), nome);
         if(((SymbToken)nome).getString().equals("=="))

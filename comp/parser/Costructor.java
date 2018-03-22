@@ -62,14 +62,12 @@ public class Costructor extends Callable{
     }
     @Override
     public void validate(Environment env, Dichiarazione[] varSt)throws CodeException{
-        Template.addTemplateConditions(temp);
         Variabili vs=new Variabili(dichs, varSt, true, null);
         vs.setCostrVarName(dichs[0].getIdent());
         Environment.ret=Types.getIstance().find(retType, true);
         Environment.template=true;
         Environment.errors=errors;
         istr.validate(vs, env);
-        Template.removeTemplateConditions(temp);
     }
     @Override
     protected void preCode(Segmenti text, Variabili var, Environment env, 

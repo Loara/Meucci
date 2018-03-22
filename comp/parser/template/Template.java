@@ -36,7 +36,8 @@ import java.io.Serializable;
 import java.util.ArrayList;
 
 /**
- *
+ * I template ora si dichiarano su tutto il modulo e non più sulle singole funzioni
+ * o tipi
  * @author loara
  */
 public abstract class Template implements Serializable{
